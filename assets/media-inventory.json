@@ -1,0 +1,134 @@
+{
+  "expectedDesignCount": 8,
+  "photographedDesignCount": 7,
+  "images": [
+    {
+      "source": "assets/source/brand/logo.jpeg",
+      "sourceSha256": "f782af66c9ef1f13ed4017fabd600f655734405ad2365349e322bc72b8df2028",
+      "output": "public/images/brand/logo.webp",
+      "width": 1024,
+      "height": 1536,
+      "bytes": 32872
+    },
+    {
+      "source": "assets/source/products/design-01/IMG_8245.JPG.jpeg",
+      "sourceSha256": "6e4ccf4049e2c2a93663197f608a649a18f33fd06800dfc6f765032f9eb91167",
+      "output": "public/images/products/design-01/front.webp",
+      "width": 1467,
+      "height": 2200,
+      "bytes": 105280
+    },
+    {
+      "source": "assets/source/products/design-01/IMG_8239.JPG.jpeg",
+      "sourceSha256": "29e8379c3d32ab579a89cf42587df2b4a93f0a3daaf5bb5c9cbe5d97034c6fad",
+      "output": "public/images/products/design-01/back.webp",
+      "width": 1467,
+      "height": 2200,
+      "bytes": 102078
+    },
+    {
+      "source": "assets/source/products/design-01/IMG_8183.JPG.jpeg",
+      "sourceSha256": "8e11f7578e4d3b359d750293d12ef6bcabddba55f247be0cc344f7bbf17e0d7b",
+      "output": "public/images/products/design-01/detail.webp",
+      "width": 1800,
+      "height": 1914,
+      "bytes": 110564
+    },
+    {
+      "source": "assets/source/products/design-01/IMG_8184.JPG.jpeg",
+      "sourceSha256": "88d5219d48c6c3ba2a8e911e4d582bd81730e1ddb77191c4c5aaeb6d07b498f6",
+      "output": "public/images/products/design-01/alternate.webp",
+      "width": 1533,
+      "height": 2200,
+      "bytes": 94774
+    },
+    {
+      "source": "assets/source/products/design-02/IMG_8002.JPG.jpeg",
+      "sourceSha256": "1b2cee7f9e872b9b4c227a9c12bf713c4d059be163446f05f276f62fcb334871",
+      "output": "public/images/products/design-02/front.webp",
+      "width": 1238,
+      "height": 2200,
+      "bytes": 112242
+    },
+    {
+      "source": "assets/source/products/design-02/IMG_8203.JPG.jpeg",
+      "sourceSha256": "c897267f049c77540582f7424f682d021e1b7f2e25d98ceabba47c7706daa529",
+      "output": "public/images/products/design-02/back.webp",
+      "width": 1467,
+      "height": 2200,
+      "bytes": 75584
+    },
+    {
+      "source": "assets/source/products/design-03/IMG_8024.JPG.jpeg",
+      "sourceSha256": "c3e3fce9d97d8b409a985f2769e1820275fe7f6b9418aa878f826fe72b9c4307",
+      "output": "public/images/products/design-03/front.webp",
+      "width": 1238,
+      "height": 2200,
+      "bytes": 107974
+    },
+    {
+      "source": "assets/source/products/design-03/IMG_8023.JPG.jpeg",
+      "sourceSha256": "d1e1ef5956317f4e68b738acde86bdca608ea8c4d141b23717a6d3b5c59decfd",
+      "output": "public/images/products/design-03/detail.webp",
+      "width": 1238,
+      "height": 2200,
+      "bytes": 149446
+    },
+    {
+      "source": "assets/source/products/design-04/IMG_8025.JPG.jpeg",
+      "sourceSha256": "a5b6c97617414e6e6ace20de49f347e4aba8545a9737f7b34727b0cfcdef2023",
+      "output": "public/images/products/design-04/front.webp",
+      "width": 1238,
+      "height": 2200,
+      "bytes": 64250
+    },
+    {
+      "source": "assets/source/products/design-04/IMG_8271.JPG.jpeg",
+      "sourceSha256": "0c98dbfd516bcf0ca8d2068bade7004ba716b3411fab4ef143601e0c912f8287",
+      "output": "public/images/products/design-04/styled.webp",
+      "width": 1307,
+      "height": 1225,
+      "bytes": 299112
+    },
+    {
+      "source": "assets/source/products/design-05/IMG_8028.JPG.jpeg",
+      "sourceSha256": "bd49cfc33278254bc446a8aae3f2d8219f3c4e8cc6c296f596585c774410a554",
+      "output": "public/images/products/design-05/front.webp",
+      "width": 1318,
+      "height": 2178,
+      "bytes": 173232
+    },
+    {
+      "source": "assets/source/products/design-06/IMG_8003.JPG.jpeg",
+      "sourceSha256": "f24f90674f0e2a64df8cd6a0a34a6a3967856c8d773115074a956efd38ff5eed",
+      "output": "public/images/products/design-06/front.webp",
+      "width": 1315,
+      "height": 2200,
+      "bytes": 204306
+    },
+    {
+      "source": "assets/source/products/design-06/IMG_8270.JPG.jpeg",
+      "sourceSha256": "7532994704a12ccbeb4067850bc57bc7b7b95a40363dc5ce11fa12ced3b0ee00",
+      "output": "public/images/products/design-06/styled.webp",
+      "width": 1238,
+      "height": 2200,
+      "bytes": 250096
+    },
+    {
+      "source": "assets/source/products/design-07/IMG_8267.JPG.jpeg",
+      "sourceSha256": "dd24940dbbcd91239b47722a5123b34fa8446e362e1d1a034c6b8c0522d2748e",
+      "output": "public/images/products/design-07/front.webp",
+      "width": 687,
+      "height": 1572,
+      "bytes": 108696
+    },
+    {
+      "source": "assets/source/products/design-07/IMG_8193.JPG.jpeg",
+      "sourceSha256": "fd1b0476620a32d652859253ac11cbe387c54e388df52fae917891d462e4305b",
+      "output": "public/images/products/design-07/detail.webp",
+      "width": 1467,
+      "height": 2200,
+      "bytes": 157072
+    }
+  ]
+}

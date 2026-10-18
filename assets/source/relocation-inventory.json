@@ -1,0 +1,127 @@
+﻿[
+    {
+        "OriginalName":  "logo.jpeg",
+        "Target":  "brand/logo.jpeg",
+        "Sha256":  "F782AF66C9EF1F13ED4017FABD600F655734405AD2365349E322BC72B8DF2028"
+    },
+    {
+        "OriginalName":  "IMG_8245.JPG.jpeg",
+        "Target":  "products/design-01/IMG_8245.JPG.jpeg",
+        "Sha256":  "6E4CCF4049E2C2A93663197F608A649A18F33FD06800DFC6F765032F9EB91167"
+    },
+    {
+        "OriginalName":  "IMG_8239.JPG.jpeg",
+        "Target":  "products/design-01/IMG_8239.JPG.jpeg",
+        "Sha256":  "29E8379C3D32AB579A89CF42587DF2B4A93F0A3DAAF5BB5C9CBE5D97034C6FAD"
+    },
+    {
+        "OriginalName":  "IMG_8183.JPG.jpeg",
+        "Target":  "products/design-01/IMG_8183.JPG.jpeg",
+        "Sha256":  "8E11F7578E4D3B359D750293D12EF6BCABDDBA55F247BE0CC344F7BBF17E0D7B"
+    },
+    {
+        "OriginalName":  "IMG_8184.JPG.jpeg",
+        "Target":  "products/design-01/IMG_8184.JPG.jpeg",
+        "Sha256":  "88D5219D48C6C3BA2A8E911E4D582BD81730E1DDB77191C4C5AAEB6D07B498F6"
+    },
+    {
+        "OriginalName":  "IMG_8002.JPG.jpeg",
+        "Target":  "products/design-02/IMG_8002.JPG.jpeg",
+        "Sha256":  "1B2CEE7F9E872B9B4C227A9C12BF713C4D059BE163446F05F276F62FCB334871"
+    },
+    {
+        "OriginalName":  "IMG_8203.JPG.jpeg",
+        "Target":  "products/design-02/IMG_8203.JPG.jpeg",
+        "Sha256":  "C897267F049C77540582F7424F682D021E1B7F2E25D98CEABBA47C7706DAA529"
+    },
+    {
+        "OriginalName":  "IMG_8024.JPG.jpeg",
+        "Target":  "products/design-03/IMG_8024.JPG.jpeg",
+        "Sha256":  "C3E3FCE9D97D8B409A985F2769E1820275FE7F6B9418AA878F826FE72B9C4307"
+    },
+    {
+        "OriginalName":  "IMG_8023.JPG.jpeg",
+        "Target":  "products/design-03/IMG_8023.JPG.jpeg",
+        "Sha256":  "D1E1EF5956317F4E68B738ACDE86BDCA608EA8C4D141B23717A6D3B5C59DECFD"
+    },
+    {
+        "OriginalName":  "IMG_8025.JPG.jpeg",
+        "Target":  "products/design-04/IMG_8025.JPG.jpeg",
+        "Sha256":  "A5B6C97617414E6E6ACE20DE49F347E4ABA8545A9737F7B34727B0CFCDEF2023"
+    },
+    {
+        "OriginalName":  "IMG_8271.JPG.jpeg",
+        "Target":  "products/design-04/IMG_8271.JPG.jpeg",
+        "Sha256":  "0C98DBFD516BCF0CA8D2068BADE7004BA716B3411FAB4EF143601E0C912F8287"
+    },
+    {
+        "OriginalName":  "IMG_8028.JPG.jpeg",
+        "Target":  "products/design-05/IMG_8028.JPG.jpeg",
+        "Sha256":  "BD49CFC33278254BC446A8AAE3F2D8219F3C4E8CC6C296F596585C774410A554"
+    },
+    {
+        "OriginalName":  "IMG_8003.JPG.jpeg",
+        "Target":  "products/design-06/IMG_8003.JPG.jpeg",
+        "Sha256":  "F24F90674F0E2A64DF8CD6A0A34A6A3967856C8D773115074A956EFD38FF5EED"
+    },
+    {
+        "OriginalName":  "IMG_8270.JPG.jpeg",
+        "Target":  "products/design-06/IMG_8270.JPG.jpeg",
+        "Sha256":  "7532994704A12CCBEB4067850BC57BC7B7B95A40363DC5CE11FA12CED3B0EE00"
+    },
+    {
+        "OriginalName":  "IMG_8267.JPG.jpeg",
+        "Target":  "products/design-07/IMG_8267.JPG.jpeg",
+        "Sha256":  "DD24940DBBCD91239B47722A5123B34FA8446E362E1D1A034C6B8C0522D2748E"
+    },
+    {
+        "OriginalName":  "IMG_8193.JPG.jpeg",
+        "Target":  "products/design-07/IMG_8193.JPG.jpeg",
+        "Sha256":  "FD1B0476620A32D652859253AC11CBE387C54E388DF52FAE917891D462E4305B"
+    },
+    {
+        "OriginalName":  "IMG_8183.JPG (1).jpeg",
+        "Target":  "duplicates/IMG_8183.JPG (1).jpeg",
+        "Sha256":  "8E11F7578E4D3B359D750293D12EF6BCABDDBA55F247BE0CC344F7BBF17E0D7B"
+    },
+    {
+        "OriginalName":  "IMG_8245.JPG (1).jpeg",
+        "Target":  "duplicates/IMG_8245.JPG (1).jpeg",
+        "Sha256":  "6E4CCF4049E2C2A93663197F608A649A18F33FD06800DFC6F765032F9EB91167"
+    },
+    {
+        "OriginalName":  "IMG_8270.JPG (1).jpeg",
+        "Target":  "duplicates/IMG_8270.JPG (1).jpeg",
+        "Sha256":  "7532994704A12CCBEB4067850BC57BC7B7B95A40363DC5CE11FA12CED3B0EE00"
+    },
+    {
+        "OriginalName":  "IMG_7967.MOV",
+        "Target":  "videos/unassigned/IMG_7967.MOV",
+        "Sha256":  "57C3EE348C829240AD6928463AC8B4D99B58D30867FA40E3CE1C655B8F2F12EF"
+    },
+    {
+        "OriginalName":  "IMG_7986.MOV",
+        "Target":  "videos/unassigned/IMG_7986.MOV",
+        "Sha256":  "D7A870F21A399A99A7352ECFEC9606BB95A0686AF872217558D2483A0A3EA1A6"
+    },
+    {
+        "OriginalName":  "IMG_8041.MOV",
+        "Target":  "videos/unassigned/IMG_8041.MOV",
+        "Sha256":  "87A9ABC58208483A969F18B8AE8FE2B43360688F943142FEF128A761254051A8"
+    },
+    {
+        "OriginalName":  "IMG_8043.MOV",
+        "Target":  "videos/unassigned/IMG_8043.MOV",
+        "Sha256":  "5752F89130AF2FBB5DEC43B40978878EDFCCE63A50DF2A4AE0F8105BCC2D56B2"
+    },
+    {
+        "OriginalName":  "IMG_8056.MOV",
+        "Target":  "videos/unassigned/IMG_8056.MOV",
+        "Sha256":  "4DBA9F79CD311B132C6E1ED27D6F58E14DEB7EFD6B8B36706BD24D3D7EE505CA"
+    },
+    {
+        "OriginalName":  "IMG_8061.MOV",
+        "Target":  "videos/unassigned/IMG_8061.MOV",
+        "Sha256":  "E0B42F5EFD894F9C8790E897AC036687930F95623E783D8FB9641B92A1FF989E"
+    }
+]

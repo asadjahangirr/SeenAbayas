@@ -1,0 +1,132 @@
+{
+  "heroIds": [
+    "design-01",
+    "design-02",
+    "design-06"
+  ],
+  "featuredIds": [
+    "design-01",
+    "design-02",
+    "design-03",
+    "design-06"
+  ],
+  "pieces": [
+    {
+      "id": "design-01",
+      "visualLabel": "Burgundy",
+      "photos": [
+        {
+          "src": "/images/products/design-01/front.webp",
+          "label": "Front",
+          "alt": "Front view of a burgundy abaya with a matching scarf."
+        },
+        {
+          "src": "/images/products/design-01/back.webp",
+          "label": "Back",
+          "alt": "Back view of the burgundy abaya against ivory studio draping."
+        },
+        {
+          "src": "/images/products/design-01/detail.webp",
+          "label": "Details",
+          "alt": "Covered buttons and sleeve details on the burgundy abaya."
+        },
+        {
+          "src": "/images/products/design-01/alternate.webp",
+          "label": "Another angle",
+          "alt": "Another front view of the burgundy abaya."
+        }
+      ]
+    },
+    {
+      "id": "design-02",
+      "visualLabel": "Botanical detailing",
+      "photos": [
+        {
+          "src": "/images/products/design-02/front.webp",
+          "label": "Front",
+          "alt": "Black abaya with tonal botanical details on the front and sleeves."
+        },
+        {
+          "src": "/images/products/design-02/back.webp",
+          "label": "Back",
+          "alt": "Back view of the black abaya with tonal botanical details."
+        }
+      ]
+    },
+    {
+      "id": "design-03",
+      "visualLabel": "Lace detailing",
+      "photos": [
+        {
+          "src": "/images/products/design-03/front.webp",
+          "label": "Front",
+          "alt": "Black abaya with lace detailing along the opening and sleeves."
+        },
+        {
+          "src": "/images/products/design-03/detail.webp",
+          "label": "Details",
+          "alt": "Closer view of the black abaya's lace sleeve and front details."
+        }
+      ]
+    },
+    {
+      "id": "design-04",
+      "visualLabel": "Soft charcoal",
+      "photos": [
+        {
+          "src": "/images/products/design-04/front.webp",
+          "label": "Front",
+          "alt": "Front view of a plain charcoal abaya with covered buttons."
+        },
+        {
+          "src": "/images/products/design-04/styled.webp",
+          "label": "Styled view",
+          "alt": "Seated view of the charcoal abaya with a matching scarf."
+        }
+      ]
+    },
+    {
+      "id": "design-05",
+      "visualLabel": "Textured charcoal",
+      "photos": [
+        {
+          "src": "/images/products/design-05/front.webp",
+          "label": "Front",
+          "alt": "Charcoal abaya with a textured-looking surface and matching scarf."
+        }
+      ]
+    },
+    {
+      "id": "design-06",
+      "visualLabel": "Polka dots",
+      "photos": [
+        {
+          "src": "/images/products/design-06/front.webp",
+          "label": "Front",
+          "alt": "Black abaya and matching scarf with ivory polka dots."
+        },
+        {
+          "src": "/images/products/design-06/styled.webp",
+          "label": "Styled view",
+          "alt": "Seated campaign view of the black and ivory polka-dot abaya."
+        }
+      ]
+    },
+    {
+      "id": "design-07",
+      "visualLabel": "Soft neutral",
+      "photos": [
+        {
+          "src": "/images/products/design-07/front.webp",
+          "label": "Front",
+          "alt": "Full-length mirror photograph of a soft neutral abaya and scarf."
+        },
+        {
+          "src": "/images/products/design-07/detail.webp",
+          "label": "Details",
+          "alt": "Close view of the neutral abaya's covered buttons and sleeve."
+        }
+      ]
+    }
+  ]
+}

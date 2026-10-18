@@ -1,0 +1,29 @@
+import { defineConfig, devices } from "@playwright/test";
+
+export default defineConfig({
+  testDir: "./tests/catalog-ui",
+  workers: 1,
+  fullyParallel: false,
+  forbidOnly: Boolean(process.env.CI),
+  reporter: "list",
+  use: {
+    ...devices["Desktop Chrome"],
+    baseURL: "http://127.0.0.1:3102",
+    channel: process.env.PLAYWRIGHT_CHANNEL || (process.platform === "win32" ? "msedge" : "chromium"),
+    trace: "retain-on-failure",
+    screenshot: "only-on-failure",
+  },
+  webServer: [
+    { command: "node tests/fixtures/catalog-api.mjs", url: "http://127.0.0.1:3101/health", reuseExistingServer: false },
+    {
+      command: "npm run start -- --hostname 127.0.0.1 --port 3102",
+      url: "http://127.0.0.1:3102",
+      reuseExistingServer: false,
+      env: {
+        CATALOG_SOURCE: "supabase",
+        NEXT_PUBLIC_SUPABASE_URL: "http://127.0.0.1:3101",
+        NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "sb_publishable_TEST_ONLY",
+      },
+    },
+  ],
+});

@@ -1,0 +1,44 @@
+{
+  "name": "seen-abayas",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "test:foundation": "playwright test",
+    "prepare:media": "node scripts/prepare-media.mjs",
+    "test:catalog": "playwright test --config playwright.catalog.config.ts",
+    "test:catalog-ui": "playwright test --config playwright.catalog-ui.config.ts",
+    "check:catalog": "node scripts/check-catalog.mjs"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "dependencies": {
+    "@fontsource-variable/cormorant-garamond": "5.3.0",
+    "@fontsource-variable/inter": "5.3.0",
+    "@supabase/ssr": "0.12.7",
+    "@supabase/supabase-js": "2.118.0",
+    "lucide-react": "1.59.0",
+    "next": "16.4.2",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "server-only": "0.0.1",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.14.0",
+    "@electric-sql/pglite": "0.5.10",
+    "@playwright/test": "1.64.1",
+    "@tailwindcss/postcss": "4.3.3",
+    "@types/node": "24.19.2",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "postcss": "8.5.30",
+    "sharp": "0.35.5",
+    "tailwindcss": "4.3.3",
+    "typescript": "5.9.3"
+  }
+}
