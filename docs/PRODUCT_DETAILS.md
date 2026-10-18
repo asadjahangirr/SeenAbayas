@@ -1,6 +1,6 @@
 # SEEN product details to confirm
 
-Fill in the blanks below, or send these details in chat using the design references. The visual descriptions identify the supplied photos; they are not official product names. Confirm that each group shows the same product before we import anything.
+Names and opening GBP prices have been selected at your request. They are saved in `supabase/catalog-drafts.sql` for importing as private drafts. They have not been written to the hosted database by the application. Fill in the remaining blanks below, or send these details in chat using the design references. Confirm that each photo group shows the same product before publication.
 
 Prices should be the final customer-facing GBP price, including any applicable tax. State stock separately for every size. Leave unknown facts blank; use `0` only for confirmed zero stock. Nothing in this document publishes a product automatically.
 
@@ -9,8 +9,8 @@ For sizes and stock, use one line per size: `actual size label | quantity availa
 ## design-01 — Burgundy (four photos)
 
 - Photo grouping confirmed:
-- Official product name:
-- Price in GBP:
+- Selected product name: Layla Burgundy Abaya
+- Selected price in GBP: 75.00
 - Approved description:
 - Sizes and stock:
 - Fabric, care and fit information (if confirmed):
@@ -18,8 +18,8 @@ For sizes and stock, use one line per size: `actual size label | quantity availa
 ## design-02 — Botanical detailing (two photos)
 
 - Photo grouping confirmed:
-- Official product name:
-- Price in GBP:
+- Selected product name: Zahra Botanical Abaya
+- Selected price in GBP: 85.00
 - Approved description:
 - Sizes and stock:
 - Fabric, care and fit information (if confirmed):
@@ -27,8 +27,8 @@ For sizes and stock, use one line per size: `actual size label | quantity availa
 ## design-03 — Lace detailing (two photos)
 
 - Photo grouping confirmed:
-- Official product name:
-- Price in GBP:
+- Selected product name: Noor Lace Abaya
+- Selected price in GBP: 85.00
 - Approved description:
 - Sizes and stock:
 - Fabric, care and fit information (if confirmed):
@@ -36,8 +36,8 @@ For sizes and stock, use one line per size: `actual size label | quantity availa
 ## design-04 — Soft charcoal (two photos)
 
 - Photo grouping confirmed:
-- Official product name:
-- Price in GBP:
+- Selected product name: Haya Charcoal Abaya
+- Selected price in GBP: 69.00
 - Approved description:
 - Sizes and stock:
 - Fabric, care and fit information (if confirmed):
@@ -45,8 +45,8 @@ For sizes and stock, use one line per size: `actual size label | quantity availa
 ## design-05 — Textured charcoal (one photo)
 
 - Photo grouping confirmed:
-- Official product name:
-- Price in GBP:
+- Selected product name: Rima Textured Abaya
+- Selected price in GBP: 75.00
 - Approved description:
 - Sizes and stock:
 - Fabric, care and fit information (if confirmed):
@@ -54,8 +54,8 @@ For sizes and stock, use one line per size: `actual size label | quantity availa
 ## design-06 — Polka dots (two photos)
 
 - Photo grouping confirmed:
-- Official product name:
-- Price in GBP:
+- Selected product name: Luma Polka Dot Abaya
+- Selected price in GBP: 69.00
 - Approved description:
 - Sizes and stock:
 - Fabric, care and fit information (if confirmed):
@@ -63,8 +63,8 @@ For sizes and stock, use one line per size: `actual size label | quantity availa
 ## design-07 — Soft neutral (two photos)
 
 - Photo grouping confirmed:
-- Official product name:
-- Price in GBP:
+- Selected product name: Amal Neutral Abaya
+- Selected price in GBP: 75.00
 - Approved description:
 - Sizes and stock:
 - Fabric, care and fit information (if confirmed):

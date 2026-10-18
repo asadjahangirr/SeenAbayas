@@ -29,6 +29,8 @@ The seven design references map to the photos described in [assets/README.md](..
 
 Use [the product-details form](PRODUCT_DETAILS.md) to collect approved information. One complete product is enough for the first hosted verification; the other designs can remain private drafts.
 
+Names and opening GBP prices have now been selected at the developer's request. After running the seed, apply [catalog-drafts.sql](../supabase/catalog-drafts.sql) in the SQL Editor to fill missing names/prices on unconfirmed drafts. It preserves existing values and skips published, archived and confirmed records. Its final query should show seven draft rows. It does not create sizes, stock, descriptions or published products, and the application has not applied it remotely.
+
 Populate the following from client-confirmed information, while each product remains a draft:
 
 - `products`: official name, description, integer GBP price in pence, ordering, and confirmation status.
