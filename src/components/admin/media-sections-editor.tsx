@@ -1,4 +1,5 @@
 "use client";
+import { browserId } from "@/lib/browser-id";
 import { Trash2, ArrowUp, ArrowDown } from "lucide-react";
 import { mediaPages, type MediaSection } from "@/lib/cms/model";
 import { MediaChoiceButton } from "./media-picker";
@@ -21,7 +22,7 @@ export const mediaPageNames: Record<string, string> = {
 };
 export function createMediaSection(src: string): MediaSection {
   return {
-    id: crypto.randomUUID(),
+    id: browserId(),
     page: "/",
     position: "after",
     src,

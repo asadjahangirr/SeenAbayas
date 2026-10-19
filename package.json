@@ -19,7 +19,8 @@
     "prepare:hero": "node scripts/prepare-hero-media.mjs",
     "prepare:brand": "node scripts/prepare-brand.mjs",
     "prepare:copy": "node scripts/generate-cms-registry.mjs",
-    "test:admin-ui": "playwright test --config playwright.admin-ui.config.ts"
+    "test:admin-ui": "playwright test --config playwright.admin-ui.config.ts",
+    "test:mobile-ui": "playwright test --config playwright.mobile-ui.config.ts"
   },
   "engines": {
     "node": ">=22.0.0"

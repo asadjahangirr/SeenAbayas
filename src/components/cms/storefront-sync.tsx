@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useTransition } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { requestDeadline } from "@/lib/request-deadline";
 import {
   STORE_CHANNEL,
   STORE_STORAGE_KEY,
@@ -45,14 +46,12 @@ export function StorefrontSync({ revision }: { revision: string }) {
       checking = true;
       clearTimeout(timer);
       controller = new AbortController();
+      const deadline = requestDeadline(10000, controller.signal);
       try {
         const response = await fetch("/api/storefront/sync", {
           cache: "no-store",
           headers: { "If-None-Match": `"${known.current}"` },
-          signal: AbortSignal.any([
-            controller.signal,
-            AbortSignal.timeout(10000),
-          ]),
+          signal: deadline.signal,
         });
         if (!response.ok && response.status !== 304)
           throw new Error("Sync unavailable");
@@ -74,6 +73,7 @@ export function StorefrontSync({ revision }: { revision: string }) {
       } catch {
         failures = Math.min(failures + 1, 4);
       } finally {
+        deadline.dispose();
         checking = false;
         if (!disposed) {
           timer = setTimeout(

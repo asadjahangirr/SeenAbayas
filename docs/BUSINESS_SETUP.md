@@ -7,7 +7,7 @@
 - Contact form: name, email, phone and message, delivered to `info@seenabayas.co.uk`.
 - Intended delivery partner: Royal Mail.
 - Complimentary standard UK delivery on eligible merchandise subtotals **over £80**. Exactly £80 does not qualify.
-- Requested future payment options: pay now, Apple Pay, Klarna and Clearpay. These are requests, not currently active methods or a guarantee of merchant eligibility.
+- Requested future payment options: pay now, Apple Pay, Klarna and Clearpay. The developer's latest client update prioritizes Apple Pay and Klarna for checkout. Clearpay was requested earlier and is not yet active. No payment method is currently enabled, and provider/customer eligibility still applies. Client payout bank details belong in the payment provider's private onboarding, not repository files or public pages; the supplied bank address does not confirm a legal trading or returns address.
 - Intended public domain: `www.seenabayas.co.uk`, purchased through Namecheap. This does not configure DNS, hosting or email. Keep the development site URL while working locally; set the final HTTPS origin when preparing deployment.
 - Eight intended designs. Seven photograph groups currently exist; do not manufacture the eighth product or image.
 

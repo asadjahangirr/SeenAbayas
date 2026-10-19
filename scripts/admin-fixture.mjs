@@ -418,7 +418,12 @@ const server = http.createServer(async (req, res) => {
     send({ message: "Not found" }, 404);
   } catch (e) {
     send(
-      { code: e.code || "TEST_ERROR", message: "Fixture request failed" },
+      {
+        code: e.code || "TEST_ERROR",
+        // PostgREST preserves custom PostgreSQL exception messages. Simulate
+        // those business-rule errors so the UI can exercise actionable copy.
+        message: e.code === "P0001" ? e.message : "Fixture request failed",
+      },
       400,
     );
   }
