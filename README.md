@@ -48,7 +48,9 @@ These choices take precedence over alternatives in the original master brief:
 
 ## Development
 
-Use Node.js 22 or later (set up with Node.js 24).
+Use Node.js 24.x. The package and lockfile pin the major version so Vercel keeps Node 24 security/patch updates without automatically moving to a future major. Vercel's project setting can also be set to Node.js 24.x under Settings → Build and Deployment.
+
+If Vercel reports npm's `Unknown env config "cache-dir"`, check its Environment Variables for `NPM_CONFIG_CACHE_DIR` or `npm_config_cache_dir`. Remove that obsolete setting if present; npm's supported cache-path setting is `NPM_CONFIG_CACHE`. No `cache-dir` configuration is defined in this repository. If neither variable is configured in the project, the warning comes from the surrounding build environment and does not indicate an application build failure.
 
 ```text
 npm install

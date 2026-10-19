@@ -5,7 +5,7 @@ import { Copy } from "@/components/cms/content-provider";
 
 import Image from "@/components/cms/image";
 import Link from "@/components/cms/link";
-import { ArrowDown, ArrowRight, Play } from "lucide-react";
+import { ArrowDown, ArrowRight } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import "./film-hero.css";
 import { useSiteDocument } from "@/components/cms/content-provider";
@@ -19,9 +19,6 @@ export function FilmHero() {
   const wordmark = useRef<HTMLAnchorElement>(null);
   const video = useRef<HTMLVideoElement>(null);
   const [hasFrame, setHasFrame] = useState(false);
-  const [needsPlayback, setNeedsPlayback] = useState(false);
-  const playbackOptIn = useRef(false);
-  const startPlayback = useRef<((manual?: boolean) => void) | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -65,6 +62,7 @@ export function FilmHero() {
               "--film-nav-surface": "rgba(255, 255, 255, 1)",
               "--film-nav-ink": "#171717",
               "--film-nav-border": "#e9e7e3",
+              "--film-nav-reveal": 1,
             };
             if (context.conditions?.reduced) {
               gsap.set(logo, {
@@ -77,7 +75,10 @@ export function FilmHero() {
                 scale: () => target.offsetWidth / logo.offsetWidth,
                 color: "#171717",
               });
-              gsap.set(header, solidNavigation);
+              gsap.set(header, {
+                ...solidNavigation,
+                "--film-nav-visibility": "visible",
+              });
               return;
             }
             const timeline = gsap.timeline({
@@ -123,10 +124,13 @@ export function FilmHero() {
                   "--film-nav-surface": "rgba(255, 255, 255, 0)",
                   "--film-nav-ink": "#fff",
                   "--film-nav-border": "rgba(233, 231, 227, 0)",
+                  "--film-nav-reveal": 0,
                 },
                 { ...solidNavigation, duration: 0.22, ease: "none" },
                 0.78,
-              );
+              )
+              .set(header, { "--film-nav-visibility": "hidden" }, 0)
+              .set(header, { "--film-nav-visibility": "visible" }, 0.78);
           },
           hero,
         );
@@ -172,11 +176,6 @@ export function FilmHero() {
     const hero = section.current;
     if (!element || !hero) return;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const connection = (
-      navigator as Navigator & {
-        connection?: EventTarget & { saveData?: boolean };
-      }
-    ).connection;
     const bounds = hero.getBoundingClientRect();
     let inView = bounds.bottom > 0 && bounds.top < window.innerHeight;
     let disposed = false;
@@ -184,13 +183,9 @@ export function FilmHero() {
     let interruptedRetry = false;
     let retryTimer: ReturnType<typeof setTimeout> | undefined;
     setHasFrame(false);
-    const sync = (manual = false) => {
+    const sync = () => {
       if (disposed) return;
-      if (manual) playbackOptIn.current = true;
-      const permitted =
-        playbackOptIn.current || (!reduced.matches && !connection?.saveData);
-      if (!permitted) setNeedsPlayback(true);
-      if (!inView || document.hidden || !permitted) {
+      if (!inView || document.hidden || reduced.matches) {
         element.pause();
         return;
       }
@@ -198,15 +193,15 @@ export function FilmHero() {
       element.defaultMuted = true;
       element.playsInline = true;
       if (element.getAttribute("src") !== filmSource) element.src = filmSource;
-      if (manual && element.error) element.load();
+      if (element.error) element.load();
       if (pending || !element.paused) return;
       pending = true;
-      // Call play synchronously from a recovery tap so mobile user activation is retained.
+      // Autoplay is automatic; a natural tap on the hero can also retry a
+      // browser-blocked request without adding a playback control to the design.
       void element
         .play()
         .then(() => {
           if (!disposed) {
-            setNeedsPlayback(false);
             interruptedRetry = false;
           }
         })
@@ -219,13 +214,12 @@ export function FilmHero() {
           ) {
             interruptedRetry = true;
             retryTimer = setTimeout(() => sync(), 150);
-          } else setNeedsPlayback(true);
+          }
         })
         .finally(() => {
           pending = false;
         });
     };
-    startPlayback.current = sync;
     const resume = () => sync();
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -236,23 +230,22 @@ export function FilmHero() {
     );
     observer.observe(hero);
     reduced.addEventListener("change", resume);
-    connection?.addEventListener("change", resume);
     document.addEventListener("visibilitychange", resume);
     window.addEventListener("pageshow", resume);
     window.addEventListener("online", resume);
     element.addEventListener("canplay", resume);
+    hero.addEventListener("click", resume, true);
     sync();
     return () => {
       disposed = true;
       clearTimeout(retryTimer);
-      startPlayback.current = null;
       observer.disconnect();
       reduced.removeEventListener("change", resume);
-      connection?.removeEventListener("change", resume);
       document.removeEventListener("visibilitychange", resume);
       window.removeEventListener("pageshow", resume);
       window.removeEventListener("online", resume);
       element.removeEventListener("canplay", resume);
+      hero.removeEventListener("click", resume, true);
       element.pause();
     };
   }, [filmSource]);
@@ -289,11 +282,9 @@ export function FilmHero() {
             }}
             onPlaying={() => {
               setHasFrame(true);
-              setNeedsPlayback(false);
             }}
             onError={() => {
               setHasFrame(false);
-              setNeedsPlayback(true);
             }}
           />
         </div>
@@ -320,24 +311,13 @@ export function FilmHero() {
             <ArrowRight size={17} strokeWidth={1.3} aria-hidden="true" />
           </Link>
         </div>
-        {needsPlayback ? (
-          <button
-            className="film-scroll-cue film-playback-recovery"
-            type="button"
-            aria-label="Play campaign film"
-            onClick={() => startPlayback.current?.(true)}
-          >
-            <Play size={18} strokeWidth={1.3} aria-hidden="true" />
-          </button>
-        ) : (
-          <CmsAnchor
-            className="film-scroll-cue"
-            href="#film-introduction"
-            aria-label="Discover SEEN"
-          >
-            <ArrowDown size={18} strokeWidth={1.1} aria-hidden="true" />
-          </CmsAnchor>
-        )}
+        <CmsAnchor
+          className="film-scroll-cue"
+          href="#film-introduction"
+          aria-label="Discover SEEN"
+        >
+          <ArrowDown size={18} strokeWidth={1.1} aria-hidden="true" />
+        </CmsAnchor>
       </section>
       <section
         className="film-introduction container"

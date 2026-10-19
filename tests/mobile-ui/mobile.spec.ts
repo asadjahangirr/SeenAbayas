@@ -19,6 +19,12 @@ test("Android touch: film plays, navigation opens and a product can be added, up
       ),
     )
     .toBe(true);
+  await expect(
+    page.getByRole("button", { name: "Open navigation menu", exact: true }),
+  ).not.toBeVisible();
+  await expect(page.locator(".announcement")).toBeVisible();
+  await page.evaluate(() => window.scrollTo({ top: 850, behavior: "instant" }));
+  await expect(page.locator(".header-inner")).toHaveCSS("opacity", "1");
   await page
     .getByRole("button", { name: "Open navigation menu", exact: true })
     .tap();
@@ -88,15 +94,24 @@ test("older Android browsers can add and restore a bag without newer AbortSignal
   );
 });
 
-test("blocked autoplay offers a working one-tap play recovery", async ({
+test("blocked autoplay leaves a clean poster and a natural hero tap retries without a Play button", async ({
   page,
 }) => {
   await page.addInitScript(() => {
     const play = HTMLMediaElement.prototype.play;
     let allowed = false;
-    document.addEventListener("click", (event) => {
-      if (event.isTrusted && event.target instanceof Element && event.target.closest(".film-playback-recovery")) allowed = true;
-    }, true);
+    document.addEventListener(
+      "click",
+      (event) => {
+        if (
+          event.isTrusted &&
+          event.target instanceof Element &&
+          event.target.closest(".film-hero")
+        )
+          allowed = true;
+      },
+      true,
+    );
     HTMLMediaElement.prototype.play = function () {
       if (!allowed) {
         this.pause();
@@ -108,9 +123,16 @@ test("blocked autoplay offers a working one-tap play recovery", async ({
     };
   });
   await page.goto("/");
-  await page
-    .getByRole("button", { name: "Play campaign film", exact: true })
-    .tap();
+  await expect(page.locator(".film-hero video")).toHaveAttribute(
+    "src",
+    /hero\.mp4/,
+  );
+  await expect(page.locator(".film-hero")).toHaveAttribute(
+    "data-has-frame",
+    "false",
+  );
+  await expect(page.locator(".film-hero button")).toHaveCount(0);
+  await page.locator(".film-hero").tap({ position: { x: 30, y: 190 } });
   await expect
     .poll(() =>
       page
@@ -118,12 +140,10 @@ test("blocked autoplay offers a working one-tap play recovery", async ({
         .evaluate((el: HTMLVideoElement) => !el.paused && el.currentTime > 0),
     )
     .toBe(true);
-  await expect(
-    page.getByRole("button", { name: "Play campaign film", exact: true }),
-  ).not.toBeVisible();
+  await expect(page.locator(".film-hero button")).toHaveCount(0);
 });
 
-test("data-saving phones can choose to play the film without an automatic download", async ({
+test("phones autoplay without requiring a Play button when the data-saving flag is set", async ({
   page,
 }) => {
   await page.addInitScript(() =>
@@ -132,18 +152,8 @@ test("data-saving phones can choose to play the film without an automatic downlo
       configurable: true,
     }),
   );
-  const requests: string[] = [];
-  page.on("request", (request) => {
-    if (request.url().endsWith("hero.mp4")) requests.push(request.url());
-  });
   await page.goto("/");
-  await expect(
-    page.getByRole("button", { name: "Play campaign film", exact: true }),
-  ).toBeVisible();
-  expect(requests).toEqual([]);
-  await page
-    .getByRole("button", { name: "Play campaign film", exact: true })
-    .tap();
+  await expect(page.locator(".film-hero button")).toHaveCount(0);
   await expect
     .poll(() =>
       page

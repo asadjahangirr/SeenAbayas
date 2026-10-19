@@ -23,7 +23,7 @@
     "test:mobile-ui": "playwright test --config playwright.mobile-ui.config.ts"
   },
   "engines": {
-    "node": ">=22.0.0"
+    "node": "24.x"
   },
   "dependencies": {
     "@fontsource-variable/cormorant-garamond": "5.3.0",
