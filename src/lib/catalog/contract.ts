@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { CollectionPiece } from "@/data/collection";
+import { assetPath } from "@/lib/cms/model";
 
 const variant = z.object({
   id: z.uuid(),
@@ -15,6 +16,10 @@ export const catalogRowSchema = z.object({
   price_pence: z.number().int().min(1).max(99_999_999),
   currency: z.literal("GBP"),
   variants: z.array(variant).min(1),
+  photos: z.array(z.object({ src: assetPath, label: z.string().max(150), alt: z.string().min(1).max(300) }).strict()).max(12).optional(),
+  tone: z.string().max(80).optional(),
+  category: z.string().max(100).optional(),
+  category_name: z.string().max(150).optional(),
 }).strict();
 
 export type CatalogRow = z.infer<typeof catalogRowSchema>;
@@ -41,10 +46,10 @@ export function mapCatalogRows(input: unknown, photography: CollectionPiece[]): 
       variants.add(item.id);
       sizes.add(size);
     }
-    const source = photography.find((piece) => piece.id === row.design_reference);
+    const source = row.photos?.length ? { id: row.design_reference, visualLabel: row.name, photos: row.photos } : photography.find((piece) => piece.id === row.design_reference);
     // A database record cannot manufacture a photograph for an unphotographed design.
     if (!source) continue;
-    pieces.push({ ...source, visualLabel: row.name, commerce: {
+    pieces.push({ ...source, visualLabel: row.name, tone: row.tone, category: row.category, categoryName: row.category_name, commerce: {
       productId: row.product_id,
       description: row.description,
       pricePence: row.price_pence,

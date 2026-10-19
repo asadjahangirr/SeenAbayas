@@ -1,19 +1,9 @@
 .catalog-breadcrumb { display: flex; align-items: center; gap: 12px; padding-block: 24px; color: var(--secondary-text); font-size: 10px; }
 .catalog-breadcrumb a { display: inline-flex; align-items: center; min-height: 44px; color: #171717; }
 .catalog-breadcrumb a:hover { text-decoration: underline; text-underline-offset: 4px; }
-.catalog-intro__layout { display: grid; gap: 28px; padding-block: 8px 36px; }
-.catalog-intro__copy > .eyebrow { animation: editorial-arrive 700ms var(--ease-editorial) both; }
-.catalog-intro h1 { margin-top: 14px; font-family: var(--font-cormorant), Georgia, serif; font-size: clamp(56px, 12vw, 80px); font-weight: 400; line-height: 0.96; letter-spacing: -0.04em; }
-.catalog-intro h1 span, .catalog-intro h1 em { display: block; width: fit-content; animation: editorial-arrive 900ms var(--ease-editorial) both; }
-.catalog-intro h1 em { padding-bottom: 8px; font-weight: 400; animation-delay: 90ms; }
-.catalog-intro__copy > p:last-child { margin-top: 20px; color: var(--secondary-text); font-size: 13px; line-height: 1.8; animation: editorial-arrive 900ms 160ms var(--ease-editorial) both; }
-.catalog-intro__imagery { display: grid; grid-template-columns: 1.15fr 1fr; align-items: start; gap: 16px; max-width: 460px; }
-.catalog-intro__imagery figure { margin: 0; min-width: 0; }
-.catalog-intro__imagery figure + figure { margin-top: 24px; }
-.catalog-intro__imagery figure > div { position: relative; aspect-ratio: 1.15; overflow: hidden; background: var(--surface); }
-.catalog-intro__imagery figure + figure > div { aspect-ratio: 1.1; }
-.catalog-intro__imagery img { object-fit: cover; object-position: 50% 32%; transition: transform 1500ms var(--ease-editorial); }
-.catalog-intro__imagery figcaption { margin-top: 8px; color: var(--secondary-text); font-size: 9px; letter-spacing: 0.04em; }
+.catalog-heading { display: flex; flex-direction: column; gap: 14px; padding-block: 4px 28px; }
+.catalog-heading h1 { font-family: var(--font-cormorant), Georgia, serif; font-size: clamp(40px, 6vw, 64px); font-weight: 400; line-height: 1.05; letter-spacing: -.035em; animation: editorial-arrive 650ms var(--ease-editorial) both; }
+.catalog-heading > p { max-width: 320px; color: var(--secondary-text); font-size: 12px; line-height: 1.8; }
 .catalog { padding-bottom: 52px; }
 .catalog-toolbar { display: flex; flex-direction: column; gap: 20px; padding-block: 22px; border-top: 1px solid var(--border); }
 .catalog-toolbar__title { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
@@ -46,9 +36,6 @@
 .catalog-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px 12px; padding-top: 24px; }
 .catalog-grid > div { min-width: 0; }
 .catalog-card__visual { position: relative; }
-.catalog-card__quickview { position: absolute; right: 10px; bottom: 10px; display: inline-flex; align-items: center; justify-content: center; gap: 12px; min-width: 44px; min-height: 44px; padding: 12px; border: 0; border-radius: 0; background: rgb(255 255 255 / 95%); color: #171717; font-size: 10px; }
-.catalog-card__quickview svg { flex-shrink: 0; }
-.catalog-card__quickview > span { white-space: nowrap; }
 .catalog-card__open { display: block; width: 100%; padding: 0; border: 0; border-radius: 0; background: transparent; color: #171717; text-align: left; }
 .catalog-card__image { position: relative; display: block; aspect-ratio: 2 / 3; overflow: hidden; background: var(--surface); }
 .catalog-card__image > img { object-fit: cover; object-position: 50% 35%; transition: opacity 700ms var(--ease-editorial), transform 1300ms var(--ease-editorial); }
@@ -71,13 +58,9 @@
 .catalog-assistance a { margin-top: 8px; color: #171717; }
 
 @media (min-width: 768px) {
+.catalog-heading { flex-direction: row; align-items: end; justify-content: space-between; gap: 36px; padding-block: 4px 36px; }
+.catalog-heading > p { max-width: 280px; text-align: right; }
   .catalog-breadcrumb { padding-block: 20px; }
-  .catalog-intro__layout { grid-template-columns: 1.15fr 1fr; align-items: center; gap: 40px; padding-block: 16px 48px; }
-  .catalog-intro__imagery { gap: 20px; }
-  .catalog-intro__imagery figure > div { aspect-ratio: 0.85; }
-  .catalog-intro__imagery figure + figure { margin-top: 40px; }
-  .catalog-intro__imagery figure + figure > div { aspect-ratio: 0.8; }
-  .catalog-intro__copy > p:last-child { margin-top: 24px; font-size: 14px; }
   .catalog-toolbar { flex-direction: row; align-items: center; justify-content: space-between; gap: 40px; padding-block: 24px; }
   .catalog-toolbar__title { justify-content: flex-start; gap: 18px; }
   .catalog-search { width: 260px; }
@@ -93,29 +76,17 @@
 }
 
 @media (min-width: 1024px) {
-  .catalog-intro__layout { grid-template-columns: 1.2fr 1fr; gap: 80px; padding-block: 24px 56px; }
-  .catalog-intro h1 { font-size: clamp(80px, 7.1vw, 102px); }
-  .catalog-intro__imagery { justify-self: end; width: 100%; }
-  .catalog-intro__imagery figure > div { aspect-ratio: 1; }
-  .catalog-intro__imagery figure + figure > div { aspect-ratio: 0.9; }
-  .catalog-intro__imagery figcaption { margin-top: 12px; font-size: 10px; }
   .catalog-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 52px 28px; }
   .catalog-tones { gap: 32px; }
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .catalog-intro__imagery figure:hover img { transform: scale(1.05); }
   .catalog-tones button:hover { color: #171717; }
   .catalog-tones button:hover::after { transform: scaleX(1); transform-origin: left; }
   .catalog-card:hover .catalog-card__image > img { transform: scale(1.035); }
   .catalog-card:hover .catalog-card__alternate, .catalog-card:focus-within .catalog-card__alternate { opacity: 1; }
   .catalog-card:hover .catalog-card__caption > svg { transform: translate(2px, -2px); }
-  .catalog-card__quickview { gap: 0; transition: gap 400ms var(--ease-editorial); }
-  .catalog-card__quickview > span { max-width: 0; overflow: hidden; opacity: 0; transition: max-width 450ms var(--ease-editorial), opacity 300ms ease; }
-  .catalog-card:hover .catalog-card__quickview, .catalog-card:focus-within .catalog-card__quickview { gap: 12px; }
-  .catalog-card:hover .catalog-card__quickview > span, .catalog-card:focus-within .catalog-card__quickview > span { max-width: 140px; opacity: 1; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .catalog-intro__imagery img, .catalog-card__image > img, .catalog-card__caption > svg { transform: none !important; }
 }

@@ -1,3 +1,7 @@
+
+import { CmsAnchor } from "@/components/cms/anchor";
+
+import { Copy } from "@/components/cms/content-provider";
 import type { ComponentPropsWithoutRef } from "react";
 
 type Variant = "primary" | "secondary";
@@ -15,7 +19,7 @@ export function Button({
 }: ComponentPropsWithoutRef<"button"> & { variant?: Variant }) {
   return (
     <button type={type} className={buttonClasses(variant, className)} {...props}>
-      <span className="button__content">{children}</span>
+      <span className="button__content"><Copy text={children} /></span>
     </button>
   );
 }
@@ -27,8 +31,8 @@ export function ButtonLink({
   ...props
 }: ComponentPropsWithoutRef<"a"> & { variant?: Variant }) {
   return (
-    <a className={buttonClasses(variant, className)} {...props}>
-      <span className="button__content">{children}</span>
-    </a>
+    <CmsAnchor className={buttonClasses(variant, className)} {...props}>
+      <span className="button__content"><Copy text={children} /></span>
+    </CmsAnchor>
   );
 }

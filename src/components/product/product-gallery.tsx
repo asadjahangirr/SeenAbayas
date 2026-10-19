@@ -1,120 +1,100 @@
 "use client";
+import { Copy } from "@/components/cms/content-provider";
 
-import { ArrowLeft, ArrowRight, Minus, Plus, X, ZoomIn } from "lucide-react";
-import Image from "next/image";
+import { ArrowLeft, ArrowRight } from "lucide-react";
+import Image from "@/components/cms/image";
 import { useEffect, useRef, useState, type TouchEvent } from "react";
-
 import type { CollectionPiece } from "@/data/collection";
-import { keepFocusInDialog } from "@/lib/dialog-focus";
 
 export function ProductGallery({ piece }: { piece: CollectionPiece }) {
   const [index, setIndex] = useState(0);
   const [zoomed, setZoomed] = useState(false);
-  const [viewerOpen, setViewerOpen] = useState(false);
-  const dialogRef = useRef<HTMLDialogElement>(null);
-  const triggerRef = useRef<HTMLButtonElement>(null);
-  const viewportRef = useRef<HTMLDivElement>(null);
+  const photoRef = useRef<HTMLButtonElement>(null);
+  const origin = useRef({ x: 50, y: 50 });
+  const frame = useRef<number | null>(null);
   const touchStart = useRef<{ x: number; y: number; onPhoto: boolean } | null>(null);
   const suppressClick = useRef(false);
   const photo = piece.photos[index];
   const multiple = piece.photos.length > 1;
 
-  useEffect(() => {
-    const viewport = viewportRef.current;
-    if (!viewport) return;
-    viewport.scrollTo({
-      left: zoomed ? (viewport.scrollWidth - viewport.clientWidth) / 2 : 0,
-      top: zoomed ? (viewport.scrollHeight - viewport.clientHeight) / 2 : 0,
-      behavior: "instant",
+  useEffect(() => () => { if (frame.current !== null) cancelAnimationFrame(frame.current); }, []);
+
+  function paintOrigin() {
+    if (frame.current !== null) return;
+    frame.current = requestAnimationFrame(() => {
+      photoRef.current?.style.setProperty("--zoom-x", `${origin.current.x}%`);
+      photoRef.current?.style.setProperty("--zoom-y", `${origin.current.y}%`);
+      frame.current = null;
     });
-  }, [zoomed, index, viewerOpen]);
+  }
+
+  function follow(clientX: number, clientY: number) {
+    const bounds = photoRef.current?.getBoundingClientRect();
+    if (!bounds) return;
+    origin.current = { x: Math.max(0, Math.min(100, (clientX - bounds.x) / bounds.width * 100)), y: Math.max(0, Math.min(100, (clientY - bounds.y) / bounds.height * 100)) };
+    paintOrigin();
+  }
 
   function select(next: number) {
     setIndex((next + piece.photos.length) % piece.photos.length);
     setZoomed(false);
+    origin.current = { x: 50, y: 50 };
+    paintOrigin();
   }
 
-  function beginSwipe(event: TouchEvent) {
+  function beginTouch(event: TouchEvent) {
     if (event.touches.length !== 1) { touchStart.current = null; return; }
-    touchStart.current = {
-      x: event.touches[0].clientX,
-      y: event.touches[0].clientY,
-      onPhoto: event.target instanceof Element && event.target.closest("button") === triggerRef.current,
-    };
+    const touch = event.touches[0];
+    touchStart.current = { x: touch.clientX, y: touch.clientY, onPhoto: event.target instanceof Element && event.target.closest("button") === photoRef.current };
     suppressClick.current = false;
   }
 
-  function openViewer() {
-    setZoomed(false);
-    setViewerOpen(true);
-    dialogRef.current?.showModal();
-  }
-
-  function endSwipe(event: TouchEvent) {
+  function endTouch(event: TouchEvent) {
     const start = touchStart.current;
     touchStart.current = null;
-    if (!start || zoomed) return;
-    const dx = event.changedTouches[0].clientX - start.x;
-    const dy = event.changedTouches[0].clientY - start.y;
-    if (Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+    if (!start || !event.changedTouches[0]) return;
+    const touch = event.changedTouches[0];
+    const dx = touch.clientX - start.x;
+    const dy = touch.clientY - start.y;
+    if (!zoomed && Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy) * 1.5) {
       suppressClick.current = true;
       if (multiple) select(index + (dx < 0 ? 1 : -1));
     } else if (start.onPhoto && Math.abs(dx) < 10 && Math.abs(dy) < 10) {
-      // Handle the tap directly; a preceding swipe can suppress compatibility clicks.
       suppressClick.current = true;
-      openViewer();
-    }
+      follow(touch.clientX, touch.clientY);
+      setZoomed(!zoomed);
+    } else if (start.onPhoto) suppressClick.current = true;
   }
 
-  function moveFromButton(direction: number) {
-    if (suppressClick.current) { suppressClick.current = false; return; }
-    select(index + direction);
-  }
-
-  return (
-    <div className="piece-gallery" role="group" aria-label={`Photographs of ${piece.visualLabel}`} onKeyDown={(event) => {
-      if (!dialogRef.current?.open && (event.key === "ArrowLeft" || event.key === "ArrowRight")) {
-        event.preventDefault();
-        select(index + (event.key === "ArrowRight" ? 1 : -1));
-      }
-    }}>
-      <div className="piece-gallery__main" onTouchStart={beginSwipe} onTouchEnd={endSwipe} onTouchCancel={() => { touchStart.current = null; }} onPointerDown={(event) => { if (event.pointerType === "mouse") suppressClick.current = false; }}>
-        <button ref={triggerRef} type="button" className="piece-photo" aria-label={`Enlarge ${photo.label.toLowerCase()} photograph of ${piece.visualLabel}`} aria-haspopup="dialog"
-          onClick={() => {
-            if (suppressClick.current) { suppressClick.current = false; return; }
-            openViewer();
-          }}
-        >
-          <Image key={photo.src} src={photo.src} alt={photo.alt} fill preload={index === 0} loading={index === 0 ? undefined : "eager"} sizes="(min-width: 1440px) 720px, (min-width: 1024px) 56vw, 94vw" />
-          <span className="piece-photo__hint" aria-hidden="true"><ZoomIn size={17} strokeWidth={1.3} /><span>Explore the details</span></span>
-        </button>
-        {multiple && <>
-          <button type="button" className="icon-button piece-gallery__arrow piece-gallery__arrow--prev" aria-label="Previous product photograph" onClick={() => moveFromButton(-1)}><ArrowLeft size={19} strokeWidth={1.3} /></button>
-          <button type="button" className="icon-button piece-gallery__arrow piece-gallery__arrow--next" aria-label="Next product photograph" onClick={() => moveFromButton(1)}><ArrowRight size={19} strokeWidth={1.3} /></button>
-        </>}
-      </div>
-      <div className="piece-gallery__meta" role="status" aria-live="polite" aria-atomic="true"><span>{photo.label}</span><span>{index + 1} / {piece.photos.length}</span></div>
-      {multiple && <div className="piece-thumbnails" role="group" aria-label="Choose a product photograph">
-        {piece.photos.map((item, position) => <button key={item.src} type="button" aria-label={`Show ${item.label.toLowerCase()} photograph`} aria-pressed={index === position} onClick={() => select(position)}><span><Image src={item.src} alt="" fill sizes="80px" /></span><span>{item.label}</span></button>)}
-      </div>}
-
-      <dialog ref={dialogRef} className="piece-zoom" aria-labelledby="piece-zoom-title" onClose={() => { suppressClick.current = false; setZoomed(false); setViewerOpen(false); triggerRef.current?.focus({ preventScroll: true }); }} onKeyDown={(event) => {
-        keepFocusInDialog(event);
-        if (!zoomed && (event.key === "ArrowLeft" || event.key === "ArrowRight")) {
-          event.preventDefault();
-          select(index + (event.key === "ArrowRight" ? 1 : -1));
-        }
-      }}>
-        <div className="piece-zoom__toolbar"><h2 id="piece-zoom-title">{piece.visualLabel}<span>Photo viewer</span></h2><div>
-          <button className="icon-button" type="button" aria-label={zoomed ? "Zoom out photograph" : "Zoom in photograph"} onClick={() => setZoomed(!zoomed)}>{zoomed ? <Minus size={21} strokeWidth={1.3} /> : <Plus size={21} strokeWidth={1.3} />}</button>
-          <button autoFocus className="icon-button" type="button" aria-label="Close enlarged photograph" onClick={() => dialogRef.current?.close()}><X size={23} strokeWidth={1.3} /></button>
-        </div></div>
-        <div className="piece-zoom__viewport" ref={viewportRef} data-magnified={zoomed} role="region" tabIndex={zoomed ? 0 : -1} aria-label="Photograph; scroll to explore when magnified" onTouchStart={beginSwipe} onTouchEnd={endSwipe} onTouchCancel={() => { touchStart.current = null; }}>
-          {/* Prepared WebP files already have the resolution needed for detail views. */}
-          <div className="piece-zoom__canvas">{viewerOpen && <Image key={photo.src} loading="eager" unoptimized src={photo.src} alt={photo.alt} fill sizes="100vw" />}</div>
-        </div>
-        <div className="piece-zoom__footer">{multiple && <button type="button" className="icon-button" aria-label="Previous enlarged photograph" onClick={() => select(index - 1)}><ArrowLeft size={19} strokeWidth={1.3} /></button>}<p role="status" aria-live="polite">{photo.label} · {index + 1} / {piece.photos.length}{zoomed && " · 200%"}</p>{multiple && <button type="button" className="icon-button" aria-label="Next enlarged photograph" onClick={() => select(index + 1)}><ArrowRight size={19} strokeWidth={1.3} /></button>}</div>
-      </dialog>
+  return <div className="piece-gallery" role="group" aria-label={`Photographs of ${piece.visualLabel}`} onKeyDown={(event) => {
+    if (event.key === "Escape") { setZoomed(false); return; }
+    if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)) return;
+    if (zoomed && event.target === photoRef.current) {
+      event.preventDefault();
+      const { x, y } = origin.current;
+      origin.current = { x: Math.max(0, Math.min(100, x + (event.key === "ArrowRight" ? 10 : event.key === "ArrowLeft" ? -10 : 0))), y: Math.max(0, Math.min(100, y + (event.key === "ArrowDown" ? 10 : event.key === "ArrowUp" ? -10 : 0))) };
+      paintOrigin();
+    } else if (event.key === "ArrowLeft" || event.key === "ArrowRight") { event.preventDefault(); select(index + (event.key === "ArrowRight" ? 1 : -1)); }
+  }}>
+    <div className="piece-gallery__main" onTouchStart={beginTouch} onTouchMove={(event) => { if (zoomed && touchStart.current?.onPhoto && event.touches.length === 1) follow(event.touches[0].clientX, event.touches[0].clientY); }} onTouchEnd={endTouch} onTouchCancel={() => { touchStart.current = null; }}>
+      <button ref={photoRef} type="button" className="piece-photo" data-zoomed={zoomed} aria-pressed={zoomed} aria-label={`View ${photo.label.toLowerCase()} details of ${piece.visualLabel}`} aria-describedby={`photo-instructions-${piece.id}`}
+        onPointerEnter={(event) => { if (event.pointerType === "mouse" && matchMedia("(hover: hover) and (pointer: fine)").matches) { follow(event.clientX, event.clientY); setZoomed(true); } }}
+        onPointerMove={(event) => { if (event.pointerType === "mouse" && zoomed) follow(event.clientX, event.clientY); }}
+        onPointerLeave={(event) => { if (event.pointerType === "mouse") setZoomed(false); }}
+        onPointerDown={(event) => { if (event.pointerType === "mouse") suppressClick.current = false; }}
+        onBlur={() => setZoomed(false)}
+        onClick={() => { if (suppressClick.current) { suppressClick.current = false; return; } setZoomed(!zoomed); }}>
+        {/* Prepared source-sized WebP keeps the hover detail sharp without another request. */}
+        <Image key={photo.src} unoptimized src={photo.src} alt={photo.alt} fill preload={index === 0} loading={index === 0 ? undefined : "eager"} sizes="(min-width: 1440px) 720px, (min-width: 1024px) 56vw, 94vw" />
+      </button>
+      {multiple && <>
+        <button type="button" className="icon-button piece-gallery__arrow piece-gallery__arrow--prev" aria-label="Previous product photograph" onPointerDown={(event) => { if (event.pointerType === "mouse") suppressClick.current = false; }} onClick={() => { if (suppressClick.current) { suppressClick.current = false; return; } select(index - 1); }}><ArrowLeft size={19} strokeWidth={1.3} aria-hidden="true" /></button>
+        <button type="button" className="icon-button piece-gallery__arrow piece-gallery__arrow--next" aria-label="Next product photograph" onPointerDown={(event) => { if (event.pointerType === "mouse") suppressClick.current = false; }} onClick={() => { if (suppressClick.current) { suppressClick.current = false; return; } select(index + 1); }}><ArrowRight size={19} strokeWidth={1.3} aria-hidden="true" /></button>
+      </>}
     </div>
-  );
+    <p className="sr-only" id={`photo-instructions-${piece.id}`}><Copy text={"Hover or tap to magnify. With the photograph focused, press Enter to toggle magnification, arrow keys to explore the detail, and Escape to return. When not magnified, left and right arrows change photographs."} /></p>
+    <div className="piece-gallery__meta" role="status" aria-live="polite" aria-atomic="true"><span><Copy text={photo.label} /></span><span><Copy text={index + 1} /><Copy text={" / "} /><Copy text={piece.photos.length} /></span></div>
+    <p className="piece-gallery__hint"><span className="piece-gallery__hint--mouse"><Copy text={"Move over the image for a closer look."} /></span><span className="piece-gallery__hint--touch"><Copy text={zoomed ? "Drag to explore. Tap to return." : multiple ? "Tap for details. Swipe to explore the views." : "Tap for a closer look."} /></span></p>
+    {multiple && <div className="piece-thumbnails" role="group" aria-label="Choose a product photograph">{piece.photos.map((item, position) => <button key={item.src} type="button" aria-label={`Show ${item.label.toLowerCase()} photograph`} aria-pressed={index === position} onClick={() => select(position)}><span><Image src={item.src} alt="" fill sizes="80px" /></span><span><Copy text={item.label} /></span></button>)}</div>}
+  </div>;
 }

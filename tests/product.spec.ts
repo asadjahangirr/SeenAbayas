@@ -23,8 +23,9 @@ for (const width of [320, 390, 768, 1024, 1440, 1920]) {
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Burgundy");
     await expect.poll(() => page.locator(".piece-photo > img").evaluate((element: HTMLImageElement) => element.naturalWidth)).toBeGreaterThan(0);
     expect(await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth)).toBe(false);
-    await expect(page.locator(".piece-enquiry").getByRole("link", { name: "Enquire about this piece" })).toHaveAttribute("href", "mailto:info@seenabayas.co.uk?subject=SEEN%20enquiry%3A%20Burgundy%20(design-01)");
-    await expect(page.getByRole("button", { name: /Add to (bag|cart)/i })).toHaveCount(0);
+    await expect(page.getByRole("link", { name: "Ask about sizing or availability" })).toHaveAttribute("href", "mailto:info@seenabayas.co.uk?subject=SEEN%20enquiry%3A%20Burgundy%20(design-01)");
+    await expect(page.getByRole("button", { name: "Add to bag", exact: true })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Add to bag", exact: true })).toBeDisabled();
     expect(errors).toEqual([]);
     if (width === 390 || width === 1440) {
       for (const image of await page.locator(".piece-related .catalog-card__image > img:first-child").all()) {
@@ -53,49 +54,47 @@ test("thumbnails and arrow keys select actual product photographs", async ({ pag
   await expect(status).toHaveText("Another angle4 / 4");
 });
 
-test("photo viewer magnifies, supports scrolling and navigation, and restores focus", async ({ page }, testInfo) => {
+test("hover magnification follows the pointer without opening a viewer or moving the image frame", async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto("/collection/design-01");
-  const trigger = page.getByRole("button", { name: "Enlarge front photograph of Burgundy", exact: true });
-  await trigger.click();
-  const dialog = page.getByRole("dialog", { name: /Burgundy.*Photo viewer/ });
-  const close = dialog.getByRole("button", { name: "Close enlarged photograph", exact: true });
-  await expect(close).toBeFocused();
-  await dialog.getByRole("button", { name: "Zoom in photograph", exact: true }).click();
-  await expect(dialog.getByRole("status")).toHaveText("Front · 1 / 4 · 200%");
-  const viewport = dialog.locator(".piece-zoom__viewport");
-  expect(await viewport.evaluate((element) => element.scrollWidth > element.clientWidth)).toBe(true);
-  expect(await viewport.evaluate((element) => element.scrollHeight > element.clientHeight)).toBe(true);
-  await viewport.focus();
-  const initialLeft = await viewport.evaluate((element) => element.scrollLeft);
+  await settle(page);
+  const photo = page.locator(".piece-photo");
+  const before = await photo.boundingBox();
+  await photo.hover({ position: { x: before!.width * .25, y: before!.height * .4 } });
+  await expect(photo).toHaveAttribute("data-zoomed", "true");
+  await expect.poll(() => photo.locator("img").evaluate((element) => new DOMMatrix(getComputedStyle(element).transform).m11)).toBeCloseTo(1.85, 2);
+  const origin = await photo.evaluate((element) => element.style.getPropertyValue("--zoom-x"));
+  await photo.hover({ position: { x: before!.width * .7, y: before!.height * .6 } });
+  await expect.poll(() => photo.evaluate((element) => element.style.getPropertyValue("--zoom-x"))).not.toBe(origin);
+  expect(await photo.boundingBox()).toEqual(before);
+  await expect(page.locator(".piece-zoom")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: /Zoom (in|out) photograph/ })).toHaveCount(0);
+  await page.screenshot({ path: testInfo.outputPath("hover-magnification.png") });
+  await page.mouse.move(0, 0);
+  await expect(photo).toHaveAttribute("data-zoomed", "false");
+  await photo.focus();
+  await page.keyboard.press("Enter");
+  await expect(photo).toHaveAttribute("aria-pressed", "true");
+  const initial = await photo.evaluate((element) => parseFloat(element.style.getPropertyValue("--zoom-x")));
   await page.keyboard.press("ArrowRight");
-  await expect.poll(() => viewport.evaluate((element) => element.scrollLeft)).toBeGreaterThan(initialLeft);
-  await dialog.getByRole("button", { name: "Zoom out photograph", exact: true }).click();
-  await dialog.getByRole("button", { name: "Next enlarged photograph", exact: true }).click();
-  await expect(dialog.getByRole("status")).toHaveText("Back · 2 / 4");
-  await expect(dialog.locator("img")).toHaveAttribute("alt", /Back view of the burgundy/);
-  for (let step = 0; step < 8; step++) {
-    await page.keyboard.press("Tab");
-    expect(await dialog.evaluate((element) => element.contains(document.activeElement))).toBe(true);
-  }
-  await expect.poll(() => dialog.locator("img").evaluate((element: HTMLImageElement) => element.naturalWidth)).toBeGreaterThan(0);
-  await page.screenshot({ path: testInfo.outputPath("enlarged-photograph.png") });
+  await expect.poll(() => photo.evaluate((element) => parseFloat(element.style.getPropertyValue("--zoom-x")))).toBeGreaterThan(initial);
   await page.keyboard.press("Escape");
-  await expect(dialog).not.toBeVisible();
-  await expect(page.getByRole("button", { name: "Enlarge back photograph of Burgundy", exact: true })).toBeFocused();
+  await expect(photo).toHaveAttribute("aria-pressed", "false");
 });
 
-test("single-photo pieces keep enlargement without redundant gallery controls", async ({ page }) => {
+test("single-photo pieces retain inline details without redundant gallery controls", async ({ page }) => {
   await page.goto("/collection/design-05");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Textured charcoal");
   await expect(page.locator(".piece-gallery__meta")).toHaveText("Front1 / 1");
   await expect(page.locator(".piece-thumbnails")).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Next product photograph", exact: true })).toHaveCount(0);
-  await page.getByRole("button", { name: "Enlarge front photograph of Textured charcoal", exact: true }).click();
-  const dialog = page.getByRole("dialog", { name: /Textured charcoal.*Photo viewer/ });
-  await expect(dialog.getByRole("button", { name: "Next enlarged photograph", exact: true })).toHaveCount(0);
-  await dialog.getByRole("button", { name: "Zoom in photograph", exact: true }).click();
-  await expect(dialog.getByRole("status")).toHaveText("Front · 1 / 1 · 200%");
+  const photo = page.locator(".piece-photo");
+  await page.mouse.move(0, 0);
+  await photo.focus();
+  await page.keyboard.press("Enter");
+  await expect(photo).toHaveAttribute("data-zoomed", "true");
+  await page.keyboard.press("Escape");
+  await expect(photo).toHaveAttribute("data-zoomed", "false");
 });
 
 test("collection cards open product pages and related links reset the gallery", async ({ page }) => {
@@ -115,12 +114,13 @@ test("collection cards open product pages and related links reset the gallery", 
   await expect(page).toHaveURL(/\/collection$/);
 });
 
-test("quick-view galleries link to the matching product page", async ({ page }) => {
-  await page.goto("/collection");
-  await page.getByRole("button", { name: "View photographs: Burgundy", exact: true }).click();
-  await page.getByRole("dialog", { name: "Burgundy", exact: true }).getByRole("link", { name: "View this piece", exact: true }).click();
+test("homepage edit cards open the matching product directly", async ({ page }) => {
+  await page.goto("/");
+  await page.locator(".collection-card").getByRole("link", { name: "View piece: Burgundy", exact: true }).click();
   await expect(page).toHaveURL(/\/collection\/design-01$/);
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Burgundy");
+  await expect(page.getByRole("button", { name: "Add to bag", exact: true })).toBeVisible();
+  await expect(page.getByRole("dialog")).not.toBeVisible();
 });
 
 test("sizing and delivery disclosures use keyboard controls and confirmed delivery text", async ({ page }) => {
@@ -133,10 +133,11 @@ test("sizing and delivery disclosures use keyboard controls and confirmed delive
   await expect(sizing.locator("p")).not.toBeVisible();
   const delivery = page.locator("details").filter({ hasText: "UK delivery" });
   await delivery.locator("summary").click();
-  await expect(delivery.locator("p")).toHaveText("Complimentary standard UK delivery on orders over £80.");
+  await expect(delivery.locator("p")).toContainText("Complimentary standard UK delivery on orders over £80.");
+  await expect(delivery.getByRole("link", { name: "View delivery information" })).toHaveAttribute("href", "/shipping-delivery");
 });
 
-test("touch swipes change the product photo without opening enlargement", async ({ browser, baseURL }) => {
+test("touch swipes browse photos and taps magnify inline", async ({ browser, baseURL }) => {
   const context = await browser.newContext({ baseURL, viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
   try {
     const page = await context.newPage();
@@ -152,25 +153,24 @@ test("touch swipes change the product photo without opening enlargement", async 
     await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
     await expect(page.locator(".piece-gallery__meta")).toHaveText("Back2 / 4");
     await expect(page.getByRole("dialog", { name: /Photo viewer/ })).not.toBeVisible();
+    await expect(photo).toHaveAttribute("data-zoomed", "false");
     await photo.tap();
-    const dialog = page.getByRole("dialog", { name: /Burgundy.*Photo viewer/ });
-    await expect(dialog).toBeVisible();
-    await dialog.getByRole("button", { name: "Zoom in photograph", exact: true }).tap();
-    await expect(dialog.getByRole("status")).toHaveText("Back · 2 / 4 · 200%");
-    await dialog.getByRole("button", { name: "Close enlarged photograph", exact: true }).tap();
-    await expect(dialog).not.toBeVisible();
+    await expect(photo).toHaveAttribute("data-zoomed", "true");
+    await photo.tap();
+    await expect(photo).toHaveAttribute("data-zoomed", "false");
   } finally { await context.close(); }
 });
 
 for (const width of [390, 1440]) {
-  test(`product accessibility at ${width}px including magnified viewer`, async ({ page }) => {
+  test(`product accessibility at ${width}px including inline magnification`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });
     await page.goto("/collection/design-01");
     await settle(page);
     const scan = () => new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze();
     expect((await scan()).violations).toEqual([]);
-    await page.getByRole("button", { name: "Enlarge front photograph of Burgundy", exact: true }).click();
-    await page.getByRole("button", { name: "Zoom in photograph", exact: true }).click();
+    await page.locator(".piece-photo").focus();
+    await page.keyboard.press("Enter");
+    await expect(page.locator(".piece-photo")).toHaveAttribute("data-zoomed", "true");
     expect((await scan()).violations).toEqual([]);
   });
 }
@@ -206,7 +206,7 @@ test("without JavaScript the product photograph, enquiry link and native disclos
     const page = await context.newPage();
     await page.goto("/collection/design-01");
     await expect(page.locator(".piece-photo > img")).toBeVisible();
-    await expect(page.locator(".piece-enquiry").getByRole("link", { name: "Enquire about this piece" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Ask about sizing or availability" })).toBeVisible();
     const details = page.locator("details").filter({ hasText: "Sizing & fit" });
     await details.locator("summary").click();
     await expect(details.locator("p")).toBeVisible();

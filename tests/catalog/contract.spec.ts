@@ -24,6 +24,11 @@ test("preview is explicit and configured mode requires a complete publishable-ke
   expect(readCatalogConfig({ CATALOG_SOURCE: "supabase", NEXT_PUBLIC_SUPABASE_URL: "https://example.supabase.co", NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "sb_publishable_TEST_ONLY" }).source).toBe("supabase");
 });
 
+test("development data must be explicitly selected and cannot be indexed", () => {
+  expect(readCatalogConfig({ CATALOG_SOURCE: "development" }).source).toBe("development");
+  expect(() => readCatalogConfig({ CATALOG_SOURCE: "development", SITE_INDEXING_ENABLED: "true" })).toThrow("cannot be used with search indexing");
+});
+
 test("secret keys, unsafe origins and malformed values fail without exposing their contents", () => {
   for (const [url, key] of [
     ["https://example.supabase.co", "sb_secret_DO_NOT_EXPOSE"],

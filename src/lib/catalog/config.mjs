@@ -8,7 +8,7 @@ const origin = z.url().refine((value) => {
 }, "Use an HTTPS project origin, or HTTP on loopback for local development.");
 
 const schema = z.object({
-  CATALOG_SOURCE: z.enum(["preview", "supabase"]).default("preview"),
+  CATALOG_SOURCE: z.enum(["preview", "development", "supabase"]).default("preview"),
   NEXT_PUBLIC_SUPABASE_URL: origin.optional(),
   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: z.string().regex(/^sb_publishable_[A-Za-z0-9_-]+$/, "Use a publishable key, never a secret or service-role key.").optional(),
 }).superRefine((value, context) => {
@@ -28,6 +28,9 @@ export function readCatalogConfig(values) {
   });
   if (!parsed.success) {
     throw new Error(`Invalid catalog configuration: ${parsed.error.issues.map((issue) => `${issue.path.join(".")}: ${issue.message}`).join("; ")}`);
+  }
+  if (parsed.data.CATALOG_SOURCE === "development" && values.SITE_INDEXING_ENABLED === "true") {
+    throw new Error("The development catalogue cannot be used with search indexing enabled.");
   }
   return {
     source: parsed.data.CATALOG_SOURCE,

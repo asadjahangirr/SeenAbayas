@@ -1,4 +1,6 @@
 "use client";
+import { Copy } from "@/components/cms/content-provider";
+
 
 import { useEffect, useRef, type ReactNode } from "react";
 
@@ -30,5 +32,5 @@ export function Reveal({ children, className = "", delay = 0 }: { children: Reac
     };
   }, [delay]);
 
-  return <div className={className} ref={ref}>{children}</div>;
+  return <div className={className} ref={ref}><Copy text={children} /></div>;
 }

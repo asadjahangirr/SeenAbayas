@@ -1,0 +1,3146 @@
+[
+  {
+    "text": "cross-site",
+    "groups": [
+      "api · bag · route"
+    ]
+  },
+  {
+    "text": "development",
+    "groups": [
+      "api · bag · route",
+      "layout"
+    ]
+  },
+  {
+    "text": "lines",
+    "groups": [
+      "api · bag · route"
+    ]
+  },
+  {
+    "text": "object",
+    "groups": [
+      "api · bag · route"
+    ]
+  },
+  {
+    "text": "preview",
+    "groups": [
+      "api · bag · route"
+    ]
+  },
+  {
+    "text": "info@seenabayas.co.uk",
+    "groups": [
+      "api · contact · route",
+      "content · contact-form",
+      "store"
+    ]
+  },
+  {
+    "text": "Your shopping bag",
+    "groups": [
+      "bag",
+      "privacy-policy"
+    ]
+  },
+  {
+    "text": " — availability needs checking",
+    "groups": [
+      "bag · bag-contents"
+    ]
+  },
+  {
+    "text": " each",
+    "groups": [
+      "bag · bag-contents"
+    ]
+  },
+  {
+    "text": " for complimentary standard UK delivery.",
+    "groups": [
+      "bag · bag-contents"
+    ]
+  },
+  {
+    "text": "Add ",
+    "groups": [
+      "bag · bag-contents"
+    ]
+  },
+  {
+    "text": "An unavailable piece needs checking.",
+    "groups": [
+      "bag · bag-contents"
+    ]
+  },
+  {
+    "text": "Available items subtotal",
+    "groups": [
+      "bag · bag-contents"
+    ]
+  },
+  {
+    "text": "Check bag again",
+    "groups": [
+      "bag · bag-contents"
+    ]
+  },
+  {
+    "text": "Checking your saved selection…",
+    "groups": [
+      "bag · bag-contents",
+      "bag · bag-drawer"
+    ]
+  },
+  {
+    "text": "Complimentary on orders over ",
+    "groups": [
+      "bag · bag-contents"
+    ]
+  },
+  {
+    "text": "Continue exploring",
+    "groups": [
+      "bag · bag-contents"
+    ]
+  },
+  {
+    "text": "Discover the collection",
+    "groups": [
+      "bag · bag-contents",
+      "home · film-hero"
+    ]
+  },
+  {
+    "text": "Enquire about your bag",
+    "groups": [
+      "bag · bag-contents"
+    ]
+  },
+  {
+    "text": "Explore the collection and find a piece that feels like you.",
+    "groups": [
+      "bag · bag-contents"
+    ]
+  },
+  {
+    "text": "insufficient-stock",
+    "groups": [
+      "bag · bag-contents",
+      "bag · bag-provider"
+    ]
+  },
+  {
+    "text": "Items in your bag are not reserved.",
+    "groups": [
+      "bag · bag-contents"
+    ]
+  },
+  {
+    "text": "Please reduce the quantity; stock has changed.",
+    "groups": [
+      "bag · bag-contents"
+    ]
+  },
+  {
+    "text": "Remove",
+    "groups": [
+      "bag · bag-contents"
+    ]
+  },
+  {
+    "text": "Room for something timeless",
+    "groups": [
+      "bag · bag-contents"
+    ]
+  },
+  {
+    "text": "Size ",
+    "groups": [
+      "bag · bag-contents"
+    ]
+  },
+  {
+    "text": "starts here.",
+    "groups": [
+      "bag · bag-contents"
+    ]
+  },
+  {
+    "text": "Subtotal",
+    "groups": [
+      "bag · bag-contents"
+    ]
+  },
+  {
+    "text": "This size is currently unavailable.",
+    "groups": [
+      "bag · bag-contents"
+    ]
+  },
+  {
+    "text": "unavailable",
+    "groups": [
+      "bag · bag-contents"
+    ]
+  },
+  {
+    "text": "unavailable piece",
+    "groups": [
+      "bag · bag-contents"
+    ]
+  },
+  {
+    "text": "Unavailable piece",
+    "groups": [
+      "bag · bag-contents"
+    ]
+  },
+  {
+    "text": "View shopping bag",
+    "groups": [
+      "bag · bag-contents"
+    ]
+  },
+  {
+    "text": "Your next favourite",
+    "groups": [
+      "bag · bag-contents"
+    ]
+  },
+  {
+    "text": "Your selection",
+    "groups": [
+      "bag · bag-contents"
+    ]
+  },
+  {
+    "text": "Your selection qualifies for complimentary standard UK delivery.",
+    "groups": [
+      "bag · bag-contents"
+    ]
+  },
+  {
+    "text": "A considered choice. Beautifully yours.",
+    "groups": [
+      "bag · bag-drawer"
+    ]
+  },
+  {
+    "text": "A SEEN selection",
+    "groups": [
+      "bag · bag-drawer"
+    ]
+  },
+  {
+    "text": "Your bag.",
+    "groups": [
+      "bag · bag-drawer"
+    ]
+  },
+  {
+    "text": "A few considered pieces. A wardrobe that feels like you.",
+    "groups": [
+      "bag · bag-page"
+    ]
+  },
+  {
+    "text": "A question about fit or styling? Our team is here to help.",
+    "groups": [
+      "bag · bag-page"
+    ]
+  },
+  {
+    "text": "Chosen with intention",
+    "groups": [
+      "bag · bag-page"
+    ]
+  },
+  {
+    "text": "Unfolding your selection…",
+    "groups": [
+      "bag · bag-page"
+    ]
+  },
+  {
+    "text": "Your shopping bag.",
+    "groups": [
+      "bag · bag-page"
+    ]
+  },
+  {
+    "text": "null",
+    "groups": [
+      "bag · bag-provider"
+    ]
+  },
+  {
+    "text": "There isn't enough stock for that quantity. Please choose fewer pieces.",
+    "groups": [
+      "bag · bag-provider"
+    ]
+  },
+  {
+    "text": "This size is no longer available. Please choose another size.",
+    "groups": [
+      "bag · bag-provider"
+    ]
+  },
+  {
+    "text": "Bag",
+    "groups": [
+      "bag · bag-trigger"
+    ]
+  },
+  {
+    "text": "item",
+    "groups": [
+      "bag · bag-trigger"
+    ]
+  },
+  {
+    "text": "items",
+    "groups": [
+      "bag · bag-trigger"
+    ]
+  },
+  {
+    "text": "Customer care",
+    "groups": [
+      "collection",
+      "contact",
+      "content · policy-page",
+      "error",
+      "faqs",
+      "site-footer",
+      "site-header"
+    ]
+  },
+  {
+    "text": "Explore the SEEN abaya collection, from burgundy silhouettes to tonal details and soft neutrals. Discover each piece through our photography.",
+    "groups": [
+      "collection"
+    ]
+  },
+  {
+    "text": "For sizing and availability, speak with our team.",
+    "groups": [
+      "collection"
+    ]
+  },
+  {
+    "text": "Here to help you choose.",
+    "groups": [
+      "collection"
+    ]
+  },
+  {
+    "text": "Home",
+    "groups": [
+      "collection",
+      "collection · [id]",
+      "content · page-breadcrumb",
+      "store"
+    ]
+  },
+  {
+    "text": "Refined silhouettes. A piece for every part of your day.",
+    "groups": [
+      "collection"
+    ]
+  },
+  {
+    "text": "The collection",
+    "groups": [
+      "collection",
+      "collection · [id]",
+      "site-footer"
+    ]
+  },
+  {
+    "text": "The Collection",
+    "groups": [
+      "collection"
+    ]
+  },
+  {
+    "text": "Ask about sizing or availability",
+    "groups": [
+      "collection · [id]"
+    ]
+  },
+  {
+    "text": "Back to the collection",
+    "groups": [
+      "collection · [id]",
+      "collection · [id] · not-found"
+    ]
+  },
+  {
+    "text": "Complimentary standard UK delivery on orders over ",
+    "groups": [
+      "collection · [id]",
+      "site-footer"
+    ]
+  },
+  {
+    "text": "Explore more from SEEN.",
+    "groups": [
+      "collection · [id]"
+    ]
+  },
+  {
+    "text": "Our team can help with measurements and sizing questions for this piece.",
+    "groups": [
+      "collection · [id]"
+    ]
+  },
+  {
+    "text": "Photographed in",
+    "groups": [
+      "collection · [id]"
+    ]
+  },
+  {
+    "text": "Piece not found",
+    "groups": [
+      "collection · [id]"
+    ]
+  },
+  {
+    "text": "Sizing & fit",
+    "groups": [
+      "collection · [id]",
+      "faqs"
+    ]
+  },
+  {
+    "text": "The SEEN Collection",
+    "groups": [
+      "collection · [id]",
+      "home · film-hero"
+    ]
+  },
+  {
+    "text": "UK delivery",
+    "groups": [
+      "collection · [id]"
+    ]
+  },
+  {
+    "text": "View delivery information",
+    "groups": [
+      "collection · [id]"
+    ]
+  },
+  {
+    "text": "Return to the collection to explore the SEEN edit.",
+    "groups": [
+      "collection · [id] · not-found"
+    ]
+  },
+  {
+    "text": "This piece could not be found.",
+    "groups": [
+      "collection · [id] · not-found"
+    ]
+  },
+  {
+    "text": "A fresh start",
+    "groups": [
+      "collection · collection-browser"
+    ]
+  },
+  {
+    "text": "All",
+    "groups": [
+      "collection · collection-browser"
+    ]
+  },
+  {
+    "text": "All categories",
+    "groups": [
+      "collection · collection-browser"
+    ]
+  },
+  {
+    "text": "All colours",
+    "groups": [
+      "collection · collection-browser"
+    ]
+  },
+  {
+    "text": "All pieces",
+    "groups": [
+      "collection · collection-browser"
+    ]
+  },
+  {
+    "text": "Alphabetical: A to Z",
+    "groups": [
+      "collection · collection-browser"
+    ]
+  },
+  {
+    "text": "Alphabetical: Z to A",
+    "groups": [
+      "collection · collection-browser"
+    ]
+  },
+  {
+    "text": "az",
+    "groups": [
+      "collection · collection-browser"
+    ]
+  },
+  {
+    "text": "Category",
+    "groups": [
+      "collection · collection-browser"
+    ]
+  },
+  {
+    "text": "Clear filters",
+    "groups": [
+      "collection · collection-browser"
+    ]
+  },
+  {
+    "text": "Explore the pieces",
+    "groups": [
+      "collection · collection-browser"
+    ]
+  },
+  {
+    "text": "Name, colour or detail",
+    "groups": [
+      "collection · collection-browser"
+    ]
+  },
+  {
+    "text": "No pieces match your search.",
+    "groups": [
+      "collection · collection-browser"
+    ]
+  },
+  {
+    "text": "piece",
+    "groups": [
+      "collection · collection-browser"
+    ]
+  },
+  {
+    "text": "pieces",
+    "groups": [
+      "collection · collection-browser"
+    ]
+  },
+  {
+    "text": "Please contact our team with any questions about the collection.",
+    "groups": [
+      "collection · collection-browser"
+    ]
+  },
+  {
+    "text": "Search the collection",
+    "groups": [
+      "collection · collection-browser"
+    ]
+  },
+  {
+    "text": "Sort by",
+    "groups": [
+      "collection · collection-browser"
+    ]
+  },
+  {
+    "text": "The collection is being prepared.",
+    "groups": [
+      "collection · collection-browser"
+    ]
+  },
+  {
+    "text": "Try another colour or detail, or return to the complete collection.",
+    "groups": [
+      "collection · collection-browser"
+    ]
+  },
+  {
+    "text": "View all pieces",
+    "groups": [
+      "collection · collection-browser"
+    ]
+  },
+  {
+    "text": "za",
+    "groups": [
+      "collection · collection-browser"
+    ]
+  },
+  {
+    "text": "photograph",
+    "groups": [
+      "collection · piece-card"
+    ]
+  },
+  {
+    "text": "photographs",
+    "groups": [
+      "collection · piece-card"
+    ]
+  },
+  {
+    "text": "Contact Us",
+    "groups": [
+      "contact",
+      "faqs",
+      "shipping-delivery",
+      "store",
+      "terms-conditions"
+    ]
+  },
+  {
+    "text": "Explore the size guide",
+    "groups": [
+      "contact"
+    ]
+  },
+  {
+    "text": "For sizing advice, include the design name and the measurements you would like to check. For an order enquiry, please include your order reference.",
+    "groups": [
+      "contact"
+    ]
+  },
+  {
+    "text": "Frequently asked questions",
+    "groups": [
+      "contact"
+    ]
+  },
+  {
+    "text": "Get ",
+    "groups": [
+      "contact"
+    ]
+  },
+  {
+    "text": "Get in touch with SEEN ABAYAS for help with sizing, the collection or an order enquiry.",
+    "groups": [
+      "contact"
+    ]
+  },
+  {
+    "text": "Here to help.",
+    "groups": [
+      "contact",
+      "content · policy-page"
+    ]
+  },
+  {
+    "text": "in Touch.",
+    "groups": [
+      "contact"
+    ]
+  },
+  {
+    "text": "We'd love to hear from you. Whether you have a question about an order, sizing or our collection, our customer care team is here to help.",
+    "groups": [
+      "contact"
+    ]
+  },
+  {
+    "text": "Clear saved bag",
+    "groups": [
+      "content · browser-storage-controls"
+    ]
+  },
+  {
+    "text": "This removes every saved piece from your bag on this browser. It does not affect an order or delete an enquiry you have sent.",
+    "groups": [
+      "content · browser-storage-controls"
+    ]
+  },
+  {
+    "text": "A note to SEEN.",
+    "groups": [
+      "content · contact-form"
+    ]
+  },
+  {
+    "text": "All fields are required.",
+    "groups": [
+      "content · contact-form"
+    ]
+  },
+  {
+    "text": "contact-email-error",
+    "groups": [
+      "content · contact-form"
+    ]
+  },
+  {
+    "text": "contact-message-error",
+    "groups": [
+      "content · contact-form"
+    ]
+  },
+  {
+    "text": "contact-name-error",
+    "groups": [
+      "content · contact-form"
+    ]
+  },
+  {
+    "text": "contact-phone-error",
+    "groups": [
+      "content · contact-form"
+    ]
+  },
+  {
+    "text": "Email",
+    "groups": [
+      "content · contact-form",
+      "content · policy-page"
+    ]
+  },
+  {
+    "text": "Error",
+    "groups": [
+      "content · contact-form"
+    ]
+  },
+  {
+    "text": "getting in touch.",
+    "groups": [
+      "content · contact-form"
+    ]
+  },
+  {
+    "text": "Leave this field empty",
+    "groups": [
+      "content · contact-form"
+    ]
+  },
+  {
+    "text": "Loading security check…",
+    "groups": [
+      "content · contact-form"
+    ]
+  },
+  {
+    "text": "Message",
+    "groups": [
+      "content · contact-form"
+    ]
+  },
+  {
+    "text": "Name",
+    "groups": [
+      "content · contact-form"
+    ]
+  },
+  {
+    "text": "Our contact form is currently unavailable. Please email ",
+    "groups": [
+      "content · contact-form"
+    ]
+  },
+  {
+    "text": "Phone number",
+    "groups": [
+      "content · contact-form"
+    ]
+  },
+  {
+    "text": "Please enable JavaScript to use this form, or email info@seenabayas.co.uk.",
+    "groups": [
+      "content · contact-form"
+    ]
+  },
+  {
+    "text": "Privacy Policy",
+    "groups": [
+      "content · contact-form",
+      "cookie-policy",
+      "privacy-policy",
+      "store",
+      "terms-conditions"
+    ]
+  },
+  {
+    "text": "Send another message",
+    "groups": [
+      "content · contact-form"
+    ]
+  },
+  {
+    "text": "Send message",
+    "groups": [
+      "content · contact-form"
+    ]
+  },
+  {
+    "text": "Sending your message…",
+    "groups": [
+      "content · contact-form"
+    ]
+  },
+  {
+    "text": "string",
+    "groups": [
+      "content · contact-form"
+    ]
+  },
+  {
+    "text": "Thank you for",
+    "groups": [
+      "content · contact-form"
+    ]
+  },
+  {
+    "text": "Thank you for contacting SEEN ABAYAS. Your message has been received.",
+    "groups": [
+      "content · contact-form"
+    ]
+  },
+  {
+    "text": "We couldn't confirm your message was sent. Please retry or email our team.",
+    "groups": [
+      "content · contact-form"
+    ]
+  },
+  {
+    "text": "We couldn't send your message. Please try again or email our team.",
+    "groups": [
+      "content · contact-form"
+    ]
+  },
+  {
+    "text": "Your details are used to respond to your enquiry. Read our ",
+    "groups": [
+      "content · contact-form"
+    ]
+  },
+  {
+    "text": "Brand",
+    "groups": [
+      "content · policy-page"
+    ]
+  },
+  {
+    "text": "Business address",
+    "groups": [
+      "content · policy-page"
+    ]
+  },
+  {
+    "text": "Business details and delivery arrangements are being confirmed. This page is a draft for review; online ordering is not yet available.",
+    "groups": [
+      "content · policy-page"
+    ]
+  },
+  {
+    "text": "Company registration",
+    "groups": [
+      "content · policy-page"
+    ]
+  },
+  {
+    "text": "Contact customer care",
+    "groups": [
+      "content · policy-page",
+      "returns-exchanges"
+    ]
+  },
+  {
+    "text": "For questions about this page, contact our team.",
+    "groups": [
+      "content · policy-page"
+    ]
+  },
+  {
+    "text": "Last reviewed: ",
+    "groups": [
+      "content · policy-page"
+    ]
+  },
+  {
+    "text": "Legal trading name",
+    "groups": [
+      "content · policy-page"
+    ]
+  },
+  {
+    "text": "On this page",
+    "groups": [
+      "content · policy-page"
+    ]
+  },
+  {
+    "text": "Preview policy",
+    "groups": [
+      "content · policy-page"
+    ]
+  },
+  {
+    "text": "Returns & Exchanges",
+    "groups": [
+      "content · policy-page",
+      "returns-exchanges",
+      "site-footer",
+      "store"
+    ]
+  },
+  {
+    "text": "Shipping & Delivery",
+    "groups": [
+      "content · policy-page",
+      "shipping-delivery",
+      "site-footer",
+      "store",
+      "terms-conditions"
+    ]
+  },
+  {
+    "text": "Telephone",
+    "groups": [
+      "content · policy-page"
+    ]
+  },
+  {
+    "text": "To be confirmed before ordering opens",
+    "groups": [
+      "content · policy-page",
+      "shipping-delivery"
+    ]
+  },
+  {
+    "text": "VAT registration",
+    "groups": [
+      "content · policy-page"
+    ]
+  },
+  {
+    "text": "A length label describes the garment length in inches, rather than a UK dress size. These conversions explain the temporary length options shown in our preview collection.",
+    "groups": [
+      "content · size-guide"
+    ]
+  },
+  {
+    "text": "A length reference.",
+    "groups": [
+      "content · size-guide"
+    ]
+  },
+  {
+    "text": "Centimetres",
+    "groups": [
+      "content · size-guide"
+    ]
+  },
+  {
+    "text": "cm",
+    "groups": [
+      "content · size-guide"
+    ]
+  },
+  {
+    "text": "in",
+    "groups": [
+      "content · size-guide"
+    ]
+  },
+  {
+    "text": "inches",
+    "groups": [
+      "content · size-guide"
+    ]
+  },
+  {
+    "text": "Inches",
+    "groups": [
+      "content · size-guide"
+    ]
+  },
+  {
+    "text": "Length (",
+    "groups": [
+      "content · size-guide"
+    ]
+  },
+  {
+    "text": "Length label",
+    "groups": [
+      "content · size-guide"
+    ]
+  },
+  {
+    "text": "Reference conversions only — confirmed SEEN garment measurements will be added for each design.",
+    "groups": [
+      "content · size-guide"
+    ]
+  },
+  {
+    "text": "This is a conversion reference, not a confirmed size chart. Bust, sleeve, fit and actual garment lengths are being confirmed. Please contact us for measurements before choosing a size.",
+    "groups": [
+      "content · size-guide"
+    ]
+  },
+  {
+    "text": "Understanding length",
+    "groups": [
+      "content · size-guide"
+    ]
+  },
+  {
+    "text": " and, for sample products, ",
+    "groups": [
+      "cookie-policy"
+    ]
+  },
+  {
+    "text": " for personal information and contact choices. Hosting and security storage will be reviewed before launch so this policy reflects the final setup.",
+    "groups": [
+      "cookie-policy"
+    ]
+  },
+  {
+    "text": " When enabled, Turnstile processes browser and device signals for security. Its storage behaviour depends on the service and widget configuration; it is not an advertising feature.",
+    "groups": [
+      "cookie-policy"
+    ]
+  },
+  {
+    "text": "Administrators use necessary Supabase authentication cookies, including session cookies with names beginning sb- and temporary PKCE verification cookies for account recovery and email confirmation. Session cookies are HttpOnly, use SameSite=Lax and are Secure on the public HTTPS website. They are refreshed with the session and cleared on sign-out. Ordinary browsing does not require an administrator account. Clearing your saved shopping bag does not sign an administrator out.",
+    "groups": [
+      "cookie-policy"
+    ]
+  },
+  {
+    "text": "Analytics and advertising",
+    "groups": [
+      "cookie-policy"
+    ]
+  },
+  {
+    "text": "Cloudflare Turnstile Privacy Addendum",
+    "groups": [
+      "cookie-policy",
+      "privacy-policy"
+    ]
+  },
+  {
+    "text": "Contact security checks",
+    "groups": [
+      "cookie-policy"
+    ]
+  },
+  {
+    "text": "Contact sending is not yet configured. The Turnstile widget does not load while the form is unavailable.",
+    "groups": [
+      "cookie-policy"
+    ]
+  },
+  {
+    "text": "Cookie Policy",
+    "groups": [
+      "cookie-policy",
+      "privacy-policy",
+      "store",
+      "terms-conditions"
+    ]
+  },
+  {
+    "text": "Cookies and browser storage can remember information on your device. This page covers local storage as well as cookies; using local storage does not make a technology exempt from privacy rules.",
+    "groups": [
+      "cookie-policy"
+    ]
+  },
+  {
+    "text": "Cookies and similar technologies",
+    "groups": [
+      "cookie-policy"
+    ]
+  },
+  {
+    "text": "Duration",
+    "groups": [
+      "cookie-policy"
+    ]
+  },
+  {
+    "text": "If optional tracking is added, this page and its controls must be updated before it runs. Where consent is required, you must be able to decline optional tracking without losing access to the store.",
+    "groups": [
+      "cookie-policy"
+    ]
+  },
+  {
+    "text": "Manage your saved bag",
+    "groups": [
+      "cookie-policy"
+    ]
+  },
+  {
+    "text": "More information",
+    "groups": [
+      "cookie-policy"
+    ]
+  },
+  {
+    "text": "Private administration",
+    "groups": [
+      "cookie-policy"
+    ]
+  },
+  {
+    "text": "Purpose",
+    "groups": [
+      "cookie-policy"
+    ]
+  },
+  {
+    "text": "Read our ",
+    "groups": [
+      "cookie-policy",
+      "faqs"
+    ]
+  },
+  {
+    "text": "Read the ",
+    "groups": [
+      "cookie-policy"
+    ]
+  },
+  {
+    "text": "Remembering the shopping bag you request",
+    "groups": [
+      "cookie-policy"
+    ]
+  },
+  {
+    "text": "SEEN ABAYAS browser storage and security information, with a control to clear your saved shopping bag.",
+    "groups": [
+      "cookie-policy"
+    ]
+  },
+  {
+    "text": "seen.bag.v1",
+    "groups": [
+      "cookie-policy"
+    ]
+  },
+  {
+    "text": "seen.bag.v1.development",
+    "groups": [
+      "cookie-policy"
+    ]
+  },
+  {
+    "text": "Standard and development bags use separate entries. You can clear both with the control below. Clearing one item from your bag removes that selection from the active saved bag.",
+    "groups": [
+      "cookie-policy"
+    ]
+  },
+  {
+    "text": "Storage names",
+    "groups": [
+      "cookie-policy"
+    ]
+  },
+  {
+    "text": "The contact form uses Cloudflare Turnstile to check for automated submissions.",
+    "groups": [
+      "cookie-policy"
+    ]
+  },
+  {
+    "text": "The current storefront does not install analytics, advertising pixels or marketing tracking tools. Fonts and product images are served by the site.",
+    "groups": [
+      "cookie-policy"
+    ]
+  },
+  {
+    "text": "The storefront uses first-party local storage to remember product variant references and quantities in your bag. It does not save payment card details, your name, email or delivery address in those entries.",
+    "groups": [
+      "cookie-policy"
+    ]
+  },
+  {
+    "text": "This draft describes cookies and similar browser technologies used by the current storefront preview, including the shopping bag you choose to save.",
+    "groups": [
+      "cookie-policy"
+    ]
+  },
+  {
+    "text": "Until removed by you or your browser; there is currently no automatic expiry",
+    "groups": [
+      "cookie-policy"
+    ]
+  },
+  {
+    "text": "You can also inspect or remove this site's cookies and local storage in your browser's site-data settings. Blocking necessary storage can prevent your bag from being remembered between visits. This button does not clear third-party cookies or unrelated browser data.",
+    "groups": [
+      "cookie-policy"
+    ]
+  },
+  {
+    "text": "Your browser choices",
+    "groups": [
+      "cookie-policy"
+    ]
+  },
+  {
+    "text": "Your saved shopping bag",
+    "groups": [
+      "cookie-policy"
+    ]
+  },
+  {
+    "text": "Please try again in a moment, or contact customer care.",
+    "groups": [
+      "error"
+    ]
+  },
+  {
+    "text": "Try again",
+    "groups": [
+      "error"
+    ]
+  },
+  {
+    "text": "Trying again",
+    "groups": [
+      "error"
+    ]
+  },
+  {
+    "text": "We couldn't load the collection.",
+    "groups": [
+      "error"
+    ]
+  },
+  {
+    "text": " and contact our team with your order reference and the item. Please obtain the correct return instructions before posting an item. No reason is required for an eligible online cancellation.",
+    "groups": [
+      "faqs"
+    ]
+  },
+  {
+    "text": " are not a confirmed garment size chart. Please ask us for design-specific measurements.",
+    "groups": [
+      "faqs"
+    ]
+  },
+  {
+    "text": " does not qualify.",
+    "groups": [
+      "faqs"
+    ]
+  },
+  {
+    "text": " explains eligible cancellation rights and includes an optional cancellation form. You do not have to accept an exchange instead of an eligible refund.",
+    "groups": [
+      "faqs"
+    ]
+  },
+  {
+    "text": " explains the planned services, tracking and details being confirmed before ordering opens.",
+    "groups": [
+      "faqs"
+    ]
+  },
+  {
+    "text": " for our contact form and customer care email. Include the design name or order reference so we can help.",
+    "groups": [
+      "faqs"
+    ]
+  },
+  {
+    "text": " to understand garment length and how to measure. Compare the specific design's measurements, as silhouettes can vary. Preview sizes are temporary and need confirmation before purchase.",
+    "groups": [
+      "faqs"
+    ]
+  },
+  {
+    "text": " with your order reference. Our ",
+    "groups": [
+      "faqs"
+    ]
+  },
+  {
+    "text": ", select an available size on a product page and add it to your bag. The store is currently in preview: online checkout is not yet available and bag additions do not place an order or reserve stock.",
+    "groups": [
+      "faqs"
+    ]
+  },
+  {
+    "text": "A little guidance on our collection, finding your fit and getting in touch.",
+    "groups": [
+      "faqs"
+    ]
+  },
+  {
+    "text": "A question",
+    "groups": [
+      "faqs"
+    ]
+  },
+  {
+    "text": "Asked Questions.",
+    "groups": [
+      "faqs"
+    ]
+  },
+  {
+    "text": "Can I change or cancel an order?",
+    "groups": [
+      "faqs"
+    ]
+  },
+  {
+    "text": "collection",
+    "groups": [
+      "faqs"
+    ]
+  },
+  {
+    "text": "Complimentary standard UK delivery applies when the eligible merchandise subtotal is over ",
+    "groups": [
+      "faqs"
+    ]
+  },
+  {
+    "text": "Confirmed measurements will be listed with each design. The reference conversions in our ",
+    "groups": [
+      "faqs"
+    ]
+  },
+  {
+    "text": "contact our team",
+    "groups": [
+      "faqs"
+    ]
+  },
+  {
+    "text": "Contact us with the design and size you are looking for. We can help with current availability; a restock date is only confirmed when we have one.",
+    "groups": [
+      "faqs"
+    ]
+  },
+  {
+    "text": "Delivery",
+    "groups": [
+      "faqs",
+      "terms-conditions"
+    ]
+  },
+  {
+    "text": "Dispatch times are still being confirmed. Once ordering and fulfilment are active, dispatch confirmation will include tracking details. For an existing order enquiry, please contact us with your order reference.",
+    "groups": [
+      "faqs"
+    ]
+  },
+  {
+    "text": "Do you offer free delivery?",
+    "groups": [
+      "faqs"
+    ]
+  },
+  {
+    "text": "FAQs",
+    "groups": [
+      "faqs",
+      "site-footer",
+      "store"
+    ]
+  },
+  {
+    "text": "For an existing order enquiry, ",
+    "groups": [
+      "faqs"
+    ]
+  },
+  {
+    "text": "Frequently",
+    "groups": [
+      "faqs"
+    ]
+  },
+  {
+    "text": "Frequently Asked Questions",
+    "groups": [
+      "faqs"
+    ]
+  },
+  {
+    "text": "Get in touch",
+    "groups": [
+      "faqs"
+    ]
+  },
+  {
+    "text": "Help with browsing the SEEN collection, abaya sizing, delivery and contacting customer care.",
+    "groups": [
+      "faqs"
+    ]
+  },
+  {
+    "text": "How can I contact the team?",
+    "groups": [
+      "faqs"
+    ]
+  },
+  {
+    "text": "How do I choose the correct abaya size?",
+    "groups": [
+      "faqs"
+    ]
+  },
+  {
+    "text": "How do I place an order?",
+    "groups": [
+      "faqs"
+    ]
+  },
+  {
+    "text": "How do I request a return or exchange?",
+    "groups": [
+      "faqs"
+    ]
+  },
+  {
+    "text": "of your own?",
+    "groups": [
+      "faqs"
+    ]
+  },
+  {
+    "text": "Ordering",
+    "groups": [
+      "faqs"
+    ]
+  },
+  {
+    "text": "Our customer care team is here to help with the collection, sizing and order enquiries.",
+    "groups": [
+      "faqs"
+    ]
+  },
+  {
+    "text": "Payments",
+    "groups": [
+      "faqs"
+    ]
+  },
+  {
+    "text": "Payments are not enabled in this preview. Available payment methods will be displayed at the secure checkout when the store opens.",
+    "groups": [
+      "faqs"
+    ]
+  },
+  {
+    "text": "Please contact us with your order reference, a description of the issue and photographs if available. Our team will review the issue and explain the next steps.",
+    "groups": [
+      "faqs"
+    ]
+  },
+  {
+    "text": "Returns & exchanges",
+    "groups": [
+      "faqs"
+    ]
+  },
+  {
+    "text": "Returns & Exchanges policy",
+    "groups": [
+      "faqs",
+      "shipping-delivery",
+      "terms-conditions"
+    ]
+  },
+  {
+    "text": "Royal Mail is the planned UK delivery partner. Our ",
+    "groups": [
+      "faqs"
+    ]
+  },
+  {
+    "text": "See Shipping & Delivery for current delivery charges.",
+    "groups": [
+      "faqs"
+    ]
+  },
+  {
+    "text": "Shipping & Delivery page",
+    "groups": [
+      "faqs"
+    ]
+  },
+  {
+    "text": "Size Guide",
+    "groups": [
+      "faqs",
+      "product · size-guide-trigger",
+      "size-guide",
+      "store",
+      "terms-conditions"
+    ]
+  },
+  {
+    "text": "Start with our ",
+    "groups": [
+      "faqs"
+    ]
+  },
+  {
+    "text": "These methods are not currently active. Their availability will depend on the store's payment configuration and eligibility, and will be confirmed at checkout.",
+    "groups": [
+      "faqs"
+    ]
+  },
+  {
+    "text": "Visit ",
+    "groups": [
+      "faqs"
+    ]
+  },
+  {
+    "text": "What if an item arrives faulty?",
+    "groups": [
+      "faqs"
+    ]
+  },
+  {
+    "text": "What if my chosen size is unavailable?",
+    "groups": [
+      "faqs"
+    ]
+  },
+  {
+    "text": "When will my order be dispatched, and how can I track it?",
+    "groups": [
+      "faqs"
+    ]
+  },
+  {
+    "text": "Where can I find garment measurements?",
+    "groups": [
+      "faqs"
+    ]
+  },
+  {
+    "text": "Which courier will deliver my order?",
+    "groups": [
+      "faqs"
+    ]
+  },
+  {
+    "text": "Which payment methods do you accept?",
+    "groups": [
+      "faqs"
+    ]
+  },
+  {
+    "text": "Will Apple Pay, Klarna or Clearpay be available?",
+    "groups": [
+      "faqs"
+    ]
+  },
+  {
+    "text": "You can explore the ",
+    "groups": [
+      "faqs"
+    ]
+  },
+  {
+    "text": "A considered selection from SEEN.",
+    "groups": [
+      "home · featured-collection"
+    ]
+  },
+  {
+    "text": "Considered in every detail.",
+    "groups": [
+      "home · featured-collection"
+    ]
+  },
+  {
+    "text": "Discover this piece",
+    "groups": [
+      "home · featured-collection"
+    ]
+  },
+  {
+    "text": "Explore the collection",
+    "groups": [
+      "home · featured-collection"
+    ]
+  },
+  {
+    "text": "Find your next everyday signature.",
+    "groups": [
+      "home · featured-collection"
+    ]
+  },
+  {
+    "text": "The collection is being prepared. Our team can help with any enquiries.",
+    "groups": [
+      "home · featured-collection"
+    ]
+  },
+  {
+    "text": "The edit",
+    "groups": [
+      "home · featured-collection"
+    ]
+  },
+  {
+    "text": "A burgundy SEEN abaya against ivory studio draping.",
+    "groups": [
+      "home · film-hero"
+    ]
+  },
+  {
+    "text": "Be Seen.",
+    "groups": [
+      "home · film-hero",
+      "our-story"
+    ]
+  },
+  {
+    "text": "Effortless elegance.",
+    "groups": [
+      "home · film-hero"
+    ]
+  },
+  {
+    "text": "Made to",
+    "groups": [
+      "home · film-hero",
+      "our-story"
+    ]
+  },
+  {
+    "text": "Refined silhouettes, beautiful details and a quiet confidence. Discover modestwear thoughtfully selected to complement your individual style.",
+    "groups": [
+      "home · film-hero"
+    ]
+  },
+  {
+    "text": "Timeless modesty.",
+    "groups": [
+      "home · film-hero"
+    ]
+  },
+  {
+    "text": "true",
+    "groups": [
+      "home · film-hero"
+    ]
+  },
+  {
+    "text": "A modern modest fashion brand celebrating timeless elegance, individuality and confidence. Made to Be Seen.",
+    "groups": [
+      "layout"
+    ]
+  },
+  {
+    "text": "SEEN ABAYAS | Made to Be Seen.",
+    "groups": [
+      "layout"
+    ]
+  },
+  {
+    "text": "supabase",
+    "groups": [
+      "layout"
+    ]
+  },
+  {
+    "text": "A charcoal SEEN abaya styled with a matching scarf, photographed against an ivory interior.",
+    "groups": [
+      "our-story"
+    ]
+  },
+  {
+    "text": "A statement of elegance.",
+    "groups": [
+      "our-story"
+    ]
+  },
+  {
+    "text": "At SEEN ABAYAS, we believe modesty and style should exist effortlessly together.",
+    "groups": [
+      "our-story"
+    ]
+  },
+  {
+    "text": "by Sisters.",
+    "groups": [
+      "our-story"
+    ]
+  },
+  {
+    "text": "Created with the modern woman in mind, our collections bring together refined silhouettes, beautiful details and contemporary designs, offering modestwear that feels as special as the woman wearing it.",
+    "groups": [
+      "our-story"
+    ]
+  },
+  {
+    "text": "Discover our story",
+    "groups": [
+      "our-story",
+      "page"
+    ]
+  },
+  {
+    "text": "Elegance for",
+    "groups": [
+      "our-story"
+    ]
+  },
+  {
+    "text": "every occasion.",
+    "groups": [
+      "our-story"
+    ]
+  },
+  {
+    "text": "Founded",
+    "groups": [
+      "our-story"
+    ]
+  },
+  {
+    "text": "Founded by sisters with a shared passion for modest fashion, SEEN ABAYAS celebrates timeless elegance, individuality and confidence.",
+    "groups": [
+      "our-story"
+    ]
+  },
+  {
+    "text": "Founded by sisters with a shared passion for modest fashion, SEEN was born from a vision to create a brand that celebrates timeless elegance, individuality and confidence.",
+    "groups": [
+      "our-story"
+    ]
+  },
+  {
+    "text": "From everyday sophistication to statement evening pieces, each design is thoughtfully selected to complement every occasion, allowing you to express your personal style without compromising on modesty.",
+    "groups": [
+      "our-story"
+    ]
+  },
+  {
+    "text": "It leaves an impression.",
+    "groups": [
+      "our-story"
+    ]
+  },
+  {
+    "text": "Lace detailing on the sleeves and opening of a black SEEN abaya.",
+    "groups": [
+      "our-story"
+    ]
+  },
+  {
+    "text": "More than modestwear.",
+    "groups": [
+      "our-story"
+    ]
+  },
+  {
+    "text": "Our beginning",
+    "groups": [
+      "our-story"
+    ]
+  },
+  {
+    "text": "Our philosophy",
+    "groups": [
+      "our-story"
+    ]
+  },
+  {
+    "text": "Our Story",
+    "groups": [
+      "our-story",
+      "page",
+      "store"
+    ]
+  },
+  {
+    "text": "SEEN ABAYAS ",
+    "groups": [
+      "our-story"
+    ]
+  },
+  {
+    "text": "SEEN ABAYAS — Elegance that speaks for itself.",
+    "groups": [
+      "our-story"
+    ]
+  },
+  {
+    "text": "Shop the collection",
+    "groups": [
+      "our-story"
+    ]
+  },
+  {
+    "text": "The SEEN perspective",
+    "groups": [
+      "our-story"
+    ]
+  },
+  {
+    "text": "Timeless modesty. Effortless elegance.",
+    "groups": [
+      "our-story",
+      "returns-exchanges"
+    ]
+  },
+  {
+    "text": "We believe true elegance doesn't demand attention. ",
+    "groups": [
+      "our-story"
+    ]
+  },
+  {
+    "text": "Defined by Elegance.",
+    "groups": [
+      "page"
+    ]
+  },
+  {
+    "text": "Founded by sisters with a shared passion for modest fashion, SEEN was created to celebrate timeless elegance, individuality and confidence.",
+    "groups": [
+      "page"
+    ]
+  },
+  {
+    "text": "Rooted in Modesty.",
+    "groups": [
+      "page"
+    ]
+  },
+  {
+    "text": "We believe true elegance doesn't demand attention. It leaves an impression.",
+    "groups": [
+      "page"
+    ]
+  },
+  {
+    "text": " for information about the security signals it processes.",
+    "groups": [
+      "privacy-policy"
+    ]
+  },
+  {
+    "text": " page or clear this site's data in your browser.",
+    "groups": [
+      "privacy-policy"
+    ]
+  },
+  {
+    "text": " When enabled, the form requires your name, email, phone number and message. It includes a submission time and reference so the team can respond and manage retries.",
+    "groups": [
+      "privacy-policy"
+    ]
+  },
+  {
+    "text": "Contact enquiries",
+    "groups": [
+      "privacy-policy"
+    ]
+  },
+  {
+    "text": "Customer accounts, online payments and newsletter subscriptions are not active in this preview. The storefront has no analytics or advertising trackers. This notice must be updated before new collection or tracking begins.",
+    "groups": [
+      "privacy-policy"
+    ]
+  },
+  {
+    "text": "Depending on the circumstances and legal basis, you may ask to access, correct, erase or restrict use of your information, or ask for a portable copy. You may also have a right to object to processing. If a future activity relies on consent, you will be able to withdraw that consent.",
+    "groups": [
+      "privacy-policy"
+    ]
+  },
+  {
+    "text": "Enquiries and correspondence",
+    "groups": [
+      "privacy-policy"
+    ]
+  },
+  {
+    "text": "Enquiry lawful basis",
+    "groups": [
+      "privacy-policy"
+    ]
+  },
+  {
+    "text": "Features not yet active",
+    "groups": [
+      "privacy-policy"
+    ]
+  },
+  {
+    "text": "For browser storage and your controls, read our ",
+    "groups": [
+      "privacy-policy"
+    ]
+  },
+  {
+    "text": "Hosting and request logs",
+    "groups": [
+      "privacy-policy"
+    ]
+  },
+  {
+    "text": "How long information is kept",
+    "groups": [
+      "privacy-policy"
+    ]
+  },
+  {
+    "text": "How the SEEN ABAYAS preview handles shopping bag information, enquiries and website security, with business disclosures awaiting confirmation.",
+    "groups": [
+      "privacy-policy"
+    ]
+  },
+  {
+    "text": "Information Commissioner's Office",
+    "groups": [
+      "privacy-policy"
+    ]
+  },
+  {
+    "text": "Information supports the shopping bag you request, responses to your enquiries and protection of the site against abuse. Contact messages are not used to automatically subscribe you to marketing.",
+    "groups": [
+      "privacy-policy"
+    ]
+  },
+  {
+    "text": "Information used by this preview",
+    "groups": [
+      "privacy-policy"
+    ]
+  },
+  {
+    "text": "Please avoid sending payment card details or unnecessary sensitive information. If you choose not to supply a required form field, the form cannot send your enquiry; you can still browse the collection or email us.",
+    "groups": [
+      "privacy-policy"
+    ]
+  },
+  {
+    "text": "Provider, logging and retention arrangements are being confirmed",
+    "groups": [
+      "privacy-policy"
+    ]
+  },
+  {
+    "text": "Retention periods or criteria are being confirmed with the business before launch",
+    "groups": [
+      "privacy-policy"
+    ]
+  },
+  {
+    "text": "Security lawful basis",
+    "groups": [
+      "privacy-policy"
+    ]
+  },
+  {
+    "text": "SEEN ABAYAS is the brand operating this storefront. The legal identity and address of the organisation responsible for your information have not yet been supplied.",
+    "groups": [
+      "privacy-policy"
+    ]
+  },
+  {
+    "text": "Service providers and transfers",
+    "groups": [
+      "privacy-policy"
+    ]
+  },
+  {
+    "text": "Technical information",
+    "groups": [
+      "privacy-policy"
+    ]
+  },
+  {
+    "text": "Terms & Conditions",
+    "groups": [
+      "privacy-policy",
+      "store",
+      "terms-conditions"
+    ]
+  },
+  {
+    "text": "The bag saves product variant references and quantities in your browser. Those selections are sent to our server to check prices and availability. Bag storage does not contain your contact details, address or payment card information, and adding a piece does not place an order.",
+    "groups": [
+      "privacy-policy"
+    ]
+  },
+  {
+    "text": "The contact form is configured to send enquiries.",
+    "groups": [
+      "privacy-policy"
+    ]
+  },
+  {
+    "text": "The contact form is currently unavailable; you can email our customer care address directly.",
+    "groups": [
+      "privacy-policy"
+    ]
+  },
+  {
+    "text": "This draft explains the information used by the current SEEN ABAYAS preview. The legal identity, handling arrangements and final policy are being confirmed before launch.",
+    "groups": [
+      "privacy-policy"
+    ]
+  },
+  {
+    "text": "To be confirmed before activation and launch",
+    "groups": [
+      "privacy-policy"
+    ]
+  },
+  {
+    "text": "To be confirmed before launch",
+    "groups": [
+      "privacy-policy"
+    ]
+  },
+  {
+    "text": "To make a request or raise a concern, email ",
+    "groups": [
+      "privacy-policy"
+    ]
+  },
+  {
+    "text": "We do not use this preview to make automated purchase or credit decisions.",
+    "groups": [
+      "privacy-policy"
+    ]
+  },
+  {
+    "text": "Website requests and security checks may involve your IP address, browser or device information and request metadata. Hosting and logging arrangements are still being confirmed.",
+    "groups": [
+      "privacy-policy"
+    ]
+  },
+  {
+    "text": "Website security",
+    "groups": [
+      "privacy-policy"
+    ]
+  },
+  {
+    "text": "When enabled, a Cloudflare Turnstile check helps protect the contact form. A check can reject an automated submission; customer care remains available by email. Read the ",
+    "groups": [
+      "privacy-policy"
+    ]
+  },
+  {
+    "text": "When the contact form is enabled, Resend processes enquiry emails for delivery to our support inbox and Cloudflare Turnstile checks whether a form submission appears automated. See Cloudflare’s privacy information below. The hosting provider, support mailbox provider, processing locations and any necessary international-transfer safeguards are still being confirmed.",
+    "groups": [
+      "privacy-policy"
+    ]
+  },
+  {
+    "text": "Who we are",
+    "groups": [
+      "privacy-policy"
+    ]
+  },
+  {
+    "text": "Why information is used",
+    "groups": [
+      "privacy-policy"
+    ]
+  },
+  {
+    "text": "You can remove your saved bag using the controls on our ",
+    "groups": [
+      "privacy-policy"
+    ]
+  },
+  {
+    "text": "Your choices and rights",
+    "groups": [
+      "privacy-policy"
+    ]
+  },
+  {
+    "text": "Your information",
+    "groups": [
+      "privacy-policy"
+    ]
+  },
+  {
+    "text": "Your saved bag remains in local browser storage until removed or cleared by you or your browser. Short-lived anti-abuse counters use a hashed email identifier; expired entries are removed on subsequent requests or when the server process restarts. An optional private Supabase inbox can retain verified, successfully emailed enquiries for customer care when its server integration is enabled. Authorised administrators can read, archive and delete those messages; the business must confirm its enquiry retention period before launch.",
+    "groups": [
+      "privacy-policy"
+    ]
+  },
+  {
+    "text": "ArrowDown",
+    "groups": [
+      "product · product-gallery"
+    ]
+  },
+  {
+    "text": "ArrowLeft",
+    "groups": [
+      "product · product-gallery"
+    ]
+  },
+  {
+    "text": "ArrowRight",
+    "groups": [
+      "product · product-gallery"
+    ]
+  },
+  {
+    "text": "ArrowUp",
+    "groups": [
+      "product · product-gallery"
+    ]
+  },
+  {
+    "text": "Drag to explore. Tap to return.",
+    "groups": [
+      "product · product-gallery"
+    ]
+  },
+  {
+    "text": "eager",
+    "groups": [
+      "product · product-gallery"
+    ]
+  },
+  {
+    "text": "Escape",
+    "groups": [
+      "product · product-gallery"
+    ]
+  },
+  {
+    "text": "Hover or tap to magnify. With the photograph focused, press Enter to toggle magnification, arrow keys to explore the detail, and Escape to return. When not magnified, left and right arrows change photographs.",
+    "groups": [
+      "product · product-gallery"
+    ]
+  },
+  {
+    "text": "mouse",
+    "groups": [
+      "product · product-gallery"
+    ]
+  },
+  {
+    "text": "Move over the image for a closer look.",
+    "groups": [
+      "product · product-gallery"
+    ]
+  },
+  {
+    "text": "Tap for a closer look.",
+    "groups": [
+      "product · product-gallery"
+    ]
+  },
+  {
+    "text": "Tap for details. Swipe to explore the views.",
+    "groups": [
+      "product · product-gallery"
+    ]
+  },
+  {
+    "text": "— Out of stock",
+    "groups": [
+      "product · product-purchase"
+    ]
+  },
+  {
+    "text": ", out of stock",
+    "groups": [
+      "product · product-purchase"
+    ]
+  },
+  {
+    "text": "Add another to bag",
+    "groups": [
+      "product · product-purchase"
+    ]
+  },
+  {
+    "text": "Add to bag",
+    "groups": [
+      "product · product-purchase"
+    ]
+  },
+  {
+    "text": "Checking availability…",
+    "groups": [
+      "product · product-purchase"
+    ]
+  },
+  {
+    "text": "Choose your length (inches)",
+    "groups": [
+      "product · product-purchase"
+    ]
+  },
+  {
+    "text": "Choose your size",
+    "groups": [
+      "product · product-purchase"
+    ]
+  },
+  {
+    "text": "length-inches",
+    "groups": [
+      "product · product-purchase"
+    ]
+  },
+  {
+    "text": "Out of stock",
+    "groups": [
+      "product · product-purchase"
+    ]
+  },
+  {
+    "text": "Please choose an available size.",
+    "groups": [
+      "product · product-purchase"
+    ]
+  },
+  {
+    "text": "Please contact customer care for current sizing and availability.",
+    "groups": [
+      "product · product-purchase"
+    ]
+  },
+  {
+    "text": "Select a size to make it yours.",
+    "groups": [
+      "product · product-purchase"
+    ]
+  },
+  {
+    "text": "Size availability is being confirmed.",
+    "groups": [
+      "product · product-purchase"
+    ]
+  },
+  {
+    "text": "This piece is currently out of stock. Please contact our team for help.",
+    "groups": [
+      "product · product-purchase"
+    ]
+  },
+  {
+    "text": "Measurements are provided to help you find the best fit. Please refer to the specific product details, as styles and silhouettes may vary.",
+    "groups": [
+      "product · size-guide-trigger",
+      "size-guide"
+    ]
+  },
+  {
+    "text": "Size guide",
+    "groups": [
+      "product · size-guide-trigger",
+      "site-footer"
+    ]
+  },
+  {
+    "text": "View the full size guide",
+    "groups": [
+      "product · size-guide-trigger"
+    ]
+  },
+  {
+    "text": " or email ",
+    "groups": [
+      "returns-exchanges"
+    ]
+  },
+  {
+    "text": "All exchanges are subject to stock availability.",
+    "groups": [
+      "returns-exchanges"
+    ]
+  },
+  {
+    "text": "All original tags must remain attached.",
+    "groups": [
+      "returns-exchanges"
+    ]
+  },
+  {
+    "text": "At SEEN ABAYAS, we want you to feel confident and happy with every purchase. We kindly ask that you review our returns and exchanges policy before placing your order.",
+    "groups": [
+      "returns-exchanges"
+    ]
+  },
+  {
+    "text": "Customers are responsible for exchange postage costs unless the item is faulty or incorrect.",
+    "groups": [
+      "returns-exchanges"
+    ]
+  },
+  {
+    "text": "Customers are responsible for return postage costs for change-of-mind returns.",
+    "groups": [
+      "returns-exchanges"
+    ]
+  },
+  {
+    "text": "Download cancellation form",
+    "groups": [
+      "returns-exchanges"
+    ]
+  },
+  {
+    "text": "Eligible refunds will be issued to your original payment method, including standard outbound delivery charges where required by law, within 14 days of receiving your return or evidence that it has been sent back, whichever is earlier.",
+    "groups": [
+      "returns-exchanges"
+    ]
+  },
+  {
+    "text": "Exchanges",
+    "groups": [
+      "returns-exchanges"
+    ]
+  },
+  {
+    "text": "Faulty or Incorrect Items",
+    "groups": [
+      "returns-exchanges"
+    ]
+  },
+  {
+    "text": "For eligible online purchases, you have the right to cancel your order within 14 days of receiving it, without providing a reason.",
+    "groups": [
+      "returns-exchanges"
+    ]
+  },
+  {
+    "text": "How to Request an Exchange or Return",
+    "groups": [
+      "returns-exchanges"
+    ]
+  },
+  {
+    "text": "If you receive an item that is faulty, damaged or incorrect, please contact us with your order number and photographs of the issue.",
+    "groups": [
+      "returns-exchanges"
+    ]
+  },
+  {
+    "text": "Important Information",
+    "groups": [
+      "returns-exchanges"
+    ]
+  },
+  {
+    "text": "Items must be free from perfume, makeup marks, stains and other signs of wear.",
+    "groups": [
+      "returns-exchanges"
+    ]
+  },
+  {
+    "text": "Items must be unworn, unwashed and in their original condition, apart from reasonable inspection or trying on.",
+    "groups": [
+      "returns-exchanges"
+    ]
+  },
+  {
+    "text": "Items returned with signs of wear, washing, damage or handling beyond what is necessary to inspect them may be subject to a reduction in refund value where legally permitted.",
+    "groups": [
+      "returns-exchanges"
+    ]
+  },
+  {
+    "text": "Once you notify us of your cancellation, you have a further 14 days to return your item.",
+    "groups": [
+      "returns-exchanges"
+    ]
+  },
+  {
+    "text": "Personalised or made-to-measure items may be excluded from change-of-mind cancellation rights where the relevant legal exception applies.",
+    "groups": [
+      "returns-exchanges"
+    ]
+  },
+  {
+    "text": "Please contact our customer care team through the contact details provided on our website, including your order number and the item you wish to return or exchange.",
+    "groups": [
+      "returns-exchanges"
+    ]
+  },
+  {
+    "text": "Proof of purchase must be provided.",
+    "groups": [
+      "returns-exchanges"
+    ]
+  },
+  {
+    "text": "Read the cancellation form",
+    "groups": [
+      "returns-exchanges"
+    ]
+  },
+  {
+    "text": "Refunds & Cancellations",
+    "groups": [
+      "returns-exchanges"
+    ]
+  },
+  {
+    "text": "Return address",
+    "groups": [
+      "returns-exchanges"
+    ]
+  },
+  {
+    "text": "Thank you for shopping with SEEN ABAYAS.",
+    "groups": [
+      "returns-exchanges"
+    ]
+  },
+  {
+    "text": "The exchange conditions above do not remove eligible online cancellation or faulty-goods rights. You may send a clear cancellation statement by email or use the optional form below. You do not have to request an exchange first or give a reason to exercise an eligible cancellation right.",
+    "groups": [
+      "returns-exchanges"
+    ]
+  },
+  {
+    "text": "The return address is being confirmed. Please contact us for instructions before posting an item.",
+    "groups": [
+      "returns-exchanges"
+    ]
+  },
+  {
+    "text": "The supplied SEEN ABAYAS returns and exchanges policy, cancellation information and customer care contact details.",
+    "groups": [
+      "returns-exchanges"
+    ]
+  },
+  {
+    "text": "This policy does not affect your statutory rights.",
+    "groups": [
+      "returns-exchanges"
+    ]
+  },
+  {
+    "text": "To qualify for an exchange:",
+    "groups": [
+      "returns-exchanges"
+    ]
+  },
+  {
+    "text": "We are happy to offer exchanges within 14 days of receiving your order, subject to availability.",
+    "groups": [
+      "returns-exchanges"
+    ]
+  },
+  {
+    "text": "We encourage customers to request an exchange where possible. However, your statutory consumer rights remain unaffected.",
+    "groups": [
+      "returns-exchanges"
+    ]
+  },
+  {
+    "text": "We strongly recommend using a tracked postal service and retaining your proof of postage.",
+    "groups": [
+      "returns-exchanges"
+    ]
+  },
+  {
+    "text": "We will assist you in accordance with your statutory consumer rights, including providing a refund, replacement or other appropriate remedy where required.",
+    "groups": [
+      "returns-exchanges"
+    ]
+  },
+  {
+    "text": "We will provide you with the relevant return instructions.",
+    "groups": [
+      "returns-exchanges"
+    ]
+  },
+  {
+    "text": "You can notify us at ",
+    "groups": [
+      "returns-exchanges"
+    ]
+  },
+  {
+    "text": "Your cancellation request",
+    "groups": [
+      "returns-exchanges"
+    ]
+  },
+  {
+    "text": " does not qualify. This offer applies to standard UK delivery; an express upgrade is separate.",
+    "groups": [
+      "shipping-delivery"
+    ]
+  },
+  {
+    "text": " for its current delivery aims and postcode exceptions.",
+    "groups": [
+      "shipping-delivery"
+    ]
+  },
+  {
+    "text": " or visit ",
+    "groups": [
+      "shipping-delivery"
+    ]
+  },
+  {
+    "text": "At SEEN ABAYAS, we want your shopping experience to be as seamless as possible. We aim to deliver your order safely and efficiently through our selected Royal Mail delivery services.",
+    "groups": [
+      "shipping-delivery"
+    ]
+  },
+  {
+    "text": "Availability",
+    "groups": [
+      "shipping-delivery"
+    ]
+  },
+  {
+    "text": "Available for eligible destinations",
+    "groups": [
+      "shipping-delivery"
+    ]
+  },
+  {
+    "text": "Delivery aim",
+    "groups": [
+      "shipping-delivery"
+    ]
+  },
+  {
+    "text": "Delivery charge",
+    "groups": [
+      "shipping-delivery"
+    ]
+  },
+  {
+    "text": "Delivery delays",
+    "groups": [
+      "shipping-delivery"
+    ]
+  },
+  {
+    "text": "Delivery destinations",
+    "groups": [
+      "shipping-delivery"
+    ]
+  },
+  {
+    "text": "Delivery enquiries",
+    "groups": [
+      "shipping-delivery"
+    ]
+  },
+  {
+    "text": "Delivery services and the full charge will be disclosed before payment when ordering opens.",
+    "groups": [
+      "shipping-delivery"
+    ]
+  },
+  {
+    "text": "Eligible UK destinations, including Northern Ireland, islands and postcode restrictions, are being confirmed.",
+    "groups": [
+      "shipping-delivery"
+    ]
+  },
+  {
+    "text": "Enjoy complimentary standard UK delivery on orders over ",
+    "groups": [
+      "shipping-delivery"
+    ]
+  },
+  {
+    "text": "Express delivery is not currently offered.",
+    "groups": [
+      "shipping-delivery"
+    ]
+  },
+  {
+    "text": "Express UK delivery",
+    "groups": [
+      "shipping-delivery"
+    ]
+  },
+  {
+    "text": "For delivery enquiries, please contact ",
+    "groups": [
+      "shipping-delivery"
+    ]
+  },
+  {
+    "text": "If a parcel is delayed or tracking appears incorrect, contact us with your order reference and tracking number. We will help investigate with the carrier. Delivery estimates can be affected by local restrictions and service disruption.",
+    "groups": [
+      "shipping-delivery"
+    ]
+  },
+  {
+    "text": "Incorrect delivery address",
+    "groups": [
+      "shipping-delivery"
+    ]
+  },
+  {
+    "text": "International delivery availability has not been confirmed. Please contact us before arranging delivery outside the UK.",
+    "groups": [
+      "shipping-delivery"
+    ]
+  },
+  {
+    "text": "Once your order has been dispatched, we will provide tracking information where available so you can follow your delivery.",
+    "groups": [
+      "shipping-delivery"
+    ]
+  },
+  {
+    "text": "Order processing",
+    "groups": [
+      "shipping-delivery"
+    ]
+  },
+  {
+    "text": "Order tracking",
+    "groups": [
+      "shipping-delivery"
+    ]
+  },
+  {
+    "text": "Our dispatch processing time is being confirmed before ordering opens.",
+    "groups": [
+      "shipping-delivery"
+    ]
+  },
+  {
+    "text": "Please check your address carefully before payment. If you notice an error, contact us promptly. We will confirm whether an address can be amended; a change may not be possible after dispatch.",
+    "groups": [
+      "shipping-delivery"
+    ]
+  },
+  {
+    "text": "Processing is the time needed to prepare an order. Courier delivery estimates begin after dispatch and are separate from processing time.",
+    "groups": [
+      "shipping-delivery"
+    ]
+  },
+  {
+    "text": "Read ",
+    "groups": [
+      "shipping-delivery"
+    ]
+  },
+  {
+    "text": "Royal Mail Tracked 24 is our planned express option, subject to availability for your address.",
+    "groups": [
+      "shipping-delivery"
+    ]
+  },
+  {
+    "text": "Royal Mail Tracked 24 service information",
+    "groups": [
+      "shipping-delivery"
+    ]
+  },
+  {
+    "text": "Royal Mail Tracked 48 is our planned standard UK service. Available services depend on the delivery address.",
+    "groups": [
+      "shipping-delivery"
+    ]
+  },
+  {
+    "text": "Royal Mail Tracked 48 service information",
+    "groups": [
+      "shipping-delivery"
+    ]
+  },
+  {
+    "text": "SEEN ABAYAS delivery information, planned Royal Mail services, complimentary UK delivery over £80 and tracking help.",
+    "groups": [
+      "shipping-delivery"
+    ]
+  },
+  {
+    "text": "Standard UK delivery",
+    "groups": [
+      "shipping-delivery"
+    ]
+  },
+  {
+    "text": "The eligible merchandise subtotal must be more than ",
+    "groups": [
+      "shipping-delivery"
+    ]
+  },
+  {
+    "text": "To be confirmed",
+    "groups": [
+      "shipping-delivery"
+    ]
+  },
+  {
+    "text": "To be confirmed for the available service and destination",
+    "groups": [
+      "shipping-delivery"
+    ]
+  },
+  {
+    "text": "Track your Royal Mail item",
+    "groups": [
+      "shipping-delivery"
+    ]
+  },
+  {
+    "text": "Tracked services have delivery aims rather than guaranteed arrival times. See ",
+    "groups": [
+      "shipping-delivery"
+    ]
+  },
+  {
+    "text": "You can enter a Royal Mail tracking number using the carrier's tracking service. Automated tracking and dispatch notifications are not active in this preview.",
+    "groups": [
+      "shipping-delivery"
+    ]
+  },
+  {
+    "text": " SEEN ABAYAS. All rights reserved.",
+    "groups": [
+      "site-footer"
+    ]
+  },
+  {
+    "text": "Contact us",
+    "groups": [
+      "site-footer"
+    ]
+  },
+  {
+    "text": "Elegance that speaks for itself.",
+    "groups": [
+      "site-footer",
+      "site-header"
+    ]
+  },
+  {
+    "text": "Explore",
+    "groups": [
+      "site-footer"
+    ]
+  },
+  {
+    "text": "For collection, sizing, and order enquiries.",
+    "groups": [
+      "site-footer"
+    ]
+  },
+  {
+    "text": "Legal",
+    "groups": [
+      "site-footer"
+    ]
+  },
+  {
+    "text": "Made to Be Seen.",
+    "groups": [
+      "site-footer"
+    ]
+  },
+  {
+    "text": "Our story",
+    "groups": [
+      "site-footer"
+    ]
+  },
+  {
+    "text": "Shopping bag",
+    "groups": [
+      "site-footer"
+    ]
+  },
+  {
+    "text": "Explore SEEN",
+    "groups": [
+      "site-header"
+    ]
+  },
+  {
+    "text": "location",
+    "groups": [
+      "site-header"
+    ]
+  },
+  {
+    "text": "page",
+    "groups": [
+      "site-header"
+    ]
+  },
+  {
+    "text": "A little guidance",
+    "groups": [
+      "size-guide"
+    ]
+  },
+  {
+    "text": "Ask about sizing",
+    "groups": [
+      "size-guide"
+    ]
+  },
+  {
+    "text": "Before you choose",
+    "groups": [
+      "size-guide"
+    ]
+  },
+  {
+    "text": "Between sizes?",
+    "groups": [
+      "size-guide"
+    ]
+  },
+  {
+    "text": "Chest",
+    "groups": [
+      "size-guide"
+    ]
+  },
+  {
+    "text": "Find Your",
+    "groups": [
+      "size-guide"
+    ]
+  },
+  {
+    "text": "Front view of a charcoal abaya, with garment length, chest and sleeve measurement positions indicated.",
+    "groups": [
+      "size-guide"
+    ]
+  },
+  {
+    "text": "Garment length",
+    "groups": [
+      "size-guide"
+    ]
+  },
+  {
+    "text": "How to measure for an abaya, understand length labels and ask the SEEN team for design-specific sizing advice.",
+    "groups": [
+      "size-guide"
+    ]
+  },
+  {
+    "text": "Lay a well-fitting abaya flat, smooth out the fabric and use a flexible measuring tape. Keep the tape straight without stretching the garment.",
+    "groups": [
+      "size-guide"
+    ]
+  },
+  {
+    "text": "Length",
+    "groups": [
+      "size-guide"
+    ]
+  },
+  {
+    "text": "Length and body fit are different measurements. If you are between lengths, or need more room through the chest or sleeves, share the design and your measurements with our team so we can help you compare.",
+    "groups": [
+      "size-guide"
+    ]
+  },
+  {
+    "text": "Let's find your fit.",
+    "groups": [
+      "size-guide"
+    ]
+  },
+  {
+    "text": "Measure a piece",
+    "groups": [
+      "size-guide"
+    ]
+  },
+  {
+    "text": "Measure from the highest point of the shoulder beside the neckline down to the hem. Consider the shoes you intend to wear.",
+    "groups": [
+      "size-guide"
+    ]
+  },
+  {
+    "text": "Measure from the shoulder seam to the cuff. Dropped shoulders and different sleeve shapes can change how this measurement is taken.",
+    "groups": [
+      "size-guide"
+    ]
+  },
+  {
+    "text": "Measure straight across the garment from underarm to underarm. Double this flat measurement when comparing it with a full chest circumference.",
+    "groups": [
+      "size-guide"
+    ]
+  },
+  {
+    "text": "Measurement positions are illustrative. Refer to each design for its actual fit.",
+    "groups": [
+      "size-guide"
+    ]
+  },
+  {
+    "text": "Perfect Fit.",
+    "groups": [
+      "size-guide"
+    ]
+  },
+  {
+    "text": "Sleeve",
+    "groups": [
+      "size-guide"
+    ]
+  },
+  {
+    "text": "The size guide",
+    "groups": [
+      "size-guide"
+    ]
+  },
+  {
+    "text": "you already love.",
+    "groups": [
+      "size-guide"
+    ]
+  },
+  {
+    "text": "Collection",
+    "groups": [
+      "store"
+    ]
+  },
+  {
+    "text": "SEEN ABAYAS",
+    "groups": [
+      "store"
+    ]
+  },
+  {
+    "text": " and ",
+    "groups": [
+      "terms-conditions"
+    ]
+  },
+  {
+    "text": " explain the current preview's information handling. Visit ",
+    "groups": [
+      "terms-conditions"
+    ]
+  },
+  {
+    "text": " explains exchanges, eligible online cancellations, refunds and faulty or incorrect items.",
+    "groups": [
+      "terms-conditions"
+    ]
+  },
+  {
+    "text": " explains how to measure and labels its reference conversions clearly; it is not a confirmed garment size chart.",
+    "groups": [
+      "terms-conditions"
+    ]
+  },
+  {
+    "text": " for current delivery information",
+    "groups": [
+      "terms-conditions"
+    ]
+  },
+  {
+    "text": " with any questions about these terms.",
+    "groups": [
+      "terms-conditions"
+    ]
+  },
+  {
+    "text": ", including complimentary standard UK delivery on eligible orders over ",
+    "groups": [
+      "terms-conditions"
+    ]
+  },
+  {
+    "text": "cancellation form",
+    "groups": [
+      "terms-conditions"
+    ]
+  },
+  {
+    "text": "Cancellations, returns and faulty items",
+    "groups": [
+      "terms-conditions"
+    ]
+  },
+  {
+    "text": "Displayed collection prices use pounds sterling (GBP). Preview prices are for review while the catalogue is being completed. VAT registration and tax treatment are being confirmed with the business.",
+    "groups": [
+      "terms-conditions"
+    ]
+  },
+  {
+    "text": "Draft SEEN ABAYAS website and sale information, including preview ordering status, delivery and consumer cancellation rights.",
+    "groups": [
+      "terms-conditions"
+    ]
+  },
+  {
+    "text": "Final ordering steps, how errors can be corrected and when an order is accepted will be explained before purchasing is enabled. These draft pages do not indicate that a preview selection has been accepted as an order.",
+    "groups": [
+      "terms-conditions"
+    ]
+  },
+  {
+    "text": "For eligible online purchases, you can notify us of cancellation within 14 days of receiving the goods and then have a further 14 days to return them. You do not have to give a reason or accept an exchange instead of an eligible refund.",
+    "groups": [
+      "terms-conditions"
+    ]
+  },
+  {
+    "text": "Our ",
+    "groups": [
+      "terms-conditions"
+    ]
+  },
+  {
+    "text": "Our supplied ",
+    "groups": [
+      "terms-conditions"
+    ]
+  },
+  {
+    "text": "Payments are not enabled. The final payable total, any applicable taxes, delivery costs and available payment methods will be disclosed before payment. Requested payment options are subject to merchant activation and eligibility; an option is available only when shown at the active checkout.",
+    "groups": [
+      "terms-conditions"
+    ]
+  },
+  {
+    "text": "Please read this draft alongside our delivery, returns and privacy information. Final sale terms and business details will be confirmed before online ordering opens.",
+    "groups": [
+      "terms-conditions"
+    ]
+  },
+  {
+    "text": "Please use the site lawfully. Do not attempt to compromise its security, misuse forms or interfere with other visitors. If you find an error or need help accessing a page, contact our team.",
+    "groups": [
+      "terms-conditions"
+    ]
+  },
+  {
+    "text": "Preview and ordering",
+    "groups": [
+      "terms-conditions"
+    ]
+  },
+  {
+    "text": "Prices and payments",
+    "groups": [
+      "terms-conditions"
+    ]
+  },
+  {
+    "text": "Privacy and questions",
+    "groups": [
+      "terms-conditions"
+    ]
+  },
+  {
+    "text": "Product photography shows the supplied designs. Colour appearance may vary between screens. Please check the specific design's confirmed description, measurements and available sizes before purchasing.",
+    "groups": [
+      "terms-conditions"
+    ]
+  },
+  {
+    "text": "Products and sizing",
+    "groups": [
+      "terms-conditions"
+    ]
+  },
+  {
+    "text": "Royal Mail is the intended delivery partner. Dispatch times, charges, destinations and available services remain subject to confirmation. Read ",
+    "groups": [
+      "terms-conditions"
+    ]
+  },
+  {
+    "text": "Seller details",
+    "groups": [
+      "terms-conditions"
+    ]
+  },
+  {
+    "text": "Sizes and quantities shown in the development collection are temporary. The ",
+    "groups": [
+      "terms-conditions"
+    ]
+  },
+  {
+    "text": "Store information",
+    "groups": [
+      "terms-conditions"
+    ]
+  },
+  {
+    "text": "The storefront trades under the SEEN ABAYAS brand. The legal trading name and postal address are awaiting confirmation.",
+    "groups": [
+      "terms-conditions"
+    ]
+  },
+  {
+    "text": "The voluntary exchange conditions do not remove statutory cancellation or faulty-goods rights. You can email a clear cancellation statement or use the optional ",
+    "groups": [
+      "terms-conditions"
+    ]
+  },
+  {
+    "text": "The website currently supports browsing and a shopping bag. Online checkout is not yet available. Adding a piece to the bag does not reserve stock, take payment or create a purchase contract.",
+    "groups": [
+      "terms-conditions"
+    ]
+  },
+  {
+    "text": "Using the website",
+    "groups": [
+      "terms-conditions"
+    ]
+  },
+  {
+    "text": "IntersectionObserver",
+    "groups": [
+      "ui · reveal"
+    ]
+  },
+  {
+    "text": "lift",
+    "groups": [
+      "ui · store-motion"
+    ]
+  },
+  {
+    "text": "magnetic",
+    "groups": [
+      "ui · store-motion"
+    ]
+  },
+  {
+    "text": "none",
+    "groups": [
+      "ui · store-motion"
+    ]
+  }
+]

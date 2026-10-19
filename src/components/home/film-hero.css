@@ -1,0 +1,71 @@
+body:has(.film-hero) { --film-announcement-height: 44px; }
+body:has(.film-hero) #main-content { padding-top: var(--film-announcement-height); }
+body:has(.film-hero) .site-header { position: fixed; inset: 0 0 auto; background: var(--film-nav-surface, transparent); color: var(--film-nav-ink, #fff); }
+body:has(.film-hero) .site-header .header-inner { border-color: var(--film-nav-border, transparent); }
+body:has(.film-hero) .header-inner > .icon-button, body:has(.film-hero) .header-inner .bag-trigger { color: var(--film-nav-ink, #fff); }
+body:has(.film-hero) .header-inner :focus-visible { outline-color: var(--film-nav-ink, #fff); }
+body:has(.film-hero[data-motion-failed="true"]) .site-header { background: #fff; color: #171717; --film-nav-ink: #171717; --film-nav-border: #e9e7e3; }
+body:has(.film-hero[data-motion-ready="true"]) .site-header .brand-logo { visibility: hidden; pointer-events: none; }
+.film-hero { --film-header-offset: 132px; --film-logo-top: 54%; --film-logo-left: 50%; position: relative; height: calc(100svh - var(--film-announcement-height)); min-height: 500px; background: #272320; color: #fff; }
+.film-hero__media, .film-hero__shade { position: absolute; inset: 0; overflow: hidden; }
+.film-hero__media video, .film-hero__poster { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 52% 50%; }
+.film-hero__media video { opacity: 0; }
+.film-hero[data-has-frame="true"] video { opacity: 1; }
+.film-hero[data-has-frame="true"] .film-hero__poster { opacity: 0; }
+.film-hero__poster { transition: opacity 600ms var(--ease-editorial); }
+.film-hero__shade { background: linear-gradient(180deg, rgb(0 0 0 / 64%), rgb(0 0 0 / 58%) calc(var(--film-header-offset) - var(--film-announcement-height)), transparent 38%), linear-gradient(180deg, rgb(0 0 0 / 4%) 20%, rgb(0 0 0 / 10%) 50%, rgb(0 0 0 / 72%) 100%), linear-gradient(90deg, rgb(0 0 0 / 40%), transparent 62%); pointer-events: none; }
+.film-floating-logo { position: absolute; z-index: 31; top: var(--film-logo-top); left: var(--film-logo-left); display: block; width: clamp(160px, 47vw, 210px); aspect-ratio: 270 / 286; color: #fff; transform: translate(-50%, -50%); transform-origin: center; }
+.film-hero[data-motion-ready="true"] .film-floating-logo { position: fixed; will-change: transform; }
+.film-floating-logo > span { display: block; width: 100%; height: 100%; background: currentColor; mask: var(--seen-logo, url("/images/brand/seen-signature.svg")) center / contain no-repeat; -webkit-mask: var(--seen-logo, url("/images/brand/seen-signature.svg")) center / contain no-repeat; }
+.film-floating-logo:focus-visible { outline-color: currentColor; outline-offset: 8px; }
+.film-hero__caption { position: absolute; bottom: 28px; left: var(--page-gutter); max-width: calc(100% - 76px); text-align: left; }
+.film-hero__caption h1 { font-family: var(--font-cormorant), Georgia, serif; font-size: clamp(32px, 5vw, 46px); font-weight: 400; line-height: 1.02; letter-spacing: -0.02em; }
+.film-hero__caption h1 span, .film-hero__caption h1 em { display: block; font-weight: 400; }
+.film-hero__shop { position: relative; display: inline-flex; align-items: center; gap: 14px; min-height: 44px; margin-top: 14px; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; }
+.film-hero__shop:focus-visible, .film-scroll-cue:focus-visible { outline-color: #fff; }
+.film-hero__shop::after { position: absolute; right: 0; bottom: 7px; left: 0; height: 1px; background: #fff; content: ""; transform: scaleX(0.25); transform-origin: left; transition: transform 600ms var(--ease-editorial); }
+.film-hero__shop svg { transition: transform 500ms var(--ease-editorial); }
+.film-hero__shop:hover::after, .film-hero__shop:focus-visible::after { transform: scaleX(1); }
+.film-hero__shop:hover svg { transform: translateX(4px); }
+.film-scroll-cue { position: absolute; right: 12px; bottom: 28px; display: grid; place-items: center; width: 44px; height: 44px; }
+.film-introduction { max-width: 670px; padding-block: 64px 48px; text-align: center; }
+.film-introduction h2 { margin-top: 20px; font-family: var(--font-cormorant), Georgia, serif; font-size: clamp(36px, 4vw, 52px); font-weight: 400; line-height: 1.08; letter-spacing: -0.025em; }
+.film-introduction > p:last-child { max-width: 440px; margin: 24px auto 0; color: var(--secondary-text); font-size: 13px; }
+@media (min-width: 768px) {
+  .film-hero { --film-logo-top: 64%; }
+  .film-floating-logo { width: 230px; }
+  .film-hero__caption { bottom: 40px; max-width: 34%; }
+  .film-hero__shop { font-size: 11px; }
+  .film-scroll-cue { right: var(--page-gutter); bottom: 40px; }
+  .film-introduction { padding-block: 80px 56px; }
+}
+@media (min-width: 1024px) {
+  .film-hero { --film-header-offset: 148px; --film-logo-top: 66%; }
+  .film-floating-logo { width: clamp(220px, 20vw, 280px); }
+  .film-hero__caption { bottom: 48px; max-width: 30%; }
+  .film-hero__caption h1 { font-size: clamp(42px, 4.2vw, 64px); }
+  .film-hero__shop { margin-top: 22px; }
+  .film-hero__media video, .film-hero__poster { object-position: center; }
+}
+@media (max-width: 767px) and (max-height: 720px) and (orientation: portrait) {
+  .film-hero { --film-logo-top: 46%; min-height: 420px; }
+  .film-floating-logo { width: clamp(130px, 42vw, 170px); }
+  .film-hero__caption { bottom: 20px; }
+  .film-hero__caption h1 { font-size: 30px; }
+}
+@media (max-height: 559px) and (orientation: landscape) {
+  body:has(.film-hero) { --film-announcement-height: 32px; }
+  body:has(.film-hero) .header-inner { min-height: 60px; }
+  body:has(.film-hero) .header-inner > .brand-logo { width: 40px; }
+  body:has(.film-hero) .announcement, body:has(.film-hero) .announcement__viewport { min-height: 32px; }
+  .film-hero { --film-logo-top: 56%; --film-logo-left: 68%; min-height: 252px; }
+  .film-hero__media video, .film-hero__poster { object-position: center top; }
+  .film-floating-logo { width: clamp(120px, 19vw, 170px); }
+  .film-hero__caption { bottom: 20px; max-width: 38%; }
+  .film-hero__caption h1 { font-size: 28px; }
+  .film-hero__shop { margin-top: 10px; font-size: 9px; gap: 10px; }
+  .film-scroll-cue { bottom: 20px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .film-hero[data-motion-ready="true"] .film-floating-logo { will-change: auto; }
+}

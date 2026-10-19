@@ -7,19 +7,30 @@ async function setState(request: APIRequestContext, state: string) {
 }
 test.beforeEach(async ({ request }) => { await setState(request, "ready"); });
 
+test("catalog-only installations keep working before admin sync is installed", async ({ page, request }) => {
+  await setState(request, "legacy");
+  await page.goto("/collection");
+  await expect(page.locator(".catalog-card")).toHaveCount(2);
+  await expect(page.locator(".catalog-card__price")).toHaveText(["£98.76", "£123.45"]);
+  const sync = await request.get("/api/storefront/sync");
+  expect(sync.status()).toBe(200);
+  expect(Object.keys(await sync.json())).toEqual(["revision"]);
+});
+
 test("configured catalog displays approved names, GBP prices and real size availability", async ({ page }) => {
   const external: string[] = [];
   page.on("request", (request) => { if (request.url().startsWith("http://127.0.0.1:3101")) external.push(request.url()); });
   await page.goto("/collection");
   await expect(page.locator(".catalog-card")).toHaveCount(2);
-  await expect(page.locator(".catalog-card__price")).toHaveText(["£123.45", "£98.76"]);
+  await expect(page.locator(".catalog-card__price")).toHaveText(["£98.76", "£123.45"]);
   await page.getByRole("link", { name: "View piece: TEST ONLY Burgundy", exact: true }).click();
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("TEST ONLY Burgundy");
   await expect(page.locator(".piece-description")).toHaveText("TEST ONLY confirmed description.");
   await expect(page.locator(".piece-price")).toHaveText("£123.45");
-  await expect(page.locator(".piece-sizes li")).toHaveText(["TEST SAvailable", "TEST MOut of stock"]);
+  await expect(page.getByRole("button", { name: "TEST S", exact: true })).toBeEnabled();
+  await expect(page.getByRole("button", { name: "TEST M, out of stock", exact: true })).toBeDisabled();
   await expect(page.locator(".piece-related .catalog-card")).toHaveCount(1);
-  await expect(page.getByRole("button", { name: /Add to (bag|cart)/i })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Add to bag", exact: true })).toBeEnabled();
   expect(external).toEqual([]);
 });
 

@@ -1,3 +1,7 @@
+
+import { CmsInput } from "@/components/cms/input";
+
+import { Copy } from "@/components/cms/content-provider";
 import type { ComponentPropsWithoutRef } from "react";
 
 type TextFieldProps = Omit<ComponentPropsWithoutRef<"input">, "id"> & {
@@ -27,17 +31,17 @@ export function TextField({
   return (
     <div className="field">
       <label className="field__label" htmlFor={id}>
-        {label}
+        <Copy text={label} />
       </label>
-      {hint && <p id={`${id}-hint`} className="field__hint">{hint}</p>}
-      <input
+      {hint && <p id={`${id}-hint`} className="field__hint"><Copy text={hint} /></p>}
+      <CmsInput
         {...props}
         id={id}
         className={["field__input", className].filter(Boolean).join(" ")}
         aria-describedby={description || undefined}
         aria-invalid={error ? true : props["aria-invalid"]}
       />
-      {error && <p id={`${id}-error`} className="field__error">{error}</p>}
+      {error && <p id={`${id}-error`} className="field__error"><Copy text={error} /></p>}
     </div>
   );
 }

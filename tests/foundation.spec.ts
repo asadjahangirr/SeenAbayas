@@ -3,43 +3,25 @@ import { expect, test, type Page } from "@playwright/test";
 
 async function settleHero(page: Page) {
   await page.evaluate(() => document.fonts.ready);
-  await page.locator(".hero").evaluate(async (hero) => {
-    await Promise.all(hero.getAnimations({ subtree: true }).map((animation) => animation.finished));
-  });
+  await expect(page.locator(".film-hero")).toHaveAttribute("data-motion-ready", "true");
 }
 
 for (const width of [320, 375, 768, 1024, 1440, 1920]) {
-  test(`responsive layout and real images at ${width}px`, async ({ page }, testInfo) => {
+  test("responsive film homepage and supplied media at " + width + "px", async ({ page }, testInfo) => {
     await page.setViewportSize({ width, height: 900 });
     const errors: string[] = [];
     page.on("pageerror", (error) => errors.push(error.message));
     await page.goto("/");
     await settleHero(page);
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(/Made to\s*Be Seen\./);
-    const images = page.locator('.hero-visuals .flip-photo__face[aria-hidden="false"] img');
-    await expect(images).toHaveCount(3);
-    for (const image of await images.all()) {
-      await expect(image).toBeVisible();
-      await expect.poll(() => image.evaluate((element: HTMLImageElement) => element.naturalWidth)).toBeGreaterThan(0);
-    }
-
-    const overflow = await page.evaluate(() =>
-      document.documentElement.scrollWidth > document.documentElement.clientWidth,
-    );
-    expect(overflow).toBe(false);
-    const titleLines = page.locator(".hero-title-line");
-    await expect(titleLines).toHaveCount(2);
-    await expect(titleLines.nth(0)).toHaveText("Made to");
-    await expect(titleLines.nth(1)).toHaveText("Be Seen.");
-    for (const line of await titleLines.all()) {
-      expect(await line.evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(true);
-    }
+    await expect(page.locator(".film-hero video")).toHaveCount(1);
+    await expect(page.locator(".hero-lookbook")).toHaveCount(0);
+    const poster = page.locator(".film-hero__poster");
+    await expect.poll(() => poster.evaluate((image: HTMLImageElement) => image.naturalWidth)).toBeGreaterThan(0);
+    await expect(page.locator(".collection-card")).toHaveCount(4);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false);
     expect(errors).toEqual([]);
-
-    if (width === 320 || width === 1440) {
-      await page.screenshot({ path: testInfo.outputPath(`hero-${width}.png`) });
-      await page.screenshot({ path: testInfo.outputPath(`foundation-${width}.png`), fullPage: true });
-    }
+    if (width === 320 || width === 1440) await page.screenshot({ path: testInfo.outputPath("hero-" + width + ".png") });
   });
 }
 
@@ -67,7 +49,7 @@ test("mobile menu traps focus, closes with Escape, and restores focus", async ({
   await trigger.click();
   await dialog.getByRole("link", { name: "Our Story" }).click();
   await expect(dialog).not.toBeVisible();
-  await expect(page).toHaveURL(/#our-story$/);
+  await expect(page).toHaveURL(/\/our-story$/);
 });
 
 test("resizing to desktop closes the mobile menu", async ({ page }) => {
@@ -92,13 +74,15 @@ test("skip navigation works and every foundation link has a real destination", a
       const href = link.getAttribute("href") || "";
       if (href.startsWith("mailto:")) return [];
       const url = new URL(href, window.location.href);
-      if (url.origin === window.location.origin && url.pathname === "/collection" && !url.hash) return [];
+      if (url.origin === window.location.origin && (["/", "/collection", "/bag", "/our-story", "/contact", "/size-guide", "/faqs", "/shipping-delivery", "/returns-exchanges", "/privacy-policy", "/terms-conditions", "/cookie-policy"].includes(url.pathname) || /^\/collection\/design-[0-9]{2,4}$/.test(url.pathname)) && !url.hash) return [];
       if (url.origin !== window.location.origin || url.pathname !== "/") return [href];
       return url.hash && document.getElementById(url.hash.slice(1)) ? [] : [href];
     }),
   );
   expect(invalidLinks).toEqual([]);
   expect((await request.get("/collection")).status()).toBe(200);
+  expect((await request.get("/bag")).status()).toBe(200);
+  for (const path of await page.locator(".collection-card__open").evaluateAll((links) => links.map((link) => link.getAttribute("href")!))) expect((await request.get(path)).status()).toBe(200);
 });
 
 for (const width of [375, 1440]) {
@@ -120,11 +104,9 @@ for (const width of [375, 1440]) {
       await page.keyboard.press("Escape");
     }
 
-    await page.getByRole("button", { name: "View photographs: Burgundy", exact: true }).click();
-    const galleryResults = await new AxeBuilder({ page })
-      .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
-      .analyze();
-    expect(galleryResults.violations).toEqual([]);
+    await page.locator(".collection-card").getByRole("link", { name: "View piece: Burgundy", exact: true }).click();
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Burgundy");
+    await expect(page.getByRole("button", { name: "Add to bag", exact: true })).toBeDisabled();
   });
 }
 
@@ -198,21 +180,19 @@ test("reduced-motion preference disables smooth scrolling", async ({ page }) => 
   await expect(staticMessage).toHaveCount(1);
   const staticBounds = await staticMessage.boundingBox();
   expect(staticBounds?.width).toBeLessThanOrEqual(320);
-  const heroAnimations = await page.locator(".hero").evaluate((hero) => hero.getAnimations({ subtree: true }).length);
+  const heroAnimations = await page.locator(".film-hero").evaluate((hero) => hero.getAnimations({ subtree: true }).length);
   expect(heroAnimations).toBe(0);
 });
 
-test("delivery announcement can be paused, resumed, and held while reading", async ({ page }) => {
+test("delivery announcement has no pause button and holds on hover or keyboard focus", async ({ page }) => {
   await page.goto("/");
   await page.mouse.move(2, 180);
   const track = page.locator(".announcement__track");
   const playState = () => track.evaluate((element) => getComputedStyle(element).animationPlayState);
   await expect.poll(playState).toBe("running");
 
-  await page.getByRole("button", { name: "Pause delivery announcement" }).click();
-  await expect.poll(playState).toBe("paused");
-  await page.getByRole("button", { name: "Resume delivery announcement" }).click();
-  await expect.poll(playState).toBe("running");
+  await expect(page.locator(".announcement button")).toHaveCount(0);
+  expect(await page.locator(".announcement__viewport").evaluate((element) => Math.abs(element.getBoundingClientRect().width - innerWidth))).toBeLessThan(2);
 
   const offer = page.getByRole("link", { name: "Complimentary UK delivery on orders over £80" });
   await offer.hover();
@@ -227,12 +207,12 @@ test("button and navigation hover effects preserve labels and layout", async ({ 
   await page.goto("/");
   await settleHero(page);
 
-  const button = page.locator(".hero").getByRole("link", { name: "Explore the collection" });
+  const button = page.locator(".film-hero__shop");
   const buttonBounds = await button.boundingBox();
   await button.hover();
-  await expect.poll(() => button.evaluate((element) => getComputedStyle(element).color)).toBe("rgb(23, 23, 23)");
+  await expect.poll(() => button.evaluate((element) => getComputedStyle(element, "::after").transform)).toBe("matrix(1, 0, 0, 1, 0, 0)");
   expect(await button.boundingBox()).toEqual(buttonBounds);
-  await expect(button).toHaveAccessibleName("Explore the collection");
+  await expect(button).toHaveAccessibleName("Discover the collection");
   await page.screenshot({ path: testInfo.outputPath("button-hover.png") });
 
   const collection = page.getByRole("navigation", { name: "Main navigation" }).getByRole("link", { name: "Collection", exact: true });
@@ -244,7 +224,7 @@ test("button and navigation hover effects preserve labels and layout", async ({ 
   await expect(collection).toHaveAccessibleName("Collection");
 });
 
-test("touch users can control the banner and mobile menu", async ({ browser, baseURL }) => {
+test("touch users can open the delivery page and mobile menu without a banner button", async ({ browser, baseURL }) => {
   const context = await browser.newContext({
     baseURL,
     viewport: { width: 390, height: 844 },
@@ -254,8 +234,9 @@ test("touch users can control the banner and mobile menu", async ({ browser, bas
   try {
     const page = await context.newPage();
     await page.goto("/");
-    await page.getByRole("button", { name: "Pause delivery announcement" }).tap();
-    await expect(page.getByRole("button", { name: "Resume delivery announcement" })).toBeVisible();
+    await expect(page.locator(".announcement button")).toHaveCount(0);
+    await page.locator(".announcement__viewport").tap();
+    await expect(page).toHaveURL(/\/shipping-delivery$/);
     await page.getByRole("button", { name: "Open navigation menu" }).tap();
     await expect(page.getByRole("dialog", { name: "Explore SEEN" })).toBeVisible();
     await page.getByRole("button", { name: "Close navigation menu" }).tap();
@@ -265,128 +246,15 @@ test("touch users can control the banner and mobile menu", async ({ browser, bas
   }
 });
 
-test("desktop photographs flip on hover and can be changed with the keyboard", async ({ page }, testInfo) => {
-  await page.setViewportSize({ width: 1440, height: 1000 });
+
+
+
+test("home edit remains four pieces and the collection contains all seven", async ({ page }) => {
   await page.goto("/");
-  await settleHero(page);
-  const photo = page.getByRole("button", { name: "Alternate view of Botanical detailing", exact: true });
-  const bounds = await photo.boundingBox();
-  await photo.hover();
-  await expect(photo).toHaveAttribute("aria-pressed", "true");
-  await expect(photo.locator('[aria-hidden="false"] img')).toHaveAttribute("alt", /Back view of the black abaya/);
-  await expect.poll(() => photo.locator(".flip-photo__inner").evaluate((element) => getComputedStyle(element).transform)).not.toBe("none");
-  await photo.locator(".flip-photo__inner").evaluate(async (element) => { await Promise.all(element.getAnimations().map((animation) => animation.finished)); });
-  expect(await photo.boundingBox()).toEqual(bounds);
-  await page.screenshot({ path: testInfo.outputPath("hero-flip.png") });
-  await page.mouse.move(2, 180);
-  await expect(photo).toHaveAttribute("aria-pressed", "false");
-  await photo.focus();
-  await page.keyboard.press("Enter");
-  await expect(photo).toHaveAttribute("aria-pressed", "true");
-  await page.mouse.move(2, 180);
-  await expect(photo).toHaveAttribute("aria-pressed", "true");
-  await page.keyboard.press("Space");
-  await expect(photo).toHaveAttribute("aria-pressed", "false");
-});
-
-test("gallery shows actual views, supports arrows and thumbnails, and restores focus", async ({ page }, testInfo) => {
-  await page.goto("/");
-  const trigger = page.getByRole("button", { name: "View photographs: Burgundy", exact: true });
-  await trigger.click();
-  const gallery = page.getByRole("dialog", { name: "Burgundy", exact: true });
-  const close = gallery.getByRole("button", { name: "Close photo gallery" });
-  await expect(close).toBeFocused();
-  await expect(gallery.getByRole("status")).toHaveText("Front1 / 4");
-  await page.keyboard.press("ArrowRight");
-  await expect(gallery.getByRole("status")).toHaveText("Back2 / 4");
-  await gallery.getByRole("button", { name: "Show details photograph", exact: true }).click();
-  await expect(gallery.getByRole("status")).toHaveText("Details3 / 4");
-  await expect(gallery.locator(".gallery-photo")).toHaveAttribute("alt", /Covered buttons/);
-  await gallery.getByRole("button", { name: "Next photo", exact: true }).click();
-  await expect(gallery.getByRole("status")).toHaveText("Another angle4 / 4");
-  await page.keyboard.press("ArrowRight");
-  await expect(gallery.getByRole("status")).toHaveText("Front1 / 4");
-  await page.keyboard.press("ArrowLeft");
-  await expect(gallery.getByRole("status")).toHaveText("Another angle4 / 4");
-  for (let step = 0; step < 12; step++) {
-    await page.keyboard.press("Tab");
-    expect(await gallery.evaluate((element) => element.contains(document.activeElement))).toBe(true);
-  }
-  await expect.poll(() => gallery.locator(".gallery-photo").evaluate((element: HTMLImageElement) => element.naturalWidth)).toBeGreaterThan(0);
-  await page.screenshot({ path: testInfo.outputPath("photo-gallery.png") });
-  await page.keyboard.press("Escape");
-  await expect(gallery).not.toBeVisible();
-  await expect(trigger).toBeFocused();
-});
-
-test("collection reveals seven photo groups and single-photo galleries have no redundant controls", async ({ page }) => {
-  await page.goto("/");
-  const cards = page.locator(".collection-card");
-  await expect(cards).toHaveCount(4);
-  await page.getByRole("button", { name: "View more pieces" }).click();
-  await expect(cards).toHaveCount(7);
-  const trigger = page.getByRole("button", { name: "View photographs: Textured charcoal", exact: true });
-  await trigger.click();
-  const gallery = page.getByRole("dialog", { name: "Textured charcoal", exact: true });
-  await expect(gallery.getByRole("status")).toHaveText("Front1 / 1");
-  await expect(gallery.getByRole("button", { name: "Next photo" })).toHaveCount(0);
-  await expect(gallery.locator(".gallery-thumbnails")).toHaveCount(0);
-  await page.keyboard.press("ArrowRight");
-  await expect(gallery.getByRole("status")).toHaveText("Front1 / 1");
-  await gallery.getByRole("button", { name: "Close photo gallery" }).click();
-  await expect(trigger).toBeFocused();
-  await page.getByRole("button", { name: "Show fewer pieces" }).click();
-  await expect(cards).toHaveCount(4);
-});
-
-test("touch lookbook supports paging, native swipes, tap views, and gallery swipes", async ({ browser, baseURL }, testInfo) => {
-  const context = await browser.newContext({ baseURL, viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
-  try {
-    const page = await context.newPage();
-    await page.goto("/");
-    await settleHero(page);
-    const controls = page.locator(".lookbook-controls");
-    await controls.getByRole("button", { name: "Next featured photograph" }).tap();
-    await expect(controls.getByRole("status")).toHaveText("02 / 03");
-    const photo = page.getByRole("button", { name: "Alternate view of Botanical detailing", exact: true });
-    await photo.tap();
-    await expect(photo).toHaveAttribute("aria-pressed", "true");
-    await photo.tap();
-    await expect(photo).toHaveAttribute("aria-pressed", "false");
-
-    const cdp = await context.newCDPSession(page);
-    async function swipe(selector: string) {
-      await page.locator(selector).scrollIntoViewIfNeeded();
-      const bounds = (await page.locator(selector).boundingBox())!;
-      const x = Math.min(bounds.x + bounds.width - 35, 350);
-      const y = Math.min(bounds.y + bounds.height / 2, 660);
-      await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x, y }] });
-      for (let step = 1; step <= 8; step++) await cdp.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: [{ x: x - step * 28, y }] });
-      await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
-    }
-    await swipe(".hero-lookbook");
-    await expect(controls.getByRole("status")).toHaveText("03 / 03");
-    await page.screenshot({ path: testInfo.outputPath("mobile-lookbook.png") });
-
-    await page.getByRole("button", { name: "View photographs: Burgundy", exact: true }).tap();
-    const gallery = page.getByRole("dialog", { name: "Burgundy", exact: true });
-    await swipe(".gallery-stage");
-    await expect(gallery.getByRole("status")).toHaveText("Back2 / 4");
-    await gallery.getByRole("button", { name: "Close photo gallery" }).tap();
-    await expect(gallery).not.toBeVisible();
-  } finally {
-    await context.close();
-  }
-});
-
-test("reduced motion retains alternate views without a flip transition", async ({ page }) => {
-  await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.goto("/");
-  const photo = page.getByRole("button", { name: "Alternate view of Burgundy", exact: true });
-  await photo.focus();
-  await page.keyboard.press("Enter");
-  await expect(photo).toHaveAttribute("aria-pressed", "true");
-  expect(await photo.locator(".flip-photo__inner").evaluate((element) => getComputedStyle(element).transform)).toBe("none");
-  await expect(photo.locator('.flip-photo__face[aria-hidden="true"]')).not.toBeVisible();
-  await expect(photo.locator('.flip-photo__face[aria-hidden="false"]')).toBeVisible();
+  await expect(page.locator(".collection-card")).toHaveCount(4);
+  await expect(page.getByRole("button", { name: /View more pieces|Show fewer pieces/ })).toHaveCount(0);
+  await page.locator(".collection-more").getByRole("link", { name: "Explore the collection" }).click();
+  await expect(page).toHaveURL(/\/collection$/);
+  await expect(page.locator(".catalog-card")).toHaveCount(7);
+  await expect(page.locator(".catalog-intro img")).toHaveCount(0);
 });

@@ -1,0 +1,30 @@
+{
+  "review": { "status": "draft", "reviewedOn": null },
+  "business": {
+    "legalName": null,
+    "legalForm": null,
+    "businessAddress": null,
+    "returnsAddress": null,
+    "registrationNumber": null,
+    "vatRegistered": null,
+    "vatNumber": null,
+    "phone": null
+  },
+  "delivery": {
+    "dispatchWindow": null,
+    "standardChargePence": null,
+    "standardDeliveryAim": null,
+    "expressAvailable": null,
+    "expressChargePence": null,
+    "expressDeliveryAim": null,
+    "destinations": null,
+    "internationalAvailability": null
+  },
+  "privacy": {
+    "enquiryLawfulBasis": null,
+    "securityLawfulBasis": null,
+    "enquiryRetention": null,
+    "hostingAndLogs": null,
+    "providersAndTransfers": null
+  }
+}

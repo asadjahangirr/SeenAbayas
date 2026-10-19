@@ -5,18 +5,21 @@ export type CollectionPiece = {
   id: string;
   visualLabel: string;
   photos: CollectionPhoto[];
+  tone?: string;
+  category?: string;
+  categoryName?: string;
   commerce?: {
     productId: string;
     description: string;
     pricePence: number;
     currency: "GBP";
+    sizeKind?: "length-inches";
     variants: { id: string; sizeLabel: string; available: boolean }[];
   };
 };
 
 // Photography captions only. Commerce data will come from the approved catalog.
 export const collectionPieces: CollectionPiece[] = media.pieces;
-export const heroPieces = media.heroIds.map((id) => collectionPieces.find((piece) => piece.id === id)!);
 export const featuredPieces = media.featuredIds.map((id) => collectionPieces.find((piece) => piece.id === id)!);
 
 export const photographTones = ["Black", "Burgundy", "Charcoal", "Neutral"] as const;

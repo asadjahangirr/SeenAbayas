@@ -16,12 +16,12 @@ for (const width of [320, 390, 768, 1024, 1440, 1920]) {
     await page.goto("/collection");
     await settle(page);
     await expect(page).toHaveTitle("The Collection | SEEN ABAYAS");
-    await expect(page.getByRole("heading", { level: 1 })).toHaveAccessibleName("The Collection.");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveAccessibleName("The Collection");
     await expect(page.locator(".catalog-card")).toHaveCount(7);
     await expect(page.locator(".catalog-toolbar").getByRole("status")).toHaveText("7 pieces");
-    for (const image of await page.locator(".catalog-intro__imagery img").all()) {
-      await expect.poll(() => image.evaluate((element: HTMLImageElement) => element.naturalWidth)).toBeGreaterThan(0);
-    }
+    await expect(page.locator(".catalog-intro img")).toHaveCount(0);
+    const heading = await page.locator(".catalog-heading").boundingBox();
+    expect(heading!.height).toBeLessThan(160);
     const firstImage = page.locator(".catalog-card__image > img").first();
     await firstImage.scrollIntoViewIfNeeded();
     await expect.poll(() => firstImage.evaluate((element: HTMLImageElement) => element.naturalWidth)).toBeGreaterThan(0);
@@ -47,7 +47,7 @@ test("colour filters combine with multi-word search, and empty results can be re
   await colours.getByRole("button", { name: "Black", exact: true }).click();
   await expect(status).toHaveText("3 pieces");
   await expect(colours.getByRole("button", { name: "Black", exact: true })).toHaveAttribute("aria-pressed", "true");
-  await page.getByRole("searchbox", { name: "Search the photographs" }).fill("black lace");
+  await page.getByRole("searchbox", { name: "Search the collection" }).fill("black lace");
   await expect(status).toHaveText("1 piece");
   await expect(page.locator(".catalog-card__name")).toHaveText("Lace detailing");
   await colours.getByRole("button", { name: "Burgundy", exact: true }).click();
@@ -73,22 +73,17 @@ test("sorting changes the displayed order without dropping the selected colour",
   await expect(names).toHaveText(["Polka dots", "Lace detailing", "Botanical detailing"]);
   await page.getByRole("combobox", { name: "Sort by" }).selectOption("az");
   await expect(names).toHaveText(["Botanical detailing", "Lace detailing", "Polka dots"]);
-  await page.getByRole("combobox", { name: "Sort by" }).selectOption("edit");
-  await expect(names).toHaveText(["Botanical detailing", "Lace detailing", "Polka dots"]);
+  await expect(page.getByRole("combobox", { name: "Sort by" }).locator("option")).toHaveText(["Alphabetical: A to Z", "Alphabetical: Z to A"]);
 });
 
-test("collection galleries show the chosen piece and return focus to its card", async ({ page }) => {
+test("collection photographs open the product directly without a quick-view action", async ({ page }) => {
   await page.goto("/collection");
-  const trigger = page.getByRole("button", { name: "View photographs: Soft neutral", exact: true });
-  await trigger.click();
-  const gallery = page.getByRole("dialog", { name: "Soft neutral", exact: true });
-  await expect(gallery.getByRole("button", { name: "Close photo gallery" })).toBeFocused();
-  await gallery.getByRole("button", { name: "Next photo", exact: true }).click();
-  await expect(gallery.getByRole("status")).toHaveText("Details2 / 2");
-  await expect(gallery.locator(".gallery-photo")).toHaveAttribute("alt", /neutral abaya's covered buttons/);
-  await expect(gallery.getByRole("link", { name: "Enquire about this piece" })).toHaveAttribute("href", /mailto:info@seenabayas.co.uk\?subject=SEEN%20enquiry%3A%20Soft%20neutral/);
-  await page.keyboard.press("Escape");
-  await expect(trigger).toBeFocused();
+  await expect(page.locator(".catalog-card__quickview")).toHaveCount(0);
+  await page.getByRole("link", { name: "View piece: Soft neutral", exact: true }).click();
+  await expect(page).toHaveURL(/\/collection\/design-07$/);
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Soft neutral");
+  await expect(page.locator(".piece-gallery__meta")).toHaveText("Front1 / 2");
+  await expect(page.getByRole("button", { name: "Add to bag", exact: true })).toBeVisible();
 });
 
 test("desktop navigation opens the collection, marks it current, and returns to the homepage", async ({ page }) => {
@@ -103,7 +98,7 @@ test("desktop navigation opens the collection, marks it current, and returns to 
   await expect(link).not.toHaveAttribute("aria-current", "page");
 });
 
-test("touch navigation, horizontally scrolling filters, and gallery controls work", async ({ browser, baseURL }) => {
+test("touch navigation and colour filters lead directly to the chosen product", async ({ browser, baseURL }) => {
   const context = await browser.newContext({ baseURL, viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
   try {
     const page = await context.newPage();
@@ -114,12 +109,10 @@ test("touch navigation, horizontally scrolling filters, and gallery controls wor
     await expect(page.getByRole("dialog", { name: "Explore SEEN" })).not.toBeVisible();
     await page.getByRole("group", { name: "Filter by photographed colour" }).getByRole("button", { name: "Neutral", exact: true }).tap();
     await expect(page.locator(".catalog-card")).toHaveCount(1);
-    await page.getByRole("button", { name: "View photographs: Soft neutral", exact: true }).tap();
-    const gallery = page.getByRole("dialog", { name: "Soft neutral", exact: true });
-    await gallery.getByRole("button", { name: "Next photo", exact: true }).tap();
-    await expect(gallery.getByRole("status")).toHaveText("Details2 / 2");
-    await gallery.getByRole("button", { name: "Close photo gallery" }).tap();
-    await expect(gallery).not.toBeVisible();
+    await page.getByRole("link", { name: "View piece: Soft neutral", exact: true }).tap();
+    await expect(page).toHaveURL(/\/collection\/design-07$/);
+    await page.getByRole("button", { name: "Next product photograph", exact: true }).tap();
+    await expect(page.locator(".piece-gallery__meta")).toHaveText("Details2 / 2");
   } finally { await context.close(); }
 });
 

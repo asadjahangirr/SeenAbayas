@@ -1,26 +1,31 @@
 "use client";
+import { CmsAnchor } from "@/components/cms/anchor";
+
+import { Copy } from "@/components/cms/content-provider";
+
 
 import { ArrowUpRight, Menu, X } from "lucide-react";
-import Link from "next/link";
+import Link from "@/components/cms/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 import { BrandLogo } from "@/components/brand-logo";
 import { DeliveryAnnouncement } from "@/components/delivery-announcement";
-import { navigation, store } from "@/config/store";
+import { BagTrigger } from "@/components/bag/bag-trigger";
+import { helpNavigation, navigation, store } from "@/config/store";
 import { keepFocusInDialog } from "@/lib/dialog-focus";
 
 function NavigationLabel({ label }: { label: string }) {
   return (
     <span className="nav-label">
-      <span className="nav-label__original">{label}</span>
-      <span className="nav-label__duplicate" aria-hidden="true">{label}</span>
+      <span className="nav-label__original"><Copy text={label} /></span>
+      <span className="nav-label__duplicate" aria-hidden="true"><Copy text={label} /></span>
     </span>
   );
 }
 
 export function SiteHeader() {
-  const pathname = usePathname();
+  const pathname = usePathname().replace(/^\/admin\/preview/, "") || "/";
   const currentLocation = (href: string) => href === pathname ? "page" : href === "/collection" && pathname.startsWith("/collection/") ? "location" : undefined;
   const menuRef = useRef<HTMLDialogElement>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -69,10 +74,10 @@ export function SiteHeader() {
 
         <BrandLogo />
 
-        <a className="header-contact" href="/#contact" aria-label="Customer care">
-          <span>Customer care</span>
+        <div className="header-actions"><Link className="header-contact" href="/contact" prefetch={false} aria-label="Customer care">
+          <span><Copy text={"Customer care"} /></span>
           <ArrowUpRight size={18} strokeWidth={1.4} aria-hidden="true" />
-        </a>
+        </Link><BagTrigger /></div>
       </div>
 
       <dialog
@@ -88,7 +93,7 @@ export function SiteHeader() {
       >
         <div className="navigation-dialog__content">
           <div className="navigation-dialog__top">
-            <h2 id="navigation-title">Explore SEEN</h2>
+            <h2 id="navigation-title"><Copy text={"Explore SEEN"} /></h2>
             <button
               autoFocus
               className="icon-button"
@@ -107,9 +112,12 @@ export function SiteHeader() {
               </Link>
             ))}
           </nav>
+          <nav className="mobile-help-nav" aria-label="Help and advice">
+            {helpNavigation.map((item) => <Link key={item.href} href={item.href} prefetch={false} onClick={closeMenu} aria-current={currentLocation(item.href)}><Copy text={item.label} /><ArrowUpRight size={16} strokeWidth={1.3} aria-hidden="true" /></Link>)}
+          </nav>
           <div className="navigation-dialog__bottom">
-            <p>Elegance that speaks for itself.</p>
-            <a href={`mailto:${store.supportEmail}`}>{store.supportEmail}</a>
+            <p><Copy text={"Elegance that speaks for itself."} /></p>
+            <CmsAnchor href={`mailto:${store.supportEmail}`}><Copy text={store.supportEmail} /></CmsAnchor>
           </div>
         </div>
       </dialog>

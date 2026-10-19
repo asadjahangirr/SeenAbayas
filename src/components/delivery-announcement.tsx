@@ -1,40 +1,32 @@
+
 "use client";
+import { CmsAnchor } from "@/components/cms/anchor";
 
-import { Pause, Play } from "lucide-react";
-import { useState } from "react";
-
-import { deliveryThreshold } from "@/config/store";
+import { Copy, useSiteDocument } from "@/components/cms/content-provider";
+import { deliveryThresholdFor } from "@/lib/cms/model";
+import type { CSSProperties } from "react";
 
 export function DeliveryAnnouncement() {
-  const [isPaused, setIsPaused] = useState(false);
-  const message = `Complimentary UK delivery on orders over ${deliveryThreshold}`;
+  const document = useSiteDocument();
+  const message = document.announcement.text.replaceAll("{threshold}", deliveryThresholdFor(document));
+  if (!document.announcement.enabled) return null;
 
   return (
-    <div className="announcement" data-paused={isPaused}>
-      <a className="announcement__viewport" href="/#delivery" aria-label={message}>
+    <div className="announcement" style={{ background: document.announcement.background, color: document.announcement.ink, "--announcement-duration": `${document.announcement.duration}s` } as CSSProperties}>
+      <CmsAnchor className="announcement__viewport" href={document.announcement.link} aria-label={message}>
         <div className="announcement__track" aria-hidden="true">
           {[0, 1].map((group) => (
             <div className="announcement__group" key={group}>
               {[0, 1, 2].map((item) => (
                 <span className="announcement__message" key={item}>
-                  {message}
+                  <Copy text={message} />
                   <span className="announcement__divider" />
                 </span>
               ))}
             </div>
           ))}
         </div>
-      </a>
-      <button
-        type="button"
-        className="announcement__control"
-        aria-label={isPaused ? "Resume delivery announcement" : "Pause delivery announcement"}
-        onClick={() => setIsPaused((paused) => !paused)}
-      >
-        {isPaused
-          ? <Play size={12} strokeWidth={1.5} aria-hidden="true" />
-          : <Pause size={12} strokeWidth={1.5} aria-hidden="true" />}
-      </button>
+      </CmsAnchor>
     </div>
   );
 }

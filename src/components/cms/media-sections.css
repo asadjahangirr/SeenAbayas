@@ -1,0 +1,9 @@
+.cms-media-section { margin-block: clamp(32px, 5vw, 88px); }
+.cms-media-frame { width: 100%; overflow: hidden; background: var(--surface, #f5f2eb); }
+.cms-media-frame > img, .cms-media-frame > video { display: block; width: 100%; height: auto; }
+.cms-media-frame > video { background: #171717; }
+.cms-media-section[data-aspect="landscape"] .cms-media-frame { aspect-ratio: 16/9; }
+.cms-media-section[data-aspect="portrait"] .cms-media-frame { aspect-ratio: 3/4; max-width: 680px; margin-inline: auto; }
+.cms-media-section[data-aspect="square"] .cms-media-frame { aspect-ratio: 1; }
+.cms-media-section:not([data-aspect="natural"]) .cms-media-frame > img, .cms-media-section:not([data-aspect="natural"]) .cms-media-frame > video { width:100%; height:100%; object-fit:contain; }
+.cms-media-section figcaption { max-width: 720px; margin: 20px auto 0; font-size: 13px; line-height: 1.9; text-align: center; white-space: pre-line; overflow-wrap: anywhere; }

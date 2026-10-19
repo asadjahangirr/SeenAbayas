@@ -1,0 +1,14 @@
+{
+  "purpose": "Temporary development catalogue requested by the developer. Replace sizing and stock before launch.",
+  "lengthsInches": [52, 54, 56, 58, 60],
+  "stockPerSize": 5,
+  "products": [
+    { "designReference": "design-01", "name": "Layla Burgundy Abaya", "pricePence": 7500 },
+    { "designReference": "design-02", "name": "Zahra Botanical Abaya", "pricePence": 8500 },
+    { "designReference": "design-03", "name": "Noor Lace Abaya", "pricePence": 8500 },
+    { "designReference": "design-04", "name": "Haya Charcoal Abaya", "pricePence": 6900 },
+    { "designReference": "design-05", "name": "Rima Textured Abaya", "pricePence": 7500 },
+    { "designReference": "design-06", "name": "Luma Polka Dot Abaya", "pricePence": 6900 },
+    { "designReference": "design-07", "name": "Amal Neutral Abaya", "pricePence": 7500 }
+  ]
+}

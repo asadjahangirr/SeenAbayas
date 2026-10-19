@@ -1,6 +1,8 @@
 # Supabase catalog setup
 
-This phase prepares a read-only commerce catalog. No hosted project has been created or changed. The default storefront continues to use the supplied photo preview until the client-owned project and approved product data are ready.
+The catalog/bag instructions below remain useful for initial setup. Administration, private media, content publishing and account recovery are now implemented separately; follow [ADMIN_SETUP.md](ADMIN_SETUP.md) to install the two new migrations and activate your owner account.
+
+The catalog is connected to a hosted Supabase project: its publishable-key read was verified successfully. The developer reports importing the seven named/priced drafts. At the developer's request, the local storefront now uses the explicit `development` catalogue with temporary lengths and stock so the bag can be tested. Actual Supabase inventory still needs the remaining product details and publication. The new bag migration below has not been applied remotely by the application.
 
 ## Connect the project
 
@@ -39,15 +41,27 @@ Populate the following from client-confirmed information, while each product rem
 
 Set `status='published'` only after the details are confirmed. PostgreSQL rejects publication without the required fields, active sizes, and recorded stock for every active size. Deferred constraints permit the product, sizes and stock to be imported atomically in one transaction. They also stop later inventory or size mutations from leaving a published product incomplete. Archive a product before removing its required catalog data.
 
-Read availability is not an inventory reservation and never authorizes checkout. Transactional reservations, pricing revalidation, payment events, orders and admin authorization remain later phases. The current application intentionally has no Add to Bag action.
+Read availability is not an inventory reservation and never authorizes checkout. Transactional reservations and payment integration remain later phases. Admin authorization and order-management screens are now available through the separate admin setup. Published products support size selection and Add to Bag after the bag migration is installed. Preview product pages show a visible disabled Add to Bag button, with an explanation that sizing and availability must first be confirmed. The secondary sizing/availability link opens customer-care email.
+
+## Enable the shopping bag
+
+For local testing now, the developer has authorized temporary lengths and sample stock. `CATALOG_SOURCE=development` enables those additions without a hosted inventory import. See [the recorded development decisions](DEVELOPMENT_NOTES.md). The following migration steps are for the actual Supabase-backed catalogue.
+
+The first catalog migration already exists on the connected project. Do not rerun it or delete its tables. Open a fresh SQL Editor query, paste only [20261018000200_bag_availability.sql](../supabase/migrations/20261018000200_bag_availability.sql), and run it once. It adds a read-only function; it does not change products or inventory.
+
+Run `npm run check:bag` to verify the function using the publishable key. This check never writes data or logs credentials. The function accepts at most 20 distinct variant IDs with quantities from 1 to 10 and returns only whether each requested quantity can be fulfilled from unreserved stock. Its private-table access uses a fixed search path, and exact stock remains private.
+
+`POST /api/bag` validates a bounded request, rejects client-supplied prices, reads current published catalog details and checks quantities using that function. Prices, photos and totals come from the server. The browser stores only variant IDs and quantities in `seen.bag.v1`, revalidates saved selections on reload, and synchronizes changes between tabs. Storage can be unavailable without breaking the current session. No bag action reserves or writes stock.
+
+The bag icon/count, drawer and `/bag` page work with an empty catalog. Actual additions require published products with real sizes and recorded stock, `CATALOG_SOURCE=supabase`, and the new migration. Out-of-stock, missing or unpublished variants cannot be added. The subtotal excludes unavailable lines and complimentary standard UK delivery requires strictly more than GBP80. There are no discounts in this phase. The bag offers a real customer-care email enquiry; payment checkout is a later phase.
 
 ## Activate the database-backed storefront
 
 After approved products, sizes and stock are present, set `CATALOG_SOURCE=supabase` and restart the app. The homepage edit, Collection page, product pages and their metadata read the approved catalog on the server. Existing local photos supply the imagery. Configured mode never falls back to preview merchandise on errors or when there are zero published products.
 
-Confirmed names, descriptions, GBP prices and size availability appear automatically. Draft and archived products do not appear. Records without a supplied photography mapping are not displayed. Empty catalogs have a preparation message; a failed or invalid response produces a retry screen without internal database errors.
+Confirmed names, descriptions, GBP prices and size availability appear automatically. Draft and archived products do not appear. The original catalog contract requires a local photography mapping. With the admin migrations and `CMS_SOURCE=supabase`, the version-two contract also supports uploaded product galleries and additional designs without a local photo mapping. Empty catalogs have a preparation message; a failed or invalid response produces a retry screen without internal database errors.
 
-There is no browser connection to Supabase in this phase, so the browser CSP does not need a new connection allowlist. The server uses the publishable key with no persisted sign-in session. Reads are uncached between requests and deduplicated within a server render. A failed read times out after eight seconds.
+Public catalog reads run on the server with the publishable key and no persisted sign-in session. Reads are uncached between requests and deduplicated within a server render. A failed read times out after eight seconds. Private admin uploads use signed URLs with a narrowly scoped project-origin CSP allowance; they do not expose a privileged key to the browser.
 
 ## Verify
 
@@ -56,12 +70,13 @@ npm run test:catalog
 npm run build
 npm run test:catalog-ui
 npm run test:foundation
+npm run check:bag
 ```
 
 `test:catalog` executes the actual migration, seed, database constraints and role-based access tests in an in-memory PostgreSQL engine (PGlite). It also validates configuration, the read contract and the installed Supabase SDK's RPC request. It needs no Docker service or Supabase account.
 
-`test:catalog-ui` runs the production app in configured mode against a local HTTP test fixture on ports 3101/3102. All synthetic names, sizes and prices are explicitly marked TEST ONLY and remain in `tests/`; none are included in the real seed or storefront preview. These checks cover actual price/size rendering, empty catalogs, failed/invalid reads, error recovery and mobile accessibility. They do not emulate or verify hosted Supabase authentication, gateway permissions or Storage.
+`test:catalog-ui` runs the production app in configured mode against a local HTTP test fixture on ports 3101/3102. All synthetic names, sizes and prices are explicitly marked TEST ONLY and remain in `tests/`; none are included in the real seed or storefront preview. These checks cover price/size rendering, empty catalogs, failed/invalid reads, error recovery, bag additions/quantity changes/removal, saved selections, server revalidation, request tampering, keyboard access and mobile accessibility. They do not emulate or verify hosted Supabase authentication, gateway permissions or Storage.
 
-Run `check:catalog` and verify the project access rules after applying the migration to the real project. Hosted verification remains pending until that project exists. Admin sign-in/MFA, writes, Storage uploads, cart, checkout and payment processing are not implemented in this phase.
+Run `check:catalog` and `check:bag` and verify the project access rules after applying migrations to the real project. The hosted catalog read has passed; the new bag function and real-product additions still need hosted verification after migration and product publication. Admin sign-in/MFA, writes and private Storage uploads are implemented and tested locally; hosted activation is described in [ADMIN_SETUP.md](ADMIN_SETUP.md). Checkout and payment processing remain pending.
 
 Implementation references: [Supabase RLS and grants](https://supabase.com/docs/guides/database/postgres/row-level-security), [Supabase API keys](https://supabase.com/docs/guides/getting-started/api-keys), [RPC client](https://supabase.com/docs/reference/javascript/rpc), and [PGlite](https://pglite.dev/docs/).

@@ -16,7 +16,7 @@ try {
     const { data, error } = await client.rpc("get_storefront_catalog", {});
     if (error || !Array.isArray(data)) throw new Error("Catalog read failed.");
     console.log(`Read-only Supabase catalog check succeeded. Published records: ${data.length}.`);
-    console.log("No database changes were made. Keep CATALOG_SOURCE=preview until approved product details and photos are ready.");
+    console.log("No database changes were made. Use development mode for the sample catalogue, or supabase mode after real product data is ready.");
   }
 } catch {
   console.error("Catalog check failed. Check the project configuration, migration and access rules; connection values have been omitted.");

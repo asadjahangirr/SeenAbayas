@@ -1,5 +1,7 @@
 # SEEN product details to confirm
 
+Temporary length options and sample stock have been authorized for local development. They are recorded separately in [DEVELOPMENT_NOTES.md](DEVELOPMENT_NOTES.md); replace them with actual client information through the planned admin dashboard before launch. The blanks below continue to represent unconfirmed real product information.
+
 Names and opening GBP prices have been selected at your request. They are saved in `supabase/catalog-drafts.sql` for importing as private drafts. They have not been written to the hosted database by the application. Fill in the remaining blanks below, or send these details in chat using the design references. Confirm that each photo group shows the same product before publication.
 
 Prices should be the final customer-facing GBP price, including any applicable tax. State stock separately for every size. Leave unknown facts blank; use `0` only for confirmed zero stock. Nothing in this document publishes a product automatically.

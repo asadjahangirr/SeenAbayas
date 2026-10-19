@@ -1,37 +1,37 @@
+
+import { CmsAnchor } from "@/components/cms/anchor";
+import { pageMetadata } from "@/lib/cms/metadata";
+
+import { Copy } from "@/components/cms/content-provider";
 import type { Metadata } from "next";
-import Image from "next/image";
-import Link from "next/link";
+import Link from "@/components/cms/link";
 import { ArrowUpRight } from "lucide-react";
 
 import { CollectionBrowser } from "@/components/collection/collection-browser";
 import { Reveal } from "@/components/ui/reveal";
 import { store } from "@/config/store";
 import { getStorefrontCatalog } from "@/lib/catalog/server";
-import { collectionPieces } from "@/data/collection";
+import { getStorefrontState } from "@/lib/storefront/server";
 
 import "./collection.css";
 
-export const metadata: Metadata = {
+const baseMetadata: Metadata = {
   title: "The Collection",
   description: "Explore the SEEN abaya collection, from burgundy silhouettes to tonal details and soft neutrals. Discover each piece through our photography.",
 };
 
 export default async function CollectionPage() {
-  const pieces = await getStorefrontCatalog();
+  const [pieces, state] = await Promise.all([getStorefrontCatalog(), getStorefrontState()]);
   return (
     <>
       <div className="catalog-intro container">
-        <nav className="catalog-breadcrumb" aria-label="Breadcrumb"><Link href="/">Home</Link><span aria-hidden="true">/</span><span aria-current="page">The collection</span></nav>
-        <div className="catalog-intro__layout">
-          <div className="catalog-intro__copy"><p className="eyebrow">SEEN ABAYAS</p><h1 aria-label="The Collection."><span>The</span><em>Collection.</em></h1><p>Timeless modesty. Effortless elegance.<br />Explore silhouettes and details that speak to you.</p></div>
-          <Reveal className="catalog-intro__imagery" delay={100}>
-            <figure><div><Image src={collectionPieces[0].photos[2].src} alt={collectionPieces[0].photos[2].alt} fill preload sizes="(min-width: 1024px) 255px, (min-width: 768px) 24vw, 45vw" /></div><figcaption>Covered buttons</figcaption></figure>
-            <figure><div><Image src={collectionPieces[2].photos[1].src} alt={collectionPieces[2].photos[1].alt} fill sizes="(min-width: 1024px) 220px, (min-width: 768px) 21vw, 40vw" /></div><figcaption>Lace detailing</figcaption></figure>
-          </Reveal>
-        </div>
+        <nav className="catalog-breadcrumb" aria-label="Breadcrumb"><Link href="/"><Copy text={"Home"} /></Link><span aria-hidden="true"><Copy text={"/"} /></span><span aria-current="page"><Copy text={"The collection"} /></span></nav>
+        <div className="catalog-heading"><h1><Copy text={"The Collection"} /></h1><p><Copy text={"Refined silhouettes. A piece for every part of your day."} /></p></div>
       </div>
-      <CollectionBrowser pieces={pieces} />
-      <Reveal className="catalog-assistance container"><div><h2>Here to help you choose.</h2><p>For sizing and availability, speak with our team.<br /><a className="text-link" href={`mailto:${store.supportEmail}`}>Customer care<ArrowUpRight size={16} strokeWidth={1.3} aria-hidden="true" /></a></p></div></Reveal>
+      <CollectionBrowser pieces={pieces} categories={state.categories} />
+      <Reveal className="catalog-assistance container"><div><h2><Copy text={"Here to help you choose."} /></h2><p><Copy text={"For sizing and availability, speak with our team."} /><br /><CmsAnchor className="text-link" href={`mailto:${store.supportEmail}`}><Copy text={"Customer care"} /><ArrowUpRight size={16} strokeWidth={1.3} aria-hidden="true" /></CmsAnchor></p></div></Reveal>
     </>
   );
 }
+
+export async function generateMetadata(): Promise<Metadata> { return pageMetadata(baseMetadata); }
