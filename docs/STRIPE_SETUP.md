@@ -76,7 +76,7 @@ References: [hosted Checkout](https://docs.stripe.com/checkout/quickstart), [dyn
 
 ## 6. Recovery and boundaries
 
-Owner-only **Refresh payment statuses** in Admin > Orders checks a rotating batch of up to five reserved checkouts. Repeat for more. Network/provider failures retain reservations for retry. Optional `GET /api/payments/reconcile` requires `Authorization: Bearer <PAYMENTS_RECONCILE_SECRET>` with a private random secret of at least 32 characters. Use a scheduler supporting that header; no scheduler is deployed automatically. Configure regular recovery before commercial launch.
+Owner-only **Refresh payment statuses** in Admin > Orders checks a rotating batch of up to five reserved checkouts. Repeat for more. Point 4 adds two-minute recovery leases; an already claimed order can need that interval before another manual check. Network/provider failures retain reservations for retry. `GET/POST /api/payments/reconcile` supports a private Bearer token; POST also accepts a short-lived HMAC proof for Supabase Cron. Configure the recurring job using [STOCK_SETUP.md](STOCK_SETUP.md) and `supabase/setup-stock-recovery.sql`; it is prepared but not activated by editing local code. The same setup guide covers the required `20261020000300_stock_management.sql` migration. Configure and verify regular recovery before commercial launch.
 
 Unattached provider sessions are recovered by metadata. Orphan reservations are released only after their frozen creation window plus ten minutes and a complete bounded Stripe lookup confirms absence. Indeterminate lookups retain stock. Attention cases require owner investigation and cannot be auto-fulfilled.
 

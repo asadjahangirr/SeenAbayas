@@ -28,6 +28,7 @@ export default defineConfig({
         PAYMENTS_MODE: "test",
         STRIPE_SECRET_KEY: "sk_test_SEEN_LOCAL_FIXTURE_ONLY",
         STRIPE_WEBHOOK_SECRET: "whsec_SEEN_LOCAL_FIXTURE_ONLY",
+        PAYMENTS_RECONCILE_SECRET: "seen-local-fixture-recovery-token-only-123456",
         SUPABASE_SECRET_KEY: "sb_secret_SEEN_LOCAL_FIXTURE_ONLY",
         PAYMENTS_FIXTURE_ORIGIN: "http://127.0.0.1:3108",
         CONTACT_INBOX_ENABLED: "false",

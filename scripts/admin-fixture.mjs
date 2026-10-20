@@ -22,6 +22,7 @@ for (const file of [
   "20261019000500_product_visibility.sql",
   "20261020000100_payments.sql",
   "20261020000200_order_records.sql",
+  "20261020000300_stock_management.sql",
 ])
   await db.exec(await readFile(`supabase/migrations/${file}`, "utf8"));
 await db.query("insert into auth.users(id) values($1)", [owner]);
@@ -125,7 +126,7 @@ async function reset(enroll = false) {
   uploads.clear();
   uploadNames.clear();
   await db.exec(
-    "reset role;delete from seen_private.stripe_event_receipts;delete from seen_private.checkout_items;delete from seen_private.checkout_orders;delete from seen_private.admin_records;delete from seen_private.admin_audit;delete from seen_private.site_history;update seen_private.site_documents set version=0,draft='{}',published=null,published_at=null;delete from seen_private.inventory;delete from public.product_variants;delete from public.products;delete from storage.objects;",
+    "reset role;delete from seen_private.checkout_stock_events;delete from seen_private.stripe_event_receipts;delete from seen_private.checkout_items;delete from seen_private.checkout_orders;delete from seen_private.admin_records;delete from seen_private.admin_audit;delete from seen_private.site_history;update seen_private.site_documents set version=0,draft='{}',published=null,published_at=null;delete from seen_private.inventory;delete from public.product_variants;delete from public.products;delete from storage.objects;",
   );
   await db.query("select set_config('request.jwt.claims',$1,false)", [
     JSON.stringify({ sub: owner, aal: "aal2" }),

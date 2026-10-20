@@ -9,6 +9,8 @@ export function OrderDetails({ record }: { record: AdminRecord }) {
   return <div className="admin-order-details">
     <div className="admin-order-overview">
       <dl><div><dt>Payment</dt><dd>{d.paymentLabel}</dd></div><div><dt>Order placed</dt><dd>{orderDate(record.created_at)}</dd></div><div><dt>Payment verified</dt><dd>{orderDate(d.verifiedAt)}</dd></div><div><dt>Order confirmed</dt><dd>{orderDate(d.confirmedAt)}</dd></div><div><dt>Source</dt><dd>{d.source}</dd></div></dl>
+      <p><strong>Stock:</strong> {d.stockLabel}</p>
+      {d.isTest && <p className="admin-help">Sandbox purchases release their reservation without reducing physical stock. Do not dispatch test orders.</p>}
       <p className="admin-help">Dates use UK time. Confirmation times are recorded when the store verifies payment. Older orders may not have a recorded confirmation time.</p>
     </div>
     <div className="admin-order-columns">

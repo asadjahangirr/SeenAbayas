@@ -7,6 +7,7 @@ const stripe = new Stripe("sk_test_SEEN_LOCAL_FIXTURE_ONLY");
 const sessions = new Map();
 const idempotency = new Map();
 let customerCount = 0;
+let unavailable = false;
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, "http://127.0.0.1:3108");
   const send = (value, status = 200) => {
@@ -20,8 +21,20 @@ const server = http.createServer(async (req, res) => {
       sessions.clear();
       idempotency.clear();
       customerCount = 0;
+      unavailable = false;
       send({ ok: true });
       return;
+    }
+    if (url.pathname === "/__test/recovery") {
+      const change = JSON.parse(raw);
+      unavailable = change.unavailable === true;
+      if (change.overdue) await serial(() => db.exec("update seen_private.checkout_orders set expires_at=clock_timestamp()-interval '11 minutes' where stock_state='reserved';"));
+      if (change.releaseLease) await serial(() => db.exec("update seen_private.checkout_orders set recovery_lease_until=null;"));
+      if (change.orphan) {
+        await serial(() => db.exec("update seen_private.checkout_orders set session_id=null,state='creating' where stock_state='reserved';"));
+        sessions.clear();
+      }
+      send({ok:true});return;
     }
     if (url.pathname === "/__test/state") {
       const stock = await serial(() =>
@@ -94,6 +107,10 @@ const server = http.createServer(async (req, res) => {
       req.headers.authorization !== "Bearer sk_test_SEEN_LOCAL_FIXTURE_ONLY"
     ) {
       send({ error: { message: "Fixture credentials required" } }, 401);
+      return;
+    }
+    if (unavailable) {
+      send({ error: { message: "Isolated provider outage" } }, 503);
       return;
     }
     const key = req.headers["idempotency-key"];

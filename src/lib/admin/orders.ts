@@ -35,6 +35,7 @@ export function orderDetails(record: AdminRecord) {
     checkoutState: text(p.checkout_state), paymentStatus: text(p.payment_status),
     paymentLabel: p.needs_attention === true ? "Paid · Needs review" : p.payment_status === "paid" ? "Paid" : p.checkout_state === "pending" ? "Awaiting payment confirmation" : p.payment_status === "expired" ? "Expired" : p.payment_status === "failed" ? "Failed" : "Awaiting payment",
     verifiedAt: text(p.payment_verified_at), confirmedAt: text(p.confirmed_at),
+    stockLabel: p.stock_state === "reserved" ? (p.needs_attention === true ? "Held · Needs review" : "Reserved for checkout") : p.stock_state === "committed" ? "Deducted from stock" : p.stock_state === "released" ? (p.is_test === true && p.payment_status === "paid" ? "Test reservation released" : "Reservation released") : p.stock_state === "attention" ? "Needs stock review" : "Not recorded",
     sessionId: text(p.stripe_session_id), paymentIntent: text(p.payment_intent),
   };
 }

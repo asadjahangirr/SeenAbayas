@@ -6,11 +6,14 @@ import {
   type APIRequestContext,
 } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
-import { randomUUID } from "node:crypto";
+import { randomUUID, createHmac } from "node:crypto";
 
 const headers = {
   Origin: "http://127.0.0.1:3107",
   "Content-Type": "application/json",
+};
+const recoveryHeaders = {
+  Authorization: "Bearer seen-local-fixture-recovery-token-only-123456",
 };
 const customer = {
   email: "test-shopper@example.test",
@@ -341,6 +344,70 @@ test("unconfirmed delivery below threshold keeps test payment disabled", async (
     "Continue to Stripe",
   );
   expect((await state(request)).sessions).toHaveLength(0);
+});
+
+test("scheduled recovery releases expired checkouts without a webhook or customer return and rejects unauthorised callers", async ({page,request}) => {
+  await review(page);await open(page);
+  for (const method of ["get","post"] as const) {
+    expect((await request[method]("/api/payments/reconcile")).status()).toBe(401);
+    expect((await request[method]("/api/payments/reconcile",{headers:{Authorization:"Bearer incorrect"}})).status()).toBe(401);
+  }
+  await request.post("http://127.0.0.1:3108/__test/recovery",{data:{overdue:true}});
+  const timestamp=String(Math.floor(Date.now()/1000));
+  const signature=createHmac("sha256","seen-local-fixture-recovery-token-only-123456").update(`seen-stock-recovery:v1:${timestamp}:POST:/api/payments/reconcile`).digest("hex");
+  const recovered=await request.post("/api/payments/reconcile",{headers:{"x-seen-recovery-timestamp":timestamp,"x-seen-recovery-signature":signature}});
+  expect(recovered.status()).toBe(200);
+  expect(await recovered.json()).toEqual({checked:1,updated:1,retryRequired:0});
+  expect((await state(request)).stock[0]).toEqual({on_hand:5,reserved:0});
+  expect((await state(request)).sessions[0].status).toBe("expired");
+  const replay=await request.get("/api/payments/reconcile",{headers:recoveryHeaders});
+  expect(await replay.json()).toEqual({checked:0,updated:0,retryRequired:0});
+});
+
+test("provider outages retain reservations and return a retryable scheduler failure; later verification recovers safely", async ({page,request}) => {
+  await review(page);await open(page);
+  const id=(await state(request)).sessions[0].id;
+  await event(request,{sessionId:id,state:"paid",badSignature:true});
+  await request.post("http://127.0.0.1:3108/__test/recovery",{data:{unavailable:true}});
+  const failed=await request.post("/api/payments/reconcile",{headers:recoveryHeaders});
+  expect(failed.status()).toBe(503);
+  expect(await failed.json()).toEqual({checked:1,updated:0,retryRequired:1});
+  expect((await state(request)).stock[0].reserved).toBe(2);
+  await request.post("http://127.0.0.1:3108/__test/recovery",{data:{unavailable:false,releaseLease:true}});
+  const recovered=await request.get("/api/payments/reconcile",{headers:recoveryHeaders});
+  expect(await recovered.json()).toEqual({checked:1,updated:1,retryRequired:0});
+  expect((await state(request)).stock[0]).toEqual({on_hand:5,reserved:0});
+});
+
+test("scheduled recovery keeps completed asynchronous payments reserved and releases a verified orphan", async ({page,request}) => {
+  await review(page);await open(page);
+  await event(request,{sessionId:(await state(request)).sessions[0].id,state:"pending"});
+  await request.post("http://127.0.0.1:3108/__test/recovery",{data:{overdue:true}});
+  const pending=await request.post("/api/payments/reconcile",{headers:recoveryHeaders});
+  expect(pending.status()).toBe(200);
+  expect((await state(request)).stock[0].reserved).toBe(2);
+  // A separate interrupted-creation fixture has no provider session to recover.
+  await request.post("http://127.0.0.1:3108/__test/recovery",{data:{orphan:true,releaseLease:true}});
+  const orphan=await request.post("/api/payments/reconcile",{headers:recoveryHeaders});
+  expect(await orphan.json()).toEqual({checked:1,updated:1,retryRequired:0});
+  expect((await state(request)).stock[0]).toEqual({on_hand:5,reserved:0});
+});
+
+test("two buyers with previously valid reviews cannot both reserve the last units", async ({page,request,browser}) => {
+  await review(page);
+  const lines=(await page.evaluate(()=>JSON.parse(localStorage.getItem("seen.bag.v1")!).lines)).map((line:{variantId:string})=>({...line,quantity:3}));
+  const buyers=await Promise.all([browser.newContext(),browser.newContext()]);
+  try {
+    const payloads=await Promise.all(buyers.map(async buyer=>{
+      const result=await buyer.request.post("http://127.0.0.1:3107/api/checkout/review",{headers,data:{details:customer,shippingMethod:"standard",lines}});
+      const snapshot=await result.json();expect(snapshot.paymentAvailable).toBe(true);
+      return {details:customer,shippingMethod:"standard",lines,requestId:randomUUID(),reviewFingerprint:snapshot.reviewFingerprint};
+    }));
+    const attempts=await Promise.all(buyers.map((buyer,i)=>buyer.request.post("http://127.0.0.1:3107/api/checkout/session",{headers,data:payloads[i]})));
+    expect(attempts.map(r=>r.status()).sort()).toEqual([200,409]);
+    expect((await state(request)).stock[0]).toEqual({on_hand:5,reserved:3});
+    expect((await state(request)).sessions).toHaveLength(1);
+  } finally {await Promise.all(buyers.map(buyer=>buyer.close()));}
 });
 
 for (const width of [320, 393, 1440])

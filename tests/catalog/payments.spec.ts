@@ -36,6 +36,7 @@ test.beforeAll(async () => {
     "20261019000500_product_visibility.sql",
     "20261020000100_payments.sql",
     "20261020000200_order_records.sql",
+    "20261020000300_stock_management.sql",
   ])
     await db.exec(await readFile(`supabase/migrations/${file}`, "utf8"));
   await db.query("insert into auth.users(id) values($1)", [owner]);
@@ -315,6 +316,68 @@ test("reconciliation rotates pending batches so unchanged sessions cannot block 
   expect(first).toHaveLength(1);
   expect(next).toHaveLength(1);
   expect(new Set([first[0].id, next[0].id])).toEqual(new Set([a.id, b.id]));
+  expect((await db.query<any>("select public.payment_pending_orders(10) data")).rows[0].data).toEqual([]);
+  await db.exec("update seen_private.checkout_orders set recovery_lease_until=clock_timestamp()-interval '1 second'");
+  expect((await db.query<any>("select public.payment_pending_orders(10) data")).rows[0].data).toHaveLength(2);
+});
+
+test("stock history records reservation and one terminal movement without exposing inventory to browsers", async () => {
+  const order=await prepare(requestId,ownerHash,2);
+  await apply(order,"paid");await apply(order,"paid");
+  const events=(await db.query("select movement,quantity,on_hand_delta from seen_private.checkout_stock_events where order_id=$1 order by occurred_at",[order.id])).rows;
+  expect(events).toEqual([{movement:"reserved",quantity:2,on_hand_delta:0},{movement:"released",quantity:2,on_hand_delta:0}]);
+  for(const role of ["anon","authenticated","service_role"]){
+    await db.exec(`set local role ${role}`);
+    await denied(()=>db.query("select * from seen_private.checkout_stock_events"));
+    await db.exec("reset role");
+  }
+  await denied(()=>db.query("update seen_private.checkout_orders set stock_state='reserved' where id=$1",[order.id]));
+  expect(await stock()).toEqual({on_hand:5,reserved:0});
+});
+
+test("sandbox commits are rejected and a mismatched reservation rolls back every purchase movement", async () => {
+  const order=await prepare();
+  await denied(()=>db.query("update seen_private.checkout_orders set state='paid',stock_state='committed' where id=$1",[order.id]));
+  expect(await stock()).toEqual({on_hand:5,reserved:1});
+  // Simulate private corruption to prove failure never produces a paid order.
+  await db.query("update seen_private.inventory set reserved=0 where variant_id=$1",[variant]);
+  await denied(()=>apply(order,"paid"));
+  expect((await db.query<any>("select state,stock_state from seen_private.checkout_orders where id=$1",[order.id])).rows[0]).toEqual({state:"creating",stock_state:"reserved"});
+  expect((await db.query("select * from seen_private.stripe_event_receipts")).rows).toHaveLength(0);
+});
+
+test("prepared physical-stock commit deducts once while the production schema still forbids live orders", async () => {
+  const template=await prepare(requestId,ownerHash,2);await apply(template,"expired");
+  // Only this rolled-back isolated database relaxes the test-only constraint to
+  // exercise the internal future-live stock branch. Hosted/live checkout stays blocked.
+  await db.exec("alter table seen_private.checkout_orders drop constraint checkout_orders_is_test_check");
+  const live=(await db.query<any>(`insert into seen_private.checkout_orders(request_id,owner_hash,request_hash,order_number,is_test,details,delivery,subtotal_pence,delivery_pence,total_pence,return_origin)
+    select gen_random_uuid(),owner_hash,request_hash,'ISOLATED-STOCK-ONLY',false,details,delivery,subtotal_pence,delivery_pence,total_pence,return_origin from seen_private.checkout_orders where id=$1 returning id`,[template.id])).rows[0];
+  await db.query(`insert into seen_private.checkout_items select $1,variant_id,product_id,quantity,unit_price_pence,snapshot from seen_private.checkout_items where order_id=$2`,[live.id,template.id]);
+  await db.query("update seen_private.inventory set reserved=2 where variant_id=$1",[variant]);
+  await db.query("update seen_private.checkout_orders set state='paid',stock_state='committed' where id=$1",[live.id]);
+  expect(await stock()).toEqual({on_hand:3,reserved:0});
+  await db.query("update seen_private.checkout_orders set stock_state='committed' where id=$1",[live.id]);
+  expect(await stock()).toEqual({on_hand:3,reserved:0});
+  expect((await db.query("select movement,quantity,on_hand_delta from seen_private.checkout_stock_events where order_id=$1 and movement='committed'",[live.id])).rows).toEqual([{movement:"committed",quantity:2,on_hand_delta:-2}]);
+  await denied(()=>db.query("update seen_private.checkout_orders set stock_state='reserved' where id=$1",[live.id]));
+});
+
+test("multiple items settle atomically and stale admin stock cannot overwrite an active reservation", async () => {
+  const p=(await db.query<any>("select id,updated_at from public.products")).rows[0];
+  const other=(await db.query<any>("insert into public.product_variants(product_id,size_label,active) values($1,'56',true) returning id",[p.id])).rows[0].id;
+  await db.query("insert into seen_private.inventory(variant_id,on_hand) values($1,3)",[other]);
+  const order=(await db.query<any>("select public.payment_prepare_order($1,$2,$3,$4,$5,'standard',0,'http://localhost:3000') data",[requestId,ownerHash,requestHash,details,[{variant_id:variant,quantity:2,unit_price_pence:8000},{variant_id:other,quantity:3,unit_price_pence:8000}]])).rows[0].data;
+  await denied(()=>db.query("select public.admin_bulk_products($1,'stock',0)",[[p.id]]));
+  expect(await stock()).toEqual({on_hand:5,reserved:2});
+  // An inconsistent second row must roll back the first row's release too.
+  await db.query("update seen_private.inventory set reserved=0 where variant_id=$1",[other]);
+  await denied(()=>apply(order,"expired"));
+  expect(await stock()).toEqual({on_hand:5,reserved:2});
+  await db.query("update seen_private.inventory set reserved=3 where variant_id=$1",[other]);
+  await apply(order,"expired");
+  expect(await stock()).toEqual({on_hand:5,reserved:0});
+  expect((await db.query<any>("select on_hand,reserved from seen_private.inventory where variant_id=$1",[other])).rows[0]).toEqual({on_hand:3,reserved:0});
 });
 
 test("verified purchases freeze item prices and contact details, confirm once and preserve owner notes on retries", async () => {
@@ -366,5 +429,8 @@ test("one provider payment cannot settle two purchases and projection backfill i
   // The migration's outer transaction is managed by this test instead.
   const migration=(await readFile("supabase/migrations/20261020000200_order_records.sql","utf8")).replace(/^begin;$/m,"").replace(/^commit;$/m,"");
   await db.exec(migration);await db.exec(migration);
+  // Restore the newest stock function after intentionally replaying an older migration.
+  const stockMigration=(await readFile("supabase/migrations/20261020000300_stock_management.sql","utf8")).replace(/^begin;$/m,"").replace(/^commit;$/m,"");
+  await db.exec(stockMigration);await db.exec(stockMigration);
   expect((await db.query("select count(*)::int count from seen_private.admin_records where kind='order'")).rows[0]).toEqual({count:2});
 });

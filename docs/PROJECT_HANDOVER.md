@@ -8,6 +8,8 @@ This file transfers the project context to a new developer or coding agent. It r
 
 **The storefront, bag, protected admin, UK checkout and private order-status page are implemented. Stripe-hosted Checkout, private test orders, stock reservations and signed payment updates are implemented for TEST MODE ONLY. Real-money charging and commercial launch remain disabled.**
 
+Latest phase — point 4, automatic stock management (20 October): new `20261020000300_stock_management.sql` centralises terminal reservation movements with consistent parent-product locking, guards against duplicate/invalid deductions, records private per-size stock events and leases rotating recovery batches. Admin order details now explain stock status. Scheduled recovery accepts bounded timestamped HMAC proofs, handles overdue open Stripe sessions via verified provider expiry, returns retryable failure counters, and retains pending/indeterminate reservations. `supabase/setup-stock-recovery.sql` prepares a named every-minute Supabase Cron job with its long-lived token kept in Vault rather than queued HTTP headers. See [STOCK_SETUP.md](STOCK_SETUP.md) for installation and verification. The agent has not applied the migration, configured secrets, activated the recurring job or changed hosted stock. Sandbox success still leaves physical on-hand quantities unchanged; real charging/live checkout remain blocked. The prepared internal physical-deduction path is tested only in an isolated rolled-back fixture.
+
 Latest development phase — point 3, order records: purchase snapshots/totals and confirmed customer details now have database update guards; successful verification records confirmation times once and projects canonical private checkout data into a readable admin order view. Duplicate events do not create a second order or invalidate unchanged admin forms; retries can repair a missing projection. Admin now has separate payment/environment filters and item-level CSV export. The developer confirms applying `20261020000200_order_records.sql` and a Ready deployment. Independent hosted health now reports `order_records_ready=true`; both earlier paid test orders retain their saved items/contact/address and matching totals. Their new timestamp columns are present but historical dates remain null by design. A fresh post-migration sandbox purchase/admin-view check remains pending. See [ORDER_SETUP.md](ORDER_SETUP.md). Genuine customer charges are still gated by the separate live-launch work.
 
 Latest catalogue checkpoint (20 October): the developer deployed and applied `supabase/catalog-release-20261020.sql`. Independent hosted checks now verify all nine published designs, matching client names/prices/descriptions, 22 reachable photographs and nine working product pages. Burgundy Roselle availability matches 54 × 1, 56 × 1, 58 × 2 through read-only quantity-boundary checks; the other eight designs are visible and sold out. The shared size guide uses the supplied 54/56/58 length/height chart. Do not rerun or rename the import batch to reset later stock edits. See [CATALOG_UPDATE.md](CATALOG_UPDATE.md) and the latest section below. Old sample prices and sizes are superseded for the commercial catalogue.
@@ -302,6 +304,8 @@ Migration dependency order:
 7. `supabase/migrations/20261019000400_product_delete.sql` - protected owner-only deletion; safe to rerun and does not itself delete products.
 8. `supabase/migrations/20261019000500_product_visibility.sql` - protected bulk visibility; safe to rerun and does not itself change product visibility.
 9. `supabase/migrations/20261020000100_payments.sql` - private test orders, transactional reservations, payment events and admin protections. User-applied successfully; protected hosted health verified.
+10. `supabase/migrations/20261020000200_order_records.sql` - canonical admin order projection, confirmation timestamps and purchase guards. User-applied; hosted capability verified. A fresh post-migration user payment/admin acceptance check remains pending.
+11. `supabase/migrations/20261020000300_stock_management.sql` - central stock settlement, private movement history and leased recovery batches. Prepared/tested locally; hosted installation not yet confirmed. Separately configure `supabase/setup-stock-recovery.sql` after deployment/private Vault setup; this is an operator activation script, not an automatic migration.
 
 Hosted status from the conversation:
 
@@ -486,7 +490,7 @@ Only run preparation when deliberately changing its inputs. Review regenerated a
 
 ## 17. Remaining work - execution order
 
-The developer has authorised point 1: checkout, and answered the initial questions. UK-based store; free delivery at GBP 80 or more; VAT unconfirmed; below-threshold shipping rate not supplied. The checkout review preview is implemented. They report client Stripe dashboard access. Do not interpret this as authorisation for live charges or automatically implementing every remaining phase.
+The developer has authorised checkout, test payments, order records and now point 4 stock management. UK-based store; free delivery at GBP 80 or more; VAT unconfirmed; below-threshold shipping rate awaits the queued Royal Mail integration. Do not interpret this as authorisation for live charges or automatically implementing every remaining phase. The fresh point-3 hosted purchase/admin timestamp acceptance remains pending; it does not block independent point-4 implementation.
 
 ### Phase A - Confirm inputs and prepare test-mode checkout
 
@@ -499,7 +503,7 @@ The developer has authorised point 1: checkout, and answered the initial questio
 
 ### Phase B - Checkout and transactional backend
 
-Test-only sessions, orders, reservations, signature checks, idempotency and recovery are now implemented (section 20). The bullets below also include commercial-launch requirements: coupon redemption and live stock commit are still absent. Do not rebuild the test foundation or treat its presence as completion of commercial checkout.
+Test-only sessions, orders, reservations, signature checks, idempotency and recovery are now implemented (section 20). Point 4 extends stock safeguards and recurring recovery; its migration/job activation are still pending. An internal physical-stock commit path is prepared and fixture-tested but cannot be reached by the test-only production provider/schema. The bullets below also include commercial-launch requirements: coupon redemption and live payment activation remain. Do not rebuild the test foundation or treat its presence as completion of commercial checkout.
 
 - The branded guest checkout review UI, customer/delivery validation and server recheck are implemented. Connect the selected hosted Stripe payment flow and complete transactional processing.
 - Validate addresses/destinations and offer only configured shipping services.

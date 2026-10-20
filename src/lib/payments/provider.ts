@@ -104,8 +104,10 @@ export async function applyProviderSession(
 /** Exhaust the bounded creation window before treating a missing session as an orphan. */
 export async function recoverCreatingOrder(order: PaymentOrder) {
   const { stripe } = paymentServices();
+  const deadline = Date.now() + 25_000;
   let after: string | undefined;
   for (let page = 0; page < 20; page++) {
+    if (Date.now() >= deadline) break;
     const sessions = await stripe.checkout.sessions.list({
       limit: 100,
       created: {
@@ -138,6 +140,28 @@ export async function reconcileOrder(order: PaymentOrder) {
   const session = await paymentServices().stripe.checkout.sessions.retrieve(
     order.session_id,
   );
+  // Time alone never releases stock. If a provider still reports an overdue
+  // session as open, explicitly expire it and use the verified returned state.
+  if (
+    session.status === "open" &&
+    Date.now() >= Date.parse(order.expires_at)
+  ) {
+    try {
+      const expired = await paymentServices().stripe.checkout.sessions.expire(
+        session.id,
+      );
+      return applyProviderSession(order, expired);
+    } catch {
+      // Payment may have won the race with expiry. Retrieve again rather than
+      // assuming cancellation, so pending/paid stock is never released early.
+      const latest = await paymentServices().stripe.checkout.sessions.retrieve(
+        session.id,
+      );
+      if (latest.status === "open")
+        throw new PaymentError("Checkout expiry needs another attempt.");
+      return applyProviderSession(order, latest);
+    }
+  }
   return applyProviderSession(order, session);
 }
 

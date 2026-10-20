@@ -1,5 +1,7 @@
 # Automatic order records — point 3
 
+Continuation: the developer has authorised point 4. Its stock safeguards and recurring recovery setup are documented in [STOCK_SETUP.md](STOCK_SETUP.md). Apply its newer migration after this phase, and keep test mode enabled. The fresh hosted point-3 order/timestamp acceptance check below remains outstanding.
+
 The existing checkout creates a private pending record and freezes the selected products before redirecting to Stripe. Verified provider success confirms that same record, rather than creating a second order. Signed webhooks work even when the customer never returns to the confirmation page; return-page status checks and owner reconciliation use the same idempotent database operation.
 
 Current checkpoint (20 October): the developer confirms migration installation and a Ready deployment. Independent hosted checks report `order_records_ready=true`, retain both earlier paid sandbox orders with matching provider/item totals and saved contact/address data, and expose both new timestamp columns. Those older orders correctly have no confirmation timestamp. Public review confirms test payments remain available for two size-58 Burgundy pieces at GBP 90. Admin API requests without a session return 401 and the order page redirects to login. No authenticated hosted admin UI or fresh post-migration payment has been inspected yet; a new user-run sandbox checkout is the remaining acceptance check. The numbered installation steps below are retained for reference.
