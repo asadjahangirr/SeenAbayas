@@ -680,22 +680,30 @@ export function CheckoutPageContent({
                       aria-hidden="true"
                     />
                     <h3>
-                      <Copy text={"Your details are ready to review."} />
+                      <Copy
+                        text={
+                          review.delivery.chargePence === null
+                            ? "Delivery pricing is being confirmed."
+                            : review.paymentAvailable
+                              ? "Your details are ready to review."
+                              : "Payment is currently unavailable."
+                        }
+                      />
                     </h3>
                     <p>
                       <Copy
                         text={
-                          review.mode === "test"
+                          review.paymentAvailable
                             ? "Continue to Stripe to test the enabled payment methods. Stock is reserved while the test checkout is open and released when it ends. No real money is charged."
                             : "Payment is not available yet. No order has been placed, no money has been taken and your pieces are not reserved."
                         }
                       />
                     </p>
-                    {review.mode === "test" && !review.paymentAvailable && (
+                    {review.delivery.chargePence === null && (
                       <p>
                         <Copy
                           text={
-                            "The delivery charge for this selection must be confirmed before test payment can open."
+                            "The delivery rate for your selection has not been set, so we cannot calculate a final total or open payment. Please contact us for delivery information."
                           }
                         />
                       </p>
@@ -723,7 +731,9 @@ export function CheckoutPageContent({
                             ? "Opening Stripe…"
                             : review.paymentAvailable
                               ? "Continue to test payment"
-                              : "Payment coming soon"
+                              : review.delivery.chargePence === null
+                                ? "Delivery rate unavailable"
+                                : "Payment unavailable"
                         }
                       />
                     </Button>

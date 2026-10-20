@@ -74,7 +74,7 @@ test("bag leads to a truthful preview, validates fields, reviews details and kee
     "SW1A 1AA",
   );
   await expect(
-    page.getByRole("button", { name: "Payment coming soon", exact: true }),
+    page.getByRole("button", { name: "Delivery rate unavailable", exact: true }),
   ).toBeDisabled();
   await expect(page.locator(".checkout-payment")).toContainText(
     "No order has been placed",
@@ -109,6 +109,15 @@ test("qualifying selections show complimentary standard delivery and an estimate
     .click();
   await expect(page.locator(".checkout-review")).toBeVisible();
   await expect(page.locator(".checkout-total dd")).toHaveText("£150.00");
+  await expect(
+    page.getByRole("button", { name: "Payment unavailable", exact: true }),
+  ).toBeDisabled();
+  await expect(page.locator(".checkout-payment")).toContainText(
+    "Payment is currently unavailable.",
+  );
+  await expect(page.locator(".checkout-payment")).not.toContainText(
+    "The delivery rate for your selection has not been set",
+  );
   await expect(page.locator(".checkout-estimate-note")).toContainText(
     "not a final payable total",
   );
@@ -334,7 +343,7 @@ test.describe("Android touch checkout", () => {
       .tap();
     await expect(page.locator(".checkout-review")).toBeVisible();
     await expect(
-      page.getByRole("button", { name: "Payment coming soon", exact: true }),
+      page.getByRole("button", { name: "Delivery rate unavailable", exact: true }),
     ).toBeDisabled();
   });
 });

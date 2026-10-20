@@ -671,6 +671,18 @@
     ]
   },
   {
+    "text": "Delivery pricing is being confirmed.",
+    "groups": [
+      "checkout · checkout-page"
+    ]
+  },
+  {
+    "text": "Delivery rate unavailable",
+    "groups": [
+      "checkout · checkout-page"
+    ]
+  },
+  {
     "text": "Delivery timing to be confirmed.",
     "groups": [
       "checkout · checkout-page"
@@ -737,7 +749,7 @@
     ]
   },
   {
-    "text": "Payment coming soon",
+    "text": "Payment is currently unavailable.",
     "groups": [
       "checkout · checkout-page"
     ]
@@ -750,6 +762,12 @@
   },
   {
     "text": "Payment took longer than expected to open. Retry to recover the same checkout; your bag is saved.",
+    "groups": [
+      "checkout · checkout-page"
+    ]
+  },
+  {
+    "text": "Payment unavailable",
     "groups": [
       "checkout · checkout-page"
     ]
@@ -903,7 +921,7 @@
     ]
   },
   {
-    "text": "The delivery charge for this selection must be confirmed before test payment can open.",
+    "text": "The delivery rate for your selection has not been set, so we cannot calculate a final total or open payment. Please contact us for delivery information.",
     "groups": [
       "checkout · checkout-page"
     ]

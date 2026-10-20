@@ -332,8 +332,14 @@ test("unconfirmed delivery below threshold keeps test payment disabled", async (
 }) => {
   await review(page, 1);
   await expect(
-    page.getByRole("button", { name: "Payment coming soon", exact: true }),
+    page.getByRole("button", { name: "Delivery rate unavailable", exact: true }),
   ).toBeDisabled();
+  await expect(page.locator(".checkout-payment")).toContainText(
+    "The delivery rate for your selection has not been set",
+  );
+  await expect(page.locator(".checkout-payment")).not.toContainText(
+    "Continue to Stripe",
+  );
   expect((await state(request)).sessions).toHaveLength(0);
 });
 
