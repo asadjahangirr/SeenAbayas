@@ -42,6 +42,8 @@ export function providerSnapshot(
     const { recipientName: _previous, ...base } = order.details;
     const address = checkoutDetailsSchema.safeParse({
       ...base,
+      email: session.customer_details?.email ?? base.email,
+      phone: session.customer_details?.phone ?? base.phone,
       addressLine1: shipping.address?.line1 || "",
       addressLine2: shipping.address?.line2 || "",
       city: shipping.address?.city || "",

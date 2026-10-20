@@ -35,6 +35,7 @@ test.beforeAll(async () => {
     "20261019000400_product_delete.sql",
     "20261019000500_product_visibility.sql",
     "20261020000100_payments.sql",
+    "20261020000200_order_records.sql",
   ])
     await db.exec(await readFile(`supabase/migrations/${file}`, "utf8"));
   await db.query("insert into auth.users(id) values($1)", [owner]);
@@ -234,6 +235,7 @@ test("failure releases once; wrong amounts, modes, sessions and metadata never s
     { order_id: "wrong" },
     { request_hash: "d".repeat(64) },
     { id: "cs_live_wrong" },
+    { payment_intent: null },
   ])
     await denied(() => apply(order, "paid", "evt_wrong", changes));
   expect(await stock()).toEqual({ on_hand: 5, reserved: 1 });
@@ -256,7 +258,7 @@ test("only the server role can access payment RPCs and private order data is nev
   await db.exec("set local role service_role");
   expect(
     (await db.query<any>("select public.payment_health() data")).rows[0].data,
-  ).toEqual({ ready: true, test_only: true });
+  ).toMatchObject({ ready: true, test_only: true, order_records_ready: true });
 });
 
 test("orphan cleanup cannot release an active creation window and only releases once", async () => {
@@ -313,4 +315,56 @@ test("reconciliation rotates pending batches so unchanged sessions cannot block 
   expect(first).toHaveLength(1);
   expect(next).toHaveLength(1);
   expect(new Set([first[0].id, next[0].id])).toEqual(new Set([a.id, b.id]));
+});
+
+test("verified purchases freeze item prices and contact details, confirm once and preserve owner notes on retries", async () => {
+  const order = await prepare(requestId, ownerHash, 2);
+  await db.query("update public.products set name='Changed later',price_pence=9000 where id=$1", [order.items[0].product_id]);
+  const finalDetails = { ...details, email: "final-contact@example.test", phone: "+447700900123", recipientName: "Delivery Recipient" };
+  const paid = await apply(order,"paid","evt_first_confirmation",{details:finalDetails});
+  expect(paid.confirmed_at).toBeTruthy();
+  expect(paid.payment_verified_at).toBeTruthy();
+  const saved = (await db.query<any>("select * from seen_private.admin_records where id=$1",[order.id])).rows[0];
+  expect(saved.payload).toMatchObject({ source:"stripe_checkout", email:finalDetails.email, phone:finalDetails.phone, name:"Delivery Recipient", checkout_state:"paid", status:"confirmed", total_pence:16000, delivery:{carrier:"Royal Mail",chargePence:0} });
+  expect(saved.payload.items[0]).toMatchObject({name:"TEST ONLY",size:"54",quantity:2,unit_price_pence:8000,line_total_pence:16000});
+  await db.query("select public.admin_save_record('order',$1,$2,$3)",[order.id,{status:"confirmed",tracking:"NOTE-ONLY",notes:"Keep this note"},saved.version]);
+  const noteVersion=(await db.query<any>("select version from seen_private.admin_records where id=$1",[order.id])).rows[0].version;
+  const replay=await apply(order,"paid","evt_first_confirmation",{details:finalDetails});
+  await apply(order,"paid","evt_second_confirmation",{details:finalDetails});
+  expect(replay.confirmed_at).toBe(paid.confirmed_at);
+  const again=(await db.query<any>("select payload,version from seen_private.admin_records where id=$1",[order.id])).rows[0];
+  expect(again.payload.notes).toBe("Keep this note");expect(again.payload.tracking).toBe("NOTE-ONLY");expect(again.version).toBe(noteVersion);
+  expect((await db.query("select count(*)::int count from seen_private.admin_audit where action='payment_confirmed'")).rows[0]).toEqual({count:1});
+  await denied(()=>db.query("update seen_private.checkout_items set quantity=1 where order_id=$1",[order.id]));
+  await denied(()=>db.query("update seen_private.checkout_orders set total_pence=1 where id=$1",[order.id]));
+  await denied(()=>db.query("update seen_private.checkout_orders set details='{}' where id=$1",[order.id]));
+});
+
+test("a lost admin projection is repaired without duplicating the purchase or changing inventory", async () => {
+  const order=await prepare();await apply(order,"paid","evt_repair");
+  await db.query("delete from seen_private.admin_records where id=$1",[order.id]);
+  await apply(order,"paid","evt_repair");
+  expect((await db.query("select count(*)::int count from seen_private.admin_records where kind='order'")).rows[0]).toEqual({count:1});
+  expect((await db.query<any>("select payload from seen_private.admin_records where id=$1",[order.id])).rows[0].payload).toMatchObject({source:"stripe_checkout",payment_status:"paid",status:"confirmed"});
+  expect(await stock()).toEqual({on_hand:5,reserved:0});
+});
+
+test("pending and attention checkouts cannot be manually confirmed and failed attempts never gain a confirmation time", async () => {
+  const order=await prepare();await apply(order,"pending");
+  const record=(await db.query<any>("select version from seen_private.admin_records where id=$1",[order.id])).rows[0];
+  await denied(()=>db.query("select public.admin_save_record('order',$1,$2,$3)",[order.id,{status:"confirmed",tracking:"",notes:""},record.version]));
+  const failed=await apply(order,"failed");expect(failed.confirmed_at).toBeNull();expect(failed.payment_verified_at).toBeNull();
+  const attention=await apply(order,"paid","evt_late_attention");expect(attention.state).toBe("attention");expect(attention.payment_verified_at).toBeTruthy();expect(attention.confirmed_at).toBeNull();
+});
+
+test("one provider payment cannot settle two purchases and projection backfill is rerunnable", async () => {
+  const a=await prepare();await apply(a,"paid","evt_a");
+  const b=await prepare("50000000-0000-4000-8000-000000000099","e".repeat(64));
+  await denied(()=>apply(b,"paid","evt_b"));
+  expect((await db.query<any>("select state from seen_private.checkout_orders where id=$1",[b.id])).rows[0].state).toBe("creating");
+  expect(await stock()).toEqual({on_hand:5,reserved:1});
+  // The migration's outer transaction is managed by this test instead.
+  const migration=(await readFile("supabase/migrations/20261020000200_order_records.sql","utf8")).replace(/^begin;$/m,"").replace(/^commit;$/m,"");
+  await db.exec(migration);await db.exec(migration);
+  expect((await db.query("select count(*)::int count from seen_private.admin_records where kind='order'")).rows[0]).toEqual({count:2});
 });

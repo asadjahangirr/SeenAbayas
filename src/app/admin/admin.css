@@ -1121,6 +1121,37 @@
   }
 }
 /* Connection and editing guidance stay readable on phones and desktop. */
+.admin-order-details { padding-block: 22px; color: #32362c; font-size: 13px; }
+.admin-order-overview dl, .admin-order-columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px 28px; }
+.admin-order-details dl { margin: 0; }
+.admin-order-details dt { font-size: 11px; color: #60645b; }
+.admin-order-details dd { margin: 5px 0 0; overflow-wrap: anywhere; }
+.admin-order-details .admin-help { margin: 18px 0 24px; }
+.admin-order-columns h3 { margin: 0 0 12px; font-size: 13px; font-weight: 500; }
+.admin-order-columns p { margin: 5px 0; overflow-wrap: anywhere; }
+.admin-order-columns address { font-style: normal; }
+.admin-order-columns address span { display: block; overflow-wrap: anywhere; }
+.admin-order-columns a { text-decoration: underline; text-underline-offset: 3px; }
+.admin-order-delivery { padding-top: 10px; color: #60645b; }
+.admin-order-table-wrap { overflow-x: auto; margin-top: 28px; }
+.admin-order-items { width: 100%; border-collapse: collapse; font-size: 12px; }
+.admin-order-items caption { text-align: left; padding-bottom: 14px; font-size: 12px; color: #60645b; }
+.admin-order-items th, .admin-order-items td { padding: 14px 10px; border-bottom: 1px solid #dedbd1; text-align: left; vertical-align: top; }
+.admin-order-items th:first-child, .admin-order-items td:first-child { padding-left: 0; }
+.admin-order-items th { font-weight: 500; }
+.admin-order-items th span { display: block; margin-top: 5px; color: #60645b; font-size: 10px; font-weight: 400; }
+.admin-order-totals { max-width: 350px; margin: 22px 0 0 auto !important; }
+.admin-order-totals > div { display: flex; justify-content: space-between; gap: 20px; padding: 9px 0; }
+.admin-order-totals > div:nth-child(3) { border-top: 1px solid #dedbd1; margin-top: 4px; padding-top: 14px; }
+.admin-order-references { margin-top: 24px; font-size: 11px; }
+.admin-order-references summary { cursor: pointer; }
+.admin-order-references dl > div { margin-top: 14px; }
+@media (max-width: 600px) {
+  .admin-order-columns { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+  .admin-order-items th, .admin-order-items td { padding-inline: 6px; font-size: 11px; }
+  .admin-order-items th:first-child { min-width: 100px; overflow-wrap: anywhere; }
+  .admin-order-overview dl { gap: 18px; }
+}
 .admin-connection { margin: 0 0 20px; padding: 17px 20px; border: 1px solid #b49b73; background: #f7f0e5; }
 .admin-connection[data-ready="true"] { border-color: #b8c3b5; background: #edf1e9; }
 .admin-connection strong { display: block; color: #24251f; font-size: 13px; font-weight: 500; }

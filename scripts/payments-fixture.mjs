@@ -51,7 +51,7 @@ const server = http.createServer(async (req, res) => {
               ? "expired"
               : "complete",
         payment_status: change.state === "paid" ? "paid" : "unpaid",
-        payment_intent: "pi_test_fixture",
+        payment_intent: `pi_test_${current.id.slice(8)}`,
         ...change.overrides,
       });
       const type =

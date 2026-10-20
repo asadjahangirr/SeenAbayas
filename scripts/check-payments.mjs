@@ -14,6 +14,7 @@ if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SECRET_KEY) {
     const db = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SECRET_KEY, { auth: { persistSession: false }, global: { fetch: (input, init) => fetch(input, { ...init, signal: AbortSignal.timeout(8000) }) } });
     const state = await db.rpc("get_storefront_state"); result.supabaseConnected = !state.error;
     const health = await db.rpc("payment_health"); result.paymentMigrationReady = !health.error && health.data?.ready === true;
+    result.orderRecordsReady = !health.error && health.data?.order_records_ready === true;
     if (health.error) result.paymentDatabaseErrorCode = health.error.code;
     result.supabaseServerKeyFormat = /^sb_secret_/.test(process.env.SUPABASE_SECRET_KEY) ? "secret" : process.env.SUPABASE_SECRET_KEY.startsWith("eyJ") ? "legacy-jwt" : "other";
   } catch { /* Only report readiness, never raw provider errors. */ }

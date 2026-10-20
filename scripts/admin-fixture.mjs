@@ -21,6 +21,7 @@ for (const file of [
   "20261019000400_product_delete.sql",
   "20261019000500_product_visibility.sql",
   "20261020000100_payments.sql",
+  "20261020000200_order_records.sql",
 ])
   await db.exec(await readFile(`supabase/migrations/${file}`, "utf8"));
 await db.query("insert into auth.users(id) values($1)", [owner]);

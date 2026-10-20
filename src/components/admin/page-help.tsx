@@ -19,8 +19,9 @@ const help: Record<AdminSection, string[]> = {
     "Assign products to it in Products & stock. Move assigned products before deleting a category.",
   ],
   orders: [
-    "Open an order to see customer details and items. Search or filter to find it.",
-    "Edit fulfilment, tracking and notes, then save. Export CSV downloads the listed orders.",
+    "Open an order for its saved products, sizes, quantities, prices, customer contact and delivery address. Later catalogue edits do not change purchased item details.",
+    "Filter payment and fulfilment separately, or show only customer/test orders. Paid means provider-confirmed payment; awaiting confirmation must not be dispatched.",
+    "Edit fulfilment, tracking and notes, then save. Export CSV downloads the filtered orders with one row per purchased size. Order totals repeat on each row; use line totals when summing items.",
     "Refresh payment statuses checks Stripe for up to five reserved checkouts. Repeat for more. Payment state cannot be edited manually.",
     "Test orders are labelled Do not dispatch and excluded from commercial totals. This screen cannot charge or refund a customer.",
   ],

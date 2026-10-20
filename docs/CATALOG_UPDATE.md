@@ -1,6 +1,8 @@
 # Client catalogue update — 20 October 2026
 
-All nine designs have photographs, descriptions, confirmed prices and size labels 54, 56 and 58 prepared. The previous seven products still exist in hosted Supabase; six were private drafts, rather than deleted.
+The developer has deployed and applied this update. Independent read-only hosted checks verify nine published products, matching approved names/prices/descriptions, 22 reachable product images and nine working product pages. Burgundy's supplied quantity boundaries pass; all other designs are unavailable. The instructions below are retained for reference, not a request to repeat the completed import. Future catalogue changes should use admin.
+
+All nine designs have photographs, descriptions, confirmed prices and size labels 54, 56 and 58. The previous seven products existed in hosted Supabase; six were private drafts, rather than deleted.
 
 The confirmed prices are Olive/Brown/Teal/Tie Dye Blue £40; Burgundy Roselle/Cream/Polka Dot £45; Black Lace/Black Sequin £50. Only Burgundy Roselle has stock: 54 × 1, 56 × 1, 58 × 2. The other eight designs will be visible and sold out. The new full-page and product-dialog size guide uses the supplied 137/142/147 cm lengths and suggested heights.
 

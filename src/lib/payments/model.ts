@@ -79,6 +79,8 @@ export type PaymentOrder = {
   session_id: string | null;
   checkout_url: string | null;
   payment_intent: string | null;
+  payment_verified_at?: string | null;
+  confirmed_at?: string | null;
   created_at: string;
   expires_at: string;
   items: PaymentItem[];

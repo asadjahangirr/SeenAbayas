@@ -429,6 +429,32 @@ test("admin distinguishes sandbox payments, prevents dispatch and refreshes prov
   ).toBe(401);
 });
 
+for (const width of [390,1440]) test(`verified purchase appears in readable admin details without a customer return at ${width}px`,async ({page,request},testInfo)=>{
+  await page.setViewportSize({width,height:1000});
+  await review(page);await open(page);
+  const sessionId=(await state(request)).sessions[0].id;
+  const success=await event(request,{sessionId,state:"paid",eventId:"evt_saved_order",overrides:{customer_details:{email:"final-contact@example.test",phone:"+447700900123"},collected_information:{shipping_details:{name:"Delivery Recipient",address:{line1:"2 Final Test Street",line2:"Flat 3",city:"London",postal_code:"SW1A 1AA",country:"GB"}}}}});
+  expect(success.status).toBe(200);
+  // No customer confirmation page is visited: the signed webhook creates the admin result.
+  await page.goto("http://127.0.0.1:3107/admin/login");
+  await page.getByLabel("Email address").fill("owner@example.test");await page.getByLabel("Password",{exact:true}).fill("Test-password-only-123");await page.getByRole("button",{name:"Continue securely"}).click();
+  await page.getByLabel("Authenticator code").fill("123456");await page.getByRole("button",{name:"Open workspace"}).click();await expect(page.getByRole("heading",{name:"Overview",exact:true})).toBeVisible({timeout:15000});
+  await page.goto("/admin/orders");await page.getByLabel("Filter order environment").selectOption("test");await page.getByLabel("Filter payment status").selectOption("paid");
+  const record=page.locator(".admin-record");await expect(record).toHaveCount(1);await record.locator(":scope > summary").click();
+  await expect(record.getByRole("region",{name:"Customer contact"})).toContainText("final-contact@example.test");
+  await expect(record).toContainText("final-contact@example.test");await expect(record).toContainText("Delivery Recipient");await expect(record).toContainText("2 Final Test Street");await expect(record).toContainText("+447700900123");
+  await expect(record.locator(".admin-order-items tbody tr")).toContainText("Layla Burgundy Abaya");await expect(record.locator(".admin-order-items tbody td")).toHaveText(["54","2","£75.00","£150.00"]);
+  await expect(record.locator(".admin-order-totals")).toContainText("£150.00");await expect(record.locator("pre")).toHaveCount(0);
+  const verified=record.locator(".admin-order-overview dl > div").filter({has:page.locator("dt",{hasText:"Order confirmed"})});await expect(verified).not.toContainText("Not recorded");
+  await record.getByLabel("Internal notes").fill("Keep purchase note");await record.getByRole("button",{name:"Save fulfilment details"}).click();await expect(page.getByText("Saved successfully.",{exact:true})).toBeVisible();
+  expect((await event(request,{sessionId,state:"paid",eventId:"evt_saved_order"})).status).toBe(200);
+  await page.reload();await page.getByLabel("Filter order environment").selectOption("test");await expect(page.locator(".admin-record")).toHaveCount(1);await page.locator(".admin-record > summary").click();await expect(page.getByLabel("Internal notes")).toHaveValue("Keep purchase note");
+  const downloading=page.waitForEvent("download");await page.getByRole("button",{name:"Export CSV",exact:true}).click();const download=await downloading;const stream=await download.createReadStream();let csv="";for await(const chunk of stream!)csv+=chunk.toString();expect(csv).toContain("final-contact@example.test");expect(csv).toContain("Layla Burgundy Abaya");expect(csv).toContain("15000");
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);
+  expect((await new AxeBuilder({page}).withTags(["wcag2a","wcag2aa","wcag21aa"]).analyze()).violations).toEqual([]);
+  await page.screenshot({path:testInfo.outputPath(`admin-purchase-${width}.png`),fullPage:true});
+});
+
 test.describe("Android touch payment", () => {
   test.use({
     viewport: devices["Pixel 5"].viewport,

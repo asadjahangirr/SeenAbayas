@@ -24,7 +24,6 @@ import {
 import {
   adminSections,
   sectionNames,
-  csvCell,
   type AdminSection,
   type AdminSnapshot,
   type AdminProduct,
@@ -49,6 +48,8 @@ import { settingsSchema } from "@/lib/policies";
 import { productSchema } from "@/lib/admin/model";
 import { MoneyInput } from "./money-input";
 import { AdminPageHelp } from "./page-help";
+import { OrderDetails } from "./order-details";
+import { orderCsv, orderDetails } from "@/lib/admin/orders";
 
 import {
   adminRequest,
@@ -2551,40 +2552,20 @@ function OrderManager({
   reconcile: () => Promise<void | boolean>;
 }) {
   const [filter, setFilter] = useState("all");
+  const [paymentFilter, setPaymentFilter] = useState("all");
+  const [environment, setEnvironment] = useState("all");
   const [search, setSearch] = useState("");
   const list = records.filter(
     (r) =>
       (filter === "all" || r.payload.status === filter) &&
+      (paymentFilter === "all" || (paymentFilter === "review" ? r.payload.needs_attention === true : paymentFilter === "pending" ? r.payload.checkout_state === "pending" : r.payload.payment_status === paymentFilter)) &&
+      (environment === "all" || (environment === "test") === (r.payload.is_test === true)) &&
       JSON.stringify(r.payload).toLowerCase().includes(search.toLowerCase()),
   );
   function exportOrders() {
-    const rows = [
-      [
-        "Order",
-        "Date",
-        "Name",
-        "Email",
-        "Total GBP pence",
-        "Payment status",
-        "Order status",
-        "Tracking",
-        "Test order",
-      ],
-      ...list.map((r) => [
-        r.payload.order_number || r.id,
-        r.created_at,
-        r.payload.name,
-        r.payload.email,
-        r.payload.total_pence,
-        r.payload.payment_status,
-        r.payload.status,
-        r.payload.tracking,
-        r.payload.is_test === true ? "Yes" : "No",
-      ]),
-    ];
     const url = URL.createObjectURL(
       new Blob(
-        ["\ufeff" + rows.map((row) => row.map(csvCell).join(",")).join("\r\n")],
+        [orderCsv(list)],
         { type: "text/csv;charset=utf-8" },
       ),
     );
@@ -2624,6 +2605,10 @@ function OrderManager({
             <option key={s}>{s}</option>
           ))}
         </select>
+        <select aria-label="Filter payment status" value={paymentFilter} onChange={e=>setPaymentFilter(e.target.value)}>
+          <option value="all">All payments</option><option value="paid">Paid</option><option value="unpaid">Unpaid</option><option value="pending">Awaiting confirmation</option><option value="review">Needs review</option><option value="failed">Failed</option><option value="expired">Expired</option>
+        </select>
+        <select aria-label="Filter order environment" value={environment} onChange={e=>setEnvironment(e.target.value)}><option value="all">All orders</option><option value="customer">Customer orders</option><option value="test">Test orders</option></select>
         <button onClick={exportOrders} disabled={!list.length}>
           Export CSV
         </button>
@@ -2648,6 +2633,7 @@ function OrderManager({
             · {String(r.payload.name || "Customer")} ·{" "}
             {formatGbp(Number(r.payload.total_pence || 0))}{" "}
             <Status>{String(r.payload.status)}</Status>
+            <Status>{orderDetails(r).paymentLabel}</Status>
             {r.payload.is_test === true && (
               <Status>Test · Do not dispatch</Status>
             )}
@@ -2655,20 +2641,7 @@ function OrderManager({
               <Status>Payment needs review</Status>
             )}
           </summary>
-          <dl className="admin-detail-list">
-            {Object.entries(r.payload).map(([k, v]) => (
-              <div key={k}>
-                <dt>{k.replaceAll("_", " ")}</dt>
-                <dd>
-                  {typeof v === "object" ? (
-                    <pre>{JSON.stringify(v, null, 2)}</pre>
-                  ) : (
-                    String(v ?? "")
-                  )}
-                </dd>
-              </div>
-            ))}
-          </dl>
+          <OrderDetails record={r} />
           <OrderForm
             key={`${r.id}:${r.version}`}
             record={r}
@@ -2717,6 +2690,7 @@ function OrderForm({
             <option
               key={s}
               disabled={
+                (s === "confirmed" && (record.payload.payment_status !== "paid" || record.payload.needs_attention === true)) ||
                 (["processing", "shipped", "completed"].includes(s) &&
                   (record.payload.is_test === true ||
                     record.payload.needs_attention === true)) ||
