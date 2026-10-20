@@ -2,14 +2,15 @@
   {
     "text": "cross-site",
     "groups": [
-      "api · bag · route"
+      "api · bag · route",
+      "api · checkout · review · route",
+      "src · lib · payments · http"
     ]
   },
   {
-    "text": "development",
+    "text": "Invalid bag request.",
     "groups": [
-      "api · bag · route",
-      "layout"
+      "api · bag · route"
     ]
   },
   {
@@ -25,9 +26,142 @@
     ]
   },
   {
-    "text": "preview",
+    "text": "Please refresh the page and try again.",
     "groups": [
       "api · bag · route"
+    ]
+  },
+  {
+    "text": "preview",
+    "groups": [
+      "api · bag · route",
+      "api · checkout · review · route"
+    ]
+  },
+  {
+    "text": "This collection is not available to add to your bag yet. Please contact customer care.",
+    "groups": [
+      "api · bag · route"
+    ]
+  },
+  {
+    "text": "We couldn't check your bag. Please try again in a moment.",
+    "groups": [
+      "api · bag · route"
+    ]
+  },
+  {
+    "text": "We couldn't confirm cancellation yet. Please try again.",
+    "groups": [
+      "api · checkout · cancel · route"
+    ]
+  },
+  {
+    "text": "application/json",
+    "groups": [
+      "api · checkout · review · route",
+      "src · lib · payments · http"
+    ]
+  },
+  {
+    "text": "Checkout details are too long.",
+    "groups": [
+      "api · checkout · review · route"
+    ]
+  },
+  {
+    "text": "details",
+    "groups": [
+      "api · checkout · review · route"
+    ]
+  },
+  {
+    "text": "express",
+    "groups": [
+      "api · checkout · review · route"
+    ]
+  },
+  {
+    "text": "Express delivery is no longer available. Please choose standard delivery.",
+    "groups": [
+      "api · checkout · review · route"
+    ]
+  },
+  {
+    "text": "Invalid checkout request.",
+    "groups": [
+      "api · checkout · review · route"
+    ]
+  },
+  {
+    "text": "Please check your details and bag before continuing.",
+    "groups": [
+      "api · checkout · review · route"
+    ]
+  },
+  {
+    "text": "Refresh the page before reviewing your details.",
+    "groups": [
+      "api · checkout · review · route"
+    ]
+  },
+  {
+    "text": "Stock has changed. Review the unavailable items in your bag before continuing.",
+    "groups": [
+      "api · checkout · review · route"
+    ]
+  },
+  {
+    "text": "string",
+    "groups": [
+      "api · checkout · review · route",
+      "content · contact-form",
+      "order-confirmation",
+      "src · lib · payments · provider"
+    ]
+  },
+  {
+    "text": "test",
+    "groups": [
+      "api · checkout · review · route",
+      "checkout · checkout-page"
+    ]
+  },
+  {
+    "text": "We couldn't review your selection. Your details are still here; please try again.",
+    "groups": [
+      "api · checkout · review · route"
+    ]
+  },
+  {
+    "text": "Your selection is below the store's minimum order value.",
+    "groups": [
+      "api · checkout · review · route",
+      "src · lib · checkout · model"
+    ]
+  },
+  {
+    "text": "We couldn't open test payment. Your bag is saved; retry to recover the same checkout.",
+    "groups": [
+      "api · checkout · session · route"
+    ]
+  },
+  {
+    "text": "This checkout is unavailable in this browser.",
+    "groups": [
+      "api · checkout · status · route"
+    ]
+  },
+  {
+    "text": "This checkout is unavailable in this browser. Return to your bag or contact customer care.",
+    "groups": [
+      "api · checkout · status · route"
+    ]
+  },
+  {
+    "text": "We couldn't check this payment. Please try again shortly.",
+    "groups": [
+      "api · checkout · status · route"
     ]
   },
   {
@@ -39,16 +173,52 @@
     ]
   },
   {
+    "text": "Reconciliation will need another attempt.",
+    "groups": [
+      "api · payments · reconcile · route"
+    ]
+  },
+  {
+    "text": "Unauthorised.",
+    "groups": [
+      "api · payments · reconcile · route"
+    ]
+  },
+  {
+    "text": "Invalid payment signature.",
+    "groups": [
+      "api · payments · stripe · webhook · route"
+    ]
+  },
+  {
+    "text": "Live payment events are not enabled.",
+    "groups": [
+      "api · payments · stripe · webhook · route"
+    ]
+  },
+  {
+    "text": "Missing payment signature.",
+    "groups": [
+      "api · payments · stripe · webhook · route"
+    ]
+  },
+  {
+    "text": "Payment verification will be retried.",
+    "groups": [
+      "api · payments · stripe · webhook · route"
+    ]
+  },
+  {
+    "text": "Store sync is temporarily unavailable.",
+    "groups": [
+      "api · storefront · sync · route"
+    ]
+  },
+  {
     "text": "Your shopping bag",
     "groups": [
       "bag",
       "privacy-policy"
-    ]
-  },
-  {
-    "text": " — availability needs checking",
-    "groups": [
-      "bag · bag-contents"
     ]
   },
   {
@@ -64,13 +234,16 @@
     ]
   },
   {
-    "text": "Add ",
+    "text": " or more.",
     "groups": [
-      "bag · bag-contents"
+      "bag · bag-contents",
+      "checkout · checkout-page",
+      "shipping-delivery",
+      "site-footer"
     ]
   },
   {
-    "text": "An unavailable piece needs checking.",
+    "text": "Add ",
     "groups": [
       "bag · bag-contents"
     ]
@@ -95,7 +268,7 @@
     ]
   },
   {
-    "text": "Complimentary on orders over ",
+    "text": "Complimentary on orders of ",
     "groups": [
       "bag · bag-contents"
     ]
@@ -107,16 +280,16 @@
     ]
   },
   {
+    "text": "Continue to checkout",
+    "groups": [
+      "bag · bag-contents"
+    ]
+  },
+  {
     "text": "Discover the collection",
     "groups": [
       "bag · bag-contents",
       "home · film-hero"
-    ]
-  },
-  {
-    "text": "Enquire about your bag",
-    "groups": [
-      "bag · bag-contents"
     ]
   },
   {
@@ -159,7 +332,9 @@
   {
     "text": "Size ",
     "groups": [
-      "bag · bag-contents"
+      "bag · bag-contents",
+      "checkout · checkout-page",
+      "checkout · order-confirmation"
     ]
   },
   {
@@ -171,7 +346,9 @@
   {
     "text": "Subtotal",
     "groups": [
-      "bag · bag-contents"
+      "bag · bag-contents",
+      "checkout · checkout-page",
+      "checkout · order-confirmation"
     ]
   },
   {
@@ -213,7 +390,9 @@
   {
     "text": "Your selection",
     "groups": [
-      "bag · bag-contents"
+      "bag · bag-contents",
+      "checkout · checkout-page",
+      "checkout · order-confirmation"
     ]
   },
   {
@@ -307,6 +486,692 @@
     ]
   },
   {
+    "text": "Checkout",
+    "groups": [
+      "checkout"
+    ]
+  },
+  {
+    "text": "Review your SEEN ABAYAS selection and UK delivery details.",
+    "groups": [
+      "checkout"
+    ]
+  },
+  {
+    "text": " and ",
+    "groups": [
+      "checkout · checkout-page",
+      "terms-conditions"
+    ]
+  },
+  {
+    "text": "A final look. A few details. Something beautiful to look forward to.",
+    "groups": [
+      "checkout · checkout-page"
+    ]
+  },
+  {
+    "text": "Address line 1",
+    "groups": [
+      "checkout · checkout-page"
+    ]
+  },
+  {
+    "text": "Address line 2 (optional)",
+    "groups": [
+      "checkout · checkout-page"
+    ]
+  },
+  {
+    "text": "An item in your bag is unavailable or its quantity has changed. Update your bag before continuing.",
+    "groups": [
+      "checkout · checkout-page"
+    ]
+  },
+  {
+    "text": "An unavailable piece needs checking in your bag.",
+    "groups": [
+      "checkout · checkout-page"
+    ]
+  },
+  {
+    "text": "Available options are shown by Stripe for the customer, device and order.",
+    "groups": [
+      "checkout · checkout-page"
+    ]
+  },
+  {
+    "text": "Back to your bag",
+    "groups": [
+      "checkout · checkout-page"
+    ]
+  },
+  {
+    "text": "Cards · Apple Pay · Klarna · Clearpay",
+    "groups": [
+      "checkout · checkout-page"
+    ]
+  },
+  {
+    "text": "Checking your selection…",
+    "groups": [
+      "checkout · checkout-page"
+    ]
+  },
+  {
+    "text": "Checkout preview",
+    "groups": [
+      "checkout · checkout-page",
+      "privacy-policy"
+    ]
+  },
+  {
+    "text": "Checkout.",
+    "groups": [
+      "checkout · checkout-page"
+    ]
+  },
+  {
+    "text": "checkout.stripe.com",
+    "groups": [
+      "checkout · checkout-page",
+      "src · lib · payments · provider"
+    ]
+  },
+  {
+    "text": "Complimentary",
+    "groups": [
+      "checkout · checkout-page",
+      "checkout · order-confirmation"
+    ]
+  },
+  {
+    "text": "Complimentary standard UK delivery on orders of ",
+    "groups": [
+      "checkout · checkout-page",
+      "collection · [id]",
+      "site-footer"
+    ]
+  },
+  {
+    "text": "Contact",
+    "groups": [
+      "checkout · checkout-page"
+    ]
+  },
+  {
+    "text": "Contact & delivery",
+    "groups": [
+      "checkout · checkout-page",
+      "checkout · order-confirmation"
+    ]
+  },
+  {
+    "text": "Contact details",
+    "groups": [
+      "checkout · checkout-page"
+    ]
+  },
+  {
+    "text": "Continue to Stripe to test the enabled payment methods. Stock is reserved while the test checkout is open and released when it ends. No real money is charged.",
+    "groups": [
+      "checkout · checkout-page"
+    ]
+  },
+  {
+    "text": "Continue to test payment",
+    "groups": [
+      "checkout · checkout-page"
+    ]
+  },
+  {
+    "text": "Country",
+    "groups": [
+      "checkout · checkout-page"
+    ]
+  },
+  {
+    "text": "Deliver to",
+    "groups": [
+      "checkout · checkout-page"
+    ]
+  },
+  {
+    "text": "Delivered with Royal Mail.",
+    "groups": [
+      "checkout · checkout-page"
+    ]
+  },
+  {
+    "text": "Delivery",
+    "groups": [
+      "checkout · checkout-page",
+      "checkout · order-confirmation",
+      "faqs",
+      "terms-conditions"
+    ]
+  },
+  {
+    "text": "Delivery address",
+    "groups": [
+      "checkout · checkout-page"
+    ]
+  },
+  {
+    "text": "Delivery information",
+    "groups": [
+      "checkout · checkout-page"
+    ]
+  },
+  {
+    "text": "Delivery method",
+    "groups": [
+      "checkout · checkout-page",
+      "checkout · order-confirmation"
+    ]
+  },
+  {
+    "text": "Delivery timing to be confirmed.",
+    "groups": [
+      "checkout · checkout-page"
+    ]
+  },
+  {
+    "text": "Edit details",
+    "groups": [
+      "checkout · checkout-page"
+    ]
+  },
+  {
+    "text": "Email address",
+    "groups": [
+      "checkout · checkout-page"
+    ]
+  },
+  {
+    "text": "Estimated total",
+    "groups": [
+      "checkout · checkout-page"
+    ]
+  },
+  {
+    "text": "Everything, considered.",
+    "groups": [
+      "checkout · checkout-page"
+    ]
+  },
+  {
+    "text": "Explore the checkout and review your details. Online payment is not available yet, and no order will be placed.",
+    "groups": [
+      "checkout · checkout-page"
+    ]
+  },
+  {
+    "text": "First name",
+    "groups": [
+      "checkout · checkout-page"
+    ]
+  },
+  {
+    "text": "For your order updates and delivery information.",
+    "groups": [
+      "checkout · checkout-page"
+    ]
+  },
+  {
+    "text": "Last name",
+    "groups": [
+      "checkout · checkout-page"
+    ]
+  },
+  {
+    "text": "Opening Stripe…",
+    "groups": [
+      "checkout · checkout-page"
+    ]
+  },
+  {
+    "text": "Payment",
+    "groups": [
+      "checkout · checkout-page"
+    ]
+  },
+  {
+    "text": "Payment coming soon",
+    "groups": [
+      "checkout · checkout-page"
+    ]
+  },
+  {
+    "text": "Payment is not available yet. No order has been placed, no money has been taken and your pieces are not reserved.",
+    "groups": [
+      "checkout · checkout-page"
+    ]
+  },
+  {
+    "text": "Payment took longer than expected to open. Retry to recover the same checkout; your bag is saved.",
+    "groups": [
+      "checkout · checkout-page"
+    ]
+  },
+  {
+    "text": "Phone number (optional)",
+    "groups": [
+      "checkout · checkout-page"
+    ]
+  },
+  {
+    "text": "piece",
+    "groups": [
+      "checkout · checkout-page",
+      "collection · collection-browser"
+    ]
+  },
+  {
+    "text": "pieces",
+    "groups": [
+      "checkout · checkout-page",
+      "collection · collection-browser"
+    ]
+  },
+  {
+    "text": "Postcode",
+    "groups": [
+      "checkout · checkout-page"
+    ]
+  },
+  {
+    "text": "Preparing your selection…",
+    "groups": [
+      "checkout · checkout-page"
+    ]
+  },
+  {
+    "text": "Privacy Policy",
+    "groups": [
+      "checkout · checkout-page",
+      "content · contact-form",
+      "cookie-policy",
+      "privacy-policy",
+      "store",
+      "terms-conditions"
+    ]
+  },
+  {
+    "text": "Qty ",
+    "groups": [
+      "checkout · checkout-page",
+      "checkout · order-confirmation"
+    ]
+  },
+  {
+    "text": "Read our ",
+    "groups": [
+      "checkout · checkout-page",
+      "cookie-policy",
+      "faqs"
+    ]
+  },
+  {
+    "text": "Return to your bag",
+    "groups": [
+      "checkout · checkout-page",
+      "checkout · order-confirmation"
+    ]
+  },
+  {
+    "text": "Returns & exchanges",
+    "groups": [
+      "checkout · checkout-page",
+      "faqs"
+    ]
+  },
+  {
+    "text": "Review",
+    "groups": [
+      "checkout · checkout-page"
+    ]
+  },
+  {
+    "text": "Review availability in your bag.",
+    "groups": [
+      "checkout · checkout-page"
+    ]
+  },
+  {
+    "text": "Review your bag",
+    "groups": [
+      "checkout · checkout-page"
+    ]
+  },
+  {
+    "text": "Review your details",
+    "groups": [
+      "checkout · checkout-page"
+    ]
+  },
+  {
+    "text": "Reviewing does not place an order. Continuing to test payment saves a private test order and sends the required checkout details to Stripe. Use test customer details.",
+    "groups": [
+      "checkout · checkout-page"
+    ]
+  },
+  {
+    "text": "Royal Mail",
+    "groups": [
+      "checkout · checkout-page"
+    ]
+  },
+  {
+    "text": "standard",
+    "groups": [
+      "checkout · checkout-page"
+    ]
+  },
+  {
+    "text": "step",
+    "groups": [
+      "checkout · checkout-page"
+    ]
+  },
+  {
+    "text": "Tax",
+    "groups": [
+      "checkout · checkout-page"
+    ]
+  },
+  {
+    "text": "Terms & Conditions",
+    "groups": [
+      "checkout · checkout-page",
+      "privacy-policy",
+      "store",
+      "terms-conditions"
+    ]
+  },
+  {
+    "text": "Test checkout",
+    "groups": [
+      "checkout · checkout-page",
+      "cookie-policy"
+    ]
+  },
+  {
+    "text": "Test environment. No real money will be charged and no garments will be dispatched.",
+    "groups": [
+      "checkout · checkout-page"
+    ]
+  },
+  {
+    "text": "The delivery charge for this selection must be confirmed before test payment can open.",
+    "groups": [
+      "checkout · checkout-page"
+    ]
+  },
+  {
+    "text": "Thoughtful service, every step.",
+    "groups": [
+      "checkout · checkout-page"
+    ]
+  },
+  {
+    "text": "To be confirmed",
+    "groups": [
+      "checkout · checkout-page",
+      "shipping-delivery"
+    ]
+  },
+  {
+    "text": "Town or city",
+    "groups": [
+      "checkout · checkout-page"
+    ]
+  },
+  {
+    "text": "United Kingdom",
+    "groups": [
+      "checkout · checkout-page",
+      "checkout · order-confirmation"
+    ]
+  },
+  {
+    "text": "VAT treatment is being confirmed. Any amount shown is an estimate, not a final payable total.",
+    "groups": [
+      "checkout · checkout-page"
+    ]
+  },
+  {
+    "text": "We couldn't check your selection. Your details are still here; please try again.",
+    "groups": [
+      "checkout · checkout-page"
+    ]
+  },
+  {
+    "text": "We couldn't open test payment. Please try again.",
+    "groups": [
+      "checkout · checkout-page"
+    ]
+  },
+  {
+    "text": "We couldn't review your selection. Please try again.",
+    "groups": [
+      "checkout · checkout-page"
+    ]
+  },
+  {
+    "text": "Your chosen pieces",
+    "groups": [
+      "checkout · checkout-page"
+    ]
+  },
+  {
+    "text": "Your details are ready to review.",
+    "groups": [
+      "checkout · checkout-page"
+    ]
+  },
+  {
+    "text": "Your details are used for this preview only and are not saved. Reviewing does not place an order or reserve stock.",
+    "groups": [
+      "checkout · checkout-page"
+    ]
+  },
+  {
+    "text": "Your selection is below the minimum order value.",
+    "groups": [
+      "checkout · checkout-page"
+    ]
+  },
+  {
+    "text": "Your selection or store settings changed. Please review your details again.",
+    "groups": [
+      "checkout · checkout-page"
+    ]
+  },
+  {
+    "text": "Awaiting confirmation.",
+    "groups": [
+      "checkout · order-confirmation"
+    ]
+  },
+  {
+    "text": "Cancel this test checkout",
+    "groups": [
+      "checkout · order-confirmation"
+    ]
+  },
+  {
+    "text": "Check payment status",
+    "groups": [
+      "checkout · order-confirmation"
+    ]
+  },
+  {
+    "text": "Checking payment…",
+    "groups": [
+      "checkout · order-confirmation"
+    ]
+  },
+  {
+    "text": "Checking your payment.",
+    "groups": [
+      "checkout · order-confirmation"
+    ]
+  },
+  {
+    "text": "Contact customer care",
+    "groups": [
+      "checkout · order-confirmation",
+      "content · policy-page",
+      "returns-exchanges"
+    ]
+  },
+  {
+    "text": "GET",
+    "groups": [
+      "checkout · order-confirmation"
+    ]
+  },
+  {
+    "text": "Let’s check your checkout.",
+    "groups": [
+      "checkout · order-confirmation"
+    ]
+  },
+  {
+    "text": "paid",
+    "groups": [
+      "checkout · order-confirmation",
+      "src · lib · payments · provider"
+    ]
+  },
+  {
+    "text": "Payment has not been completed. You can return to Stripe using your browser, or cancel this test checkout to release its reservation.",
+    "groups": [
+      "checkout · order-confirmation"
+    ]
+  },
+  {
+    "text": "Payment status is unavailable. Please try again.",
+    "groups": [
+      "checkout · order-confirmation"
+    ]
+  },
+  {
+    "text": "Payment status took too long to load. Please try again.",
+    "groups": [
+      "checkout · order-confirmation"
+    ]
+  },
+  {
+    "text": "Payment was not completed.",
+    "groups": [
+      "checkout · order-confirmation"
+    ]
+  },
+  {
+    "text": "POST",
+    "groups": [
+      "checkout · order-confirmation"
+    ]
+  },
+  {
+    "text": "SEEN ABAYAS · Payment status",
+    "groups": [
+      "checkout · order-confirmation"
+    ]
+  },
+  {
+    "text": "Stripe confirmed this test checkout is closed. Its reservation has been released and your saved bag is ready to review again.",
+    "groups": [
+      "checkout · order-confirmation"
+    ]
+  },
+  {
+    "text": "Stripe has confirmed this sandbox payment. No real money was charged and no garments will be dispatched.",
+    "groups": [
+      "checkout · order-confirmation"
+    ]
+  },
+  {
+    "text": "Stripe is still confirming your test payment. Please wait before attempting another payment. Your pieces remain reserved.",
+    "groups": [
+      "checkout · order-confirmation"
+    ]
+  },
+  {
+    "text": "Test payment complete.",
+    "groups": [
+      "checkout · order-confirmation"
+    ]
+  },
+  {
+    "text": "Test reference",
+    "groups": [
+      "checkout · order-confirmation"
+    ]
+  },
+  {
+    "text": "Test total",
+    "groups": [
+      "checkout · order-confirmation"
+    ]
+  },
+  {
+    "text": "This is a test order. Your bag has been kept so you can test another payment method. Physical inventory is not sold by sandbox payments.",
+    "groups": [
+      "checkout · order-confirmation"
+    ]
+  },
+  {
+    "text": "This test checkout has ended and its stock reservation has been released. You can return to your bag to try again.",
+    "groups": [
+      "checkout · order-confirmation"
+    ]
+  },
+  {
+    "text": "We are checking whether Stripe opened your test checkout. Please check again shortly.",
+    "groups": [
+      "checkout · order-confirmation"
+    ]
+  },
+  {
+    "text": "We could not refresh Stripe just now. The last saved status is shown; please check again shortly.",
+    "groups": [
+      "checkout · order-confirmation"
+    ]
+  },
+  {
+    "text": "We received a payment update that needs checking. Please contact customer care with the reference below before trying another payment.",
+    "groups": [
+      "checkout · order-confirmation"
+    ]
+  },
+  {
+    "text": "Your checkout has ended.",
+    "groups": [
+      "checkout · order-confirmation"
+    ]
+  },
+  {
+    "text": "Your checkout is still open.",
+    "groups": [
+      "checkout · order-confirmation"
+    ]
+  },
+  {
+    "text": "Your payment needs review.",
+    "groups": [
+      "checkout · order-confirmation"
+    ]
+  },
+  {
+    "text": "Your payment status is checked securely with Stripe.",
+    "groups": [
+      "checkout · order-confirmation"
+    ]
+  },
+  {
     "text": "Customer care",
     "groups": [
       "collection",
@@ -366,6 +1231,12 @@
     ]
   },
   {
+    "text": " or more. ",
+    "groups": [
+      "collection · [id]"
+    ]
+  },
+  {
     "text": "Ask about sizing or availability",
     "groups": [
       "collection · [id]"
@@ -376,13 +1247,6 @@
     "groups": [
       "collection · [id]",
       "collection · [id] · not-found"
-    ]
-  },
-  {
-    "text": "Complimentary standard UK delivery on orders over ",
-    "groups": [
-      "collection · [id]",
-      "site-footer"
     ]
   },
   {
@@ -521,18 +1385,6 @@
   },
   {
     "text": "No pieces match your search.",
-    "groups": [
-      "collection · collection-browser"
-    ]
-  },
-  {
-    "text": "piece",
-    "groups": [
-      "collection · collection-browser"
-    ]
-  },
-  {
-    "text": "pieces",
     "groups": [
       "collection · collection-browser"
     ]
@@ -760,16 +1612,6 @@
     ]
   },
   {
-    "text": "Privacy Policy",
-    "groups": [
-      "content · contact-form",
-      "cookie-policy",
-      "privacy-policy",
-      "store",
-      "terms-conditions"
-    ]
-  },
-  {
     "text": "Send another message",
     "groups": [
       "content · contact-form"
@@ -783,12 +1625,6 @@
   },
   {
     "text": "Sending your message…",
-    "groups": [
-      "content · contact-form"
-    ]
-  },
-  {
-    "text": "string",
     "groups": [
       "content · contact-form"
     ]
@@ -845,13 +1681,6 @@
     "text": "Company registration",
     "groups": [
       "content · policy-page"
-    ]
-  },
-  {
-    "text": "Contact customer care",
-    "groups": [
-      "content · policy-page",
-      "returns-exchanges"
     ]
   },
   {
@@ -1101,13 +1930,6 @@
     ]
   },
   {
-    "text": "Read our ",
-    "groups": [
-      "cookie-policy",
-      "faqs"
-    ]
-  },
-  {
     "text": "Read the ",
     "groups": [
       "cookie-policy"
@@ -1180,6 +2002,12 @@
     ]
   },
   {
+    "text": "When test payment is enabled, reviewing checkout sets the necessary first-party seen_checkout_owner cookie for up to 30 days. It is a random browser ownership token, contains no contact or card details, uses HttpOnly and SameSite=Lax, and is Secure on HTTPS. It authorises private test-order access after returning from Stripe. Blocking or clearing it prevents access to those orders in that browser. Stripe-hosted Checkout uses its own payment and fraud-prevention technologies; no Stripe script is loaded by this storefront. Clearing your bag does not cancel a pending checkout or remove this cookie.",
+    "groups": [
+      "cookie-policy"
+    ]
+  },
+  {
     "text": "You can also inspect or remove this site's cookies and local storage in your browser's site-data settings. Blocking necessary storage can prevent your bag from being remembered between visits. This button does not clear third-party cookies or unrelated browser data.",
     "groups": [
       "cookie-policy"
@@ -1234,12 +2062,6 @@
     ]
   },
   {
-    "text": " does not qualify.",
-    "groups": [
-      "faqs"
-    ]
-  },
-  {
     "text": " explains eligible cancellation rights and includes an optional cancellation form. You do not have to accept an exchange instead of an eligible refund.",
     "groups": [
       "faqs"
@@ -1258,6 +2080,12 @@
     ]
   },
   {
+    "text": " qualifies.",
+    "groups": [
+      "faqs"
+    ]
+  },
+  {
     "text": " to understand garment length and how to measure. Compare the specific design's measurements, as silhouettes can vary. Preview sizes are temporary and need confirmation before purchase.",
     "groups": [
       "faqs"
@@ -1270,7 +2098,7 @@
     ]
   },
   {
-    "text": ", select an available size on a product page and add it to your bag. The store is currently in preview: online checkout is not yet available and bag additions do not place an order or reserve stock.",
+    "text": ", select an available size on a product page and add it to your bag. You can review your contact and delivery details in the checkout preview. Reviewing does not place an order or reserve stock. If test payment is enabled, continuing creates a private sandbox checkout with a temporary reservation. It does not make a real purchase.",
     "groups": [
       "faqs"
     ]
@@ -1306,7 +2134,7 @@
     ]
   },
   {
-    "text": "Complimentary standard UK delivery applies when the eligible merchandise subtotal is over ",
+    "text": "Complimentary standard UK delivery applies when the eligible merchandise subtotal is at least ",
     "groups": [
       "faqs"
     ]
@@ -1327,13 +2155,6 @@
     "text": "Contact us with the design and size you are looking for. We can help with current availability; a restock date is only confirmed when we have one.",
     "groups": [
       "faqs"
-    ]
-  },
-  {
-    "text": "Delivery",
-    "groups": [
-      "faqs",
-      "terms-conditions"
     ]
   },
   {
@@ -1435,19 +2256,13 @@
     ]
   },
   {
-    "text": "Payments are not enabled in this preview. Available payment methods will be displayed at the secure checkout when the store opens.",
-    "groups": [
-      "faqs"
-    ]
-  },
-  {
     "text": "Please contact us with your order reference, a description of the issue and photographs if available. Our team will review the issue and explain the next steps.",
     "groups": [
       "faqs"
     ]
   },
   {
-    "text": "Returns & exchanges",
+    "text": "Real-money payments are not enabled. Test checkout supports cards, Apple Pay, Klarna and Clearpay where Stripe makes them available. No real money is charged during testing.",
     "groups": [
       "faqs"
     ]
@@ -1495,7 +2310,7 @@
     ]
   },
   {
-    "text": "These methods are not currently active. Their availability will depend on the store's payment configuration and eligibility, and will be confirmed at checkout.",
+    "text": "The store is being configured for Apple Pay, Klarna and Clearpay. Stripe shows eligible options for the account, customer, device and order; an enabled method is not guaranteed for every checkout. Real purchasing remains unavailable during testing.",
     "groups": [
       "faqs"
     ]
@@ -1603,6 +2418,12 @@
     ]
   },
   {
+    "text": "AbortError",
+    "groups": [
+      "home · film-hero"
+    ]
+  },
+  {
     "text": "Be Seen.",
     "groups": [
       "home · film-hero",
@@ -1647,6 +2468,12 @@
     ]
   },
   {
+    "text": "development",
+    "groups": [
+      "layout"
+    ]
+  },
+  {
     "text": "SEEN ABAYAS | Made to Be Seen.",
     "groups": [
       "layout"
@@ -1656,6 +2483,12 @@
     "text": "supabase",
     "groups": [
       "layout"
+    ]
+  },
+  {
+    "text": "Payment status",
+    "groups": [
+      "order-confirmation"
     ]
   },
   {
@@ -1855,7 +2688,7 @@
     ]
   },
   {
-    "text": "Customer accounts, online payments and newsletter subscriptions are not active in this preview. The storefront has no analytics or advertising trackers. This notice must be updated before new collection or tracking begins.",
+    "text": "Customer accounts, real-money payments and newsletter subscriptions are not active in this preview. Sandbox payments may be enabled for testing; test orders are private and do not purchase garments. The business must confirm test-order retention and the final order/payment privacy disclosures before launch. The storefront has no analytics or advertising trackers. This notice must be updated before new collection or tracking begins.",
     "groups": [
       "privacy-policy"
     ]
@@ -1969,15 +2802,13 @@
     ]
   },
   {
-    "text": "Terms & Conditions",
+    "text": "The bag saves product variant references and quantities in your browser. Those selections are sent to our server to check prices and availability. Bag storage does not contain your contact details, address or payment card information, and adding a piece does not place an order.",
     "groups": [
-      "privacy-policy",
-      "store",
-      "terms-conditions"
+      "privacy-policy"
     ]
   },
   {
-    "text": "The bag saves product variant references and quantities in your browser. Those selections are sent to our server to check prices and availability. Bag storage does not contain your contact details, address or payment card information, and adding a piece does not place an order.",
+    "text": "The checkout preview sends your entered contact and UK delivery details to our server when you request a review. They are validated and returned to the current page, without being saved as an order or stored in your browser. Reloading clears those details. Reviewing alone does not collect payment details or reserve stock. When test payments are enabled, continuing saves a private test order in Supabase, temporarily reserves stock and sends the required customer, delivery and item details to Stripe-hosted Checkout. Use test customer details. Payment details are entered on Stripe, not on this website.",
     "groups": [
       "privacy-policy"
     ]
@@ -2483,12 +3314,6 @@
     ]
   },
   {
-    "text": " does not qualify. This offer applies to standard UK delivery; an express upgrade is separate.",
-    "groups": [
-      "shipping-delivery"
-    ]
-  },
-  {
     "text": " for its current delivery aims and postcode exceptions.",
     "groups": [
       "shipping-delivery"
@@ -2496,6 +3321,12 @@
   },
   {
     "text": " or visit ",
+    "groups": [
+      "shipping-delivery"
+    ]
+  },
+  {
+    "text": " qualifies. This offer applies to standard UK delivery; an express upgrade is separate.",
     "groups": [
       "shipping-delivery"
     ]
@@ -2561,7 +3392,7 @@
     ]
   },
   {
-    "text": "Enjoy complimentary standard UK delivery on orders over ",
+    "text": "Enjoy complimentary standard UK delivery on orders of ",
     "groups": [
       "shipping-delivery"
     ]
@@ -2669,7 +3500,7 @@
     ]
   },
   {
-    "text": "SEEN ABAYAS delivery information, planned Royal Mail services, complimentary UK delivery over £80 and tracking help.",
+    "text": "SEEN ABAYAS delivery information, planned Royal Mail services, complimentary UK delivery from £80 and tracking help.",
     "groups": [
       "shipping-delivery"
     ]
@@ -2681,13 +3512,7 @@
     ]
   },
   {
-    "text": "The eligible merchandise subtotal must be more than ",
-    "groups": [
-      "shipping-delivery"
-    ]
-  },
-  {
-    "text": "To be confirmed",
+    "text": "The eligible merchandise subtotal must be at least ",
     "groups": [
       "shipping-delivery"
     ]
@@ -2922,6 +3747,265 @@
     ]
   },
   {
+    "text": "Add an available piece to your bag first.",
+    "groups": [
+      "src · lib · checkout · model"
+    ]
+  },
+  {
+    "text": "Enter a UK postcode, for example SW1A 1AA.",
+    "groups": [
+      "src · lib · checkout · model"
+    ]
+  },
+  {
+    "text": "Enter a valid email address.",
+    "groups": [
+      "src · lib · checkout · model"
+    ]
+  },
+  {
+    "text": "Enter a valid phone number or leave it blank.",
+    "groups": [
+      "src · lib · checkout · model"
+    ]
+  },
+  {
+    "text": "Enter your email address.",
+    "groups": [
+      "src · lib · checkout · model"
+    ]
+  },
+  {
+    "text": "Express delivery",
+    "groups": [
+      "src · lib · checkout · model"
+    ]
+  },
+  {
+    "text": "Review the unavailable items in your bag before continuing.",
+    "groups": [
+      "src · lib · checkout · model"
+    ]
+  },
+  {
+    "text": "Standard delivery",
+    "groups": [
+      "src · lib · checkout · model"
+    ]
+  },
+  {
+    "text": "That delivery option is no longer available. Please choose standard delivery.",
+    "groups": [
+      "src · lib · checkout · model"
+    ]
+  },
+  {
+    "text": "This checkout preview supports UK addresses.",
+    "groups": [
+      "src · lib · checkout · model"
+    ]
+  },
+  {
+    "text": "Invalid payment request.",
+    "groups": [
+      "src · lib · payments · http"
+    ]
+  },
+  {
+    "text": "Payment request is too large.",
+    "groups": [
+      "src · lib · payments · http"
+    ]
+  },
+  {
+    "text": "Refresh the page before continuing to payment.",
+    "groups": [
+      "src · lib · payments · http"
+    ]
+  },
+  {
+    "text": "creating",
+    "groups": [
+      "src · lib · payments · model"
+    ]
+  },
+  {
+    "text": "open",
+    "groups": [
+      "src · lib · payments · model",
+      "src · lib · payments · provider"
+    ]
+  },
+  {
+    "text": "PaymentError",
+    "groups": [
+      "src · lib · payments · model"
+    ]
+  },
+  {
+    "text": "attention",
+    "groups": [
+      "src · lib · payments · provider"
+    ]
+  },
+  {
+    "text": "checkout.session.async_payment_failed",
+    "groups": [
+      "src · lib · payments · provider"
+    ]
+  },
+  {
+    "text": "complete",
+    "groups": [
+      "src · lib · payments · provider"
+    ]
+  },
+  {
+    "text": "expired",
+    "groups": [
+      "src · lib · payments · provider"
+    ]
+  },
+  {
+    "text": "failed",
+    "groups": [
+      "src · lib · payments · provider"
+    ]
+  },
+  {
+    "text": "gbp",
+    "groups": [
+      "src · lib · payments · provider"
+    ]
+  },
+  {
+    "text": "payment",
+    "groups": [
+      "src · lib · payments · provider"
+    ]
+  },
+  {
+    "text": "Payment reconciliation needs another attempt.",
+    "groups": [
+      "src · lib · payments · provider"
+    ]
+  },
+  {
+    "text": "pending",
+    "groups": [
+      "src · lib · payments · provider"
+    ]
+  },
+  {
+    "text": "Stripe payment does not match the reserved order.",
+    "groups": [
+      "src · lib · payments · provider"
+    ]
+  },
+  {
+    "text": "This checkout can no longer be opened. Return to your bag and review a new selection.",
+    "groups": [
+      "src · lib · payments · provider"
+    ]
+  },
+  {
+    "text": "This checkout has ended. Return to your bag to start again.",
+    "groups": [
+      "src · lib · payments · provider"
+    ]
+  },
+  {
+    "text": "Unexpected payment-page address.",
+    "groups": [
+      "src · lib · payments · provider"
+    ]
+  },
+  {
+    "text": "We couldn't confirm cancellation yet. Your reservation is retained until Stripe confirms its state.",
+    "groups": [
+      "src · lib · payments · provider"
+    ]
+  },
+  {
+    "text": "fulfilled",
+    "groups": [
+      "src · lib · payments · reconcile"
+    ]
+  },
+  {
+    "text": "rejected",
+    "groups": [
+      "src · lib · payments · reconcile"
+    ]
+  },
+  {
+    "text": "Checkout request does not match",
+    "groups": [
+      "src · lib · payments · server"
+    ]
+  },
+  {
+    "text": "Delivery charge is not configured",
+    "groups": [
+      "src · lib · payments · server"
+    ]
+  },
+  {
+    "text": "Delivery charges changed",
+    "groups": [
+      "src · lib · payments · server"
+    ]
+  },
+  {
+    "text": "Delivery option is unavailable",
+    "groups": [
+      "src · lib · payments · server"
+    ]
+  },
+  {
+    "text": "P0001",
+    "groups": [
+      "src · lib · payments · server"
+    ]
+  },
+  {
+    "text": "Test payments are not configured yet. Your bag is still saved.",
+    "groups": [
+      "src · lib · payments · server"
+    ]
+  },
+  {
+    "text": "Test payments are not enabled yet. Your bag is still saved.",
+    "groups": [
+      "src · lib · payments · server"
+    ]
+  },
+  {
+    "text": "The payment database update has not been installed yet.",
+    "groups": [
+      "src · lib · payments · server"
+    ]
+  },
+  {
+    "text": "The payment database update is not ready yet.",
+    "groups": [
+      "src · lib · payments · server"
+    ]
+  },
+  {
+    "text": "This checkout cannot be accessed. Return to your bag and try again.",
+    "groups": [
+      "src · lib · payments · server"
+    ]
+  },
+  {
+    "text": "We couldn't update this checkout safely. Please try again shortly.",
+    "groups": [
+      "src · lib · payments · server"
+    ]
+  },
+  {
     "text": "Collection",
     "groups": [
       "store"
@@ -2931,12 +4015,6 @@
     "text": "SEEN ABAYAS",
     "groups": [
       "store"
-    ]
-  },
-  {
-    "text": " and ",
-    "groups": [
-      "terms-conditions"
     ]
   },
   {
@@ -2964,13 +4042,19 @@
     ]
   },
   {
+    "text": " or more",
+    "groups": [
+      "terms-conditions"
+    ]
+  },
+  {
     "text": " with any questions about these terms.",
     "groups": [
       "terms-conditions"
     ]
   },
   {
-    "text": ", including complimentary standard UK delivery on eligible orders over ",
+    "text": ", including complimentary standard UK delivery on eligible orders of ",
     "groups": [
       "terms-conditions"
     ]
@@ -3012,6 +4096,12 @@
     ]
   },
   {
+    "text": "Live payments are not enabled. Test checkout uses sandbox totals without charging real money. The final commercial payable total, any applicable taxes, delivery costs and available payment methods will be disclosed before payment. Requested payment options are subject to merchant activation and eligibility; an option is available only when shown at the active checkout.",
+    "groups": [
+      "terms-conditions"
+    ]
+  },
+  {
     "text": "Our ",
     "groups": [
       "terms-conditions"
@@ -3019,12 +4109,6 @@
   },
   {
     "text": "Our supplied ",
-    "groups": [
-      "terms-conditions"
-    ]
-  },
-  {
-    "text": "Payments are not enabled. The final payable total, any applicable taxes, delivery costs and available payment methods will be disclosed before payment. Requested payment options are subject to merchant activation and eligibility; an option is available only when shown at the active checkout.",
     "groups": [
       "terms-conditions"
     ]
@@ -3108,7 +4192,7 @@
     ]
   },
   {
-    "text": "The website currently supports browsing and a shopping bag. Online checkout is not yet available. Adding a piece to the bag does not reserve stock, take payment or create a purchase contract.",
+    "text": "The website supports browsing, a shopping bag and a checkout review preview. Real-money payments and commercial order placement are not available. Sandbox checkout may be enabled for testing: it saves private test orders and temporarily reserves stock, without a purchase contract or dispatch. Adding a piece or reviewing your details does not reserve stock, take payment or create a purchase contract.",
     "groups": [
       "terms-conditions"
     ]

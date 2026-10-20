@@ -72,7 +72,7 @@ test("FAQ accordions work with a keyboard and expose honest preview answers", as
   await details.locator("summary").focus();
   await page.keyboard.press("Enter");
   await expect(details).toHaveAttribute("open", "");
-  await expect(details.locator("div")).toContainText("exactly £80 does not qualify");
+  await expect(details.locator("div")).toContainText("exactly £80 qualifies");
   await page.keyboard.press("Space");
   await expect(details).not.toHaveAttribute("open", "");
   await page.getByRole("link", { name: "Sizing & fit", exact: true }).click();

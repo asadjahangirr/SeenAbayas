@@ -487,8 +487,8 @@ test("published delivery settings and conditional copy survive bag removals", as
     })
     .click();
   await expect(page.locator("main .bag-subtotal strong")).toHaveText("£85.00");
-  await expect(page.locator("main .bag-delivery")).toContainText("Add £5.01");
-  await expect(page.locator("main .bag-delivery")).toContainText("over £90");
+  await expect(page.locator("main .bag-delivery")).toContainText("Add £5.00");
+  await expect(page.locator("main .bag-delivery")).toContainText("of £90 or more");
 });
 
 test("new products and empty categories reach an already open independent storefront", async ({

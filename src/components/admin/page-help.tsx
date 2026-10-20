@@ -21,7 +21,8 @@ const help: Record<AdminSection, string[]> = {
   orders: [
     "Open an order to see customer details and items. Search or filter to find it.",
     "Edit fulfilment, tracking and notes, then save. Export CSV downloads the listed orders.",
-    "Payments are verified by the future payment integration. This screen cannot charge or refund a customer.",
+    "Refresh payment statuses checks Stripe for up to five reserved checkouts. Repeat for more. Payment state cannot be edited manually.",
+    "Test orders are labelled Do not dispatch and excluded from commercial totals. This screen cannot charge or refund a customer.",
   ],
   inbox: [
     "Open a message to read it, mark it read or archive it.",

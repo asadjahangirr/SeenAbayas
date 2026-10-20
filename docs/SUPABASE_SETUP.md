@@ -53,7 +53,7 @@ Run `npm run check:bag` to verify the function using the publishable key. This c
 
 `POST /api/bag` validates a bounded request, rejects client-supplied prices, reads current published catalog details and checks quantities using that function. Prices, photos and totals come from the server. The browser stores only variant IDs and quantities in `seen.bag.v1`, revalidates saved selections on reload, and synchronizes changes between tabs. Storage can be unavailable without breaking the current session. No bag action reserves or writes stock.
 
-The bag icon/count, drawer and `/bag` page work with an empty catalog. Actual additions require published products with real sizes and recorded stock, `CATALOG_SOURCE=supabase`, and the new migration. Out-of-stock, missing or unpublished variants cannot be added. The subtotal excludes unavailable lines and complimentary standard UK delivery requires strictly more than GBP80. There are no discounts in this phase. The bag offers a real customer-care email enquiry; payment checkout is a later phase.
+The bag icon/count, drawer and `/bag` page work with an empty catalog. Actual additions require published products with real sizes and recorded stock, `CATALOG_SOURCE=supabase`, and the new migration. Out-of-stock, missing or unpublished variants cannot be added. The subtotal excludes unavailable lines and complimentary standard UK delivery requires GBP80 or more. There are no discounts in this phase. The bag offers a real customer-care email enquiry; payment checkout is a later phase.
 
 ## Activate the database-backed storefront
 

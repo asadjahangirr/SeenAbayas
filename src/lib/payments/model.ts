@@ -1,0 +1,115 @@
+import { createHash } from "node:crypto";
+import { z } from "zod";
+import {
+  checkoutReviewRequestSchema,
+  type CheckoutDetails,
+  type CheckoutReview,
+} from "@/lib/checkout/model";
+
+export const paymentRequestSchema = checkoutReviewRequestSchema
+  .extend({
+    requestId: z.uuid(),
+    reviewFingerprint: z.string().regex(/^[a-f0-9]{64}$/),
+  })
+  .strict();
+export const cancelPaymentSchema = z.object({ orderId: z.uuid() }).strict();
+export const checkoutOwnerCookie = "seen_checkout_owner";
+export const hash = (value: string) =>
+  createHash("sha256").update(value).digest("hex");
+
+export function reviewFingerprint(review: CheckoutReview) {
+  return hash(
+    JSON.stringify({
+      details: review.details,
+      lines: review.bag.lines
+        .map((line) => ({
+          id: line.variantId,
+          quantity: line.quantity,
+          price: line.piece?.pricePence,
+          name: line.piece?.name,
+          size: line.piece?.size,
+        }))
+        .sort((a, b) => a.id.localeCompare(b.id)),
+      delivery: review.delivery,
+      subtotal: review.bag.subtotalPence,
+      total: review.estimatedTotalPence,
+    }),
+  );
+}
+
+export type PaymentItem = {
+  product_id: string;
+  variant_id: string;
+  design_reference: string;
+  name: string;
+  size: string;
+  quantity: number;
+  unit_price_pence: number;
+  photo: { src: string; alt: string; label?: string } | null;
+};
+export type PaymentOrder = {
+  id: string;
+  request_id: string;
+  owner_hash: string;
+  request_hash: string;
+  order_number: string;
+  is_test: true;
+  state:
+    | "creating"
+    | "open"
+    | "pending"
+    | "paid"
+    | "failed"
+    | "expired"
+    | "attention";
+  stock_state: "reserved" | "released" | "committed" | "attention";
+  details: CheckoutDetails & { recipientName?: string };
+  delivery: {
+    id: "standard" | "express";
+    label: string;
+    carrier: string;
+    chargePence: number;
+  };
+  subtotal_pence: number;
+  delivery_pence: number;
+  total_pence: number;
+  refunded_pence: number;
+  currency: "gbp";
+  return_origin: string;
+  session_id: string | null;
+  checkout_url: string | null;
+  payment_intent: string | null;
+  created_at: string;
+  expires_at: string;
+  items: PaymentItem[];
+};
+
+/** Deliberately omit capability hashes, request identifiers and provider URLs. */
+export function customerOrder(order: PaymentOrder) {
+  return {
+    id: order.id,
+    number: order.order_number,
+    state: order.state,
+    isTest: order.is_test,
+    details: order.details,
+    delivery: order.delivery,
+    items: order.items,
+    subtotalPence: order.subtotal_pence,
+    deliveryPence: order.delivery_pence,
+    totalPence: order.total_pence,
+    currency: "GBP" as const,
+    refundedPence: order.refunded_pence,
+    canCancel: order.state === "open" || order.state === "creating",
+  };
+}
+export type CustomerOrder = ReturnType<typeof customerOrder>;
+
+export class PaymentError extends Error {
+  constructor(
+    message: string,
+    public status = 503,
+  ) {
+    super(message);
+    this.name = "PaymentError";
+  }
+}

@@ -1,0 +1,130 @@
+.confirmation-page {
+  padding-block: 58px 90px;
+  max-width: 1120px;
+}
+.confirmation-intro {
+  max-width: 640px;
+  margin: 30px 0 44px;
+}
+.confirmation-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 58px;
+  height: 58px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  margin-bottom: 24px;
+}
+.confirmation-intro h1 {
+  font-family: var(--font-cormorant);
+  font-weight: 400;
+  font-size: clamp(42px, 6vw, 72px);
+  line-height: 1.04;
+  letter-spacing: -0.025em;
+}
+.confirmation-intro p {
+  font-size: 13px;
+  line-height: 1.9;
+  color: var(--secondary-text);
+  margin-top: 20px;
+  max-width: 510px;
+}
+.confirmation-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: clamp(30px, 6vw, 90px);
+  align-items: start;
+}
+.confirmation-reference {
+  border-block: 1px solid var(--border);
+  padding: 20px 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 20px;
+  justify-content: space-between;
+  font-size: 12px;
+}
+.confirmation-reference strong {
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+.confirmation-details {
+  min-width: 0;
+}
+.confirmation-details h2 {
+  font-weight: 500;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 15px;
+}
+.confirmation-details address {
+  margin-top: 14px;
+}
+.confirmation-summary {
+  position: static;
+}
+.confirmation-summary > h2 {
+  font-family: var(--font-cormorant);
+  font-size: 30px;
+  font-weight: 400;
+}
+.confirmation-note {
+  font-size: 11px;
+  line-height: 1.9;
+  color: var(--secondary-text);
+  margin-block: 24px;
+}
+.confirmation-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px 28px;
+  margin-top: 40px;
+  border-top: 1px solid var(--border);
+  padding-top: 30px;
+}
+.confirmation-actions > a {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 11px;
+  text-decoration: underline;
+  text-underline-offset: 5px;
+}
+.confirmation-actions .confirmation-bag {
+  text-decoration: none;
+}
+@media (max-width: 700px) {
+  .confirmation-page {
+    padding-block: 32px 56px;
+  }
+  .confirmation-layout {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  .confirmation-intro {
+    margin-bottom: 30px;
+  }
+  .confirmation-summary {
+    order: initial;
+  }
+  .confirmation-actions {
+    align-items: start;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .confirmation-actions .button {
+    width: 100%;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .confirmation-mark {
+    animation: checkout-arrive 0.6s ease both;
+  }
+  .confirmation-summary {
+    animation: checkout-arrive 0.7s ease both;
+  }
+}

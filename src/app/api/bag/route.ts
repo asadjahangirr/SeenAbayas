@@ -1,19 +1,9 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { z } from "zod";
-
-import { parseBagLines, summarizeBag } from "@/lib/bag/model";
-import {
-  createCatalogClient,
-  getStorefrontCatalog,
-} from "@/lib/catalog/server";
+import { parseBagLines } from "@/lib/bag/model";
+import { getBagState } from "@/lib/bag/server";
 import { environment } from "@/lib/environment";
-import { checkDevelopmentAvailability } from "@/lib/catalog/development";
-import { getSiteDocument } from "@/lib/cms/server";
 
 const responseHeaders = { "Cache-Control": "private, no-store" };
-const availabilitySchema = z.array(
-  z.object({ variant_id: z.uuid(), can_fulfil: z.boolean() }).strict(),
-);
 const reply = (body: unknown, status = 200) =>
   NextResponse.json(body, { status, headers: responseHeaders });
 
@@ -74,9 +64,7 @@ export async function POST(request: NextRequest) {
       return reply({ error: "Invalid bag request." }, 400);
     const lines = parseBagLines(body.lines);
     if (!lines) return reply({ error: "Invalid bag request." }, 400);
-    if (lines.length === 0)
-      return reply(summarizeBag([], (await getSiteDocument()).commerce));
-    if (environment.catalog.source === "preview")
+    if (lines.length && environment.catalog.source === "preview")
       return reply(
         {
           error:
@@ -84,61 +72,7 @@ export async function POST(request: NextRequest) {
         },
         409,
       );
-    const [document, pieces, { data, error }] = await Promise.all([
-      getSiteDocument(),
-      getStorefrontCatalog(),
-      environment.catalog.source === "development"
-        ? { data: checkDevelopmentAvailability(lines), error: null }
-        : createCatalogClient().rpc("check_bag_availability", {
-            requested_lines: lines.map((line) => ({
-              variant_id: line.variantId,
-              quantity: line.quantity,
-            })),
-          }),
-    ]);
-    const parsed = availabilitySchema.safeParse(data);
-    if (error || !parsed.success || parsed.data.length !== lines.length)
-      throw new Error("Bag unavailable");
-    const availability = new Map(
-      parsed.data.map((row) => [row.variant_id, row.can_fulfil]),
-    );
-    if (
-      availability.size !== lines.length ||
-      lines.some((line) => !availability.has(line.variantId))
-    )
-      throw new Error("Bag unavailable");
-    return reply(
-      summarizeBag(
-        lines.map((line) => {
-          const piece = pieces.find((item) =>
-            item.commerce?.variants.some(
-              (variant) => variant.id === line.variantId,
-            ),
-          );
-          const variant = piece?.commerce?.variants.find(
-            (item) => item.id === line.variantId,
-          );
-          if (!piece?.commerce || !variant)
-            return { ...line, piece: null, issue: "unavailable" as const };
-          return {
-            ...line,
-            piece: {
-              id: piece.id,
-              name: piece.visualLabel,
-              size: variant.sizeLabel,
-              pricePence: piece.commerce.pricePence,
-              photo: piece.photos[0],
-            },
-            issue: !variant.available
-              ? ("unavailable" as const)
-              : !availability.get(line.variantId)
-                ? ("insufficient-stock" as const)
-                : null,
-          };
-        }),
-        document.commerce,
-      ),
-    );
+    return reply((await getBagState(lines)).quote);
   } catch {
     return reply(
       { error: "We couldn't check your bag. Please try again in a moment." },

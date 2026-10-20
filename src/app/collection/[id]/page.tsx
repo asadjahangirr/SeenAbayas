@@ -65,7 +65,7 @@ export default async function PiecePage({ params }: PiecePageProps) {
           <p className="piece-description"><Copy text={piece.commerce?.description || photographDescriptions[piece.id] || piece.photos[0].alt} /></p>
           <div className="piece-information__details">
             <details><summary><Copy text={"Sizing & fit"} /><ChevronDown size={16} strokeWidth={1.3} aria-hidden="true" /></summary><p><Copy text={"Our team can help with measurements and sizing questions for this piece."} /></p></details>
-            <details><summary><Copy text={"UK delivery"} /><ChevronDown size={16} strokeWidth={1.3} aria-hidden="true" /></summary><p>{document.commerce.freeDeliveryEnabled && <><Copy text={"Complimentary standard UK delivery on orders over "} /><Copy text={deliveryThreshold} /><Copy text={". "} /></>}<Link href="/shipping-delivery"><Copy text={"View delivery information"} /></Link><Copy text={"."} /></p></details>
+            <details><summary><Copy text={"UK delivery"} /><ChevronDown size={16} strokeWidth={1.3} aria-hidden="true" /></summary><p>{document.commerce.freeDeliveryEnabled && <><Copy text={"Complimentary standard UK delivery on orders of "} /><Copy text={deliveryThreshold} /><Copy text={" or more. "} /></>}<Link href="/shipping-delivery"><Copy text={"View delivery information"} /></Link><Copy text={"."} /></p></details>
           </div>
           <Link className="text-link piece-return" href="/collection"><ArrowLeft size={16} strokeWidth={1.3} aria-hidden="true" /><Copy text={"Back to the collection"} /></Link>
         </div>

@@ -2,6 +2,7 @@ import { defineConfig, devices } from "@playwright/test";
 
 export default defineConfig({
   testDir: "./tests/catalog-ui",
+  outputDir: "test-results/catalog-ui",
   workers: 1,
   fullyParallel: false,
   forbidOnly: Boolean(process.env.CI),

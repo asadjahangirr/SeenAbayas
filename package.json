@@ -20,7 +20,10 @@
     "prepare:brand": "node scripts/prepare-brand.mjs",
     "prepare:copy": "node scripts/generate-cms-registry.mjs",
     "test:admin-ui": "playwright test --config playwright.admin-ui.config.ts",
-    "test:mobile-ui": "playwright test --config playwright.mobile-ui.config.ts"
+    "test:mobile-ui": "playwright test --config playwright.mobile-ui.config.ts",
+    "test:checkout-ui": "playwright test --config playwright.checkout-ui.config.ts",
+    "test:payments-ui": "playwright test --config playwright.payments-ui.config.ts",
+    "check:payments": "node scripts/check-payments.mjs"
   },
   "engines": {
     "node": "24.x"
@@ -36,6 +39,7 @@
     "react": "19.3.1",
     "react-dom": "19.3.1",
     "server-only": "0.0.1",
+    "stripe": "23.0.0",
     "zod": "4.6.7"
   },
   "devDependencies": {

@@ -46,7 +46,7 @@ test("saved bags revalidate prices, stock changes and the exact delivery thresho
   await state(request, "repriced");
   await page.goto("/bag");
   await expect(page.locator(".bag-page .bag-subtotal strong")).toHaveText("£80.00");
-  await expect(page.locator(".bag-page .bag-delivery p")).toHaveText("Add £0.01 for complimentary standard UK delivery.");
+  await expect(page.locator(".bag-page .bag-delivery p")).toHaveText("Your selection qualifies for complimentary standard UK delivery.");
   const saved = await page.evaluate((key) => JSON.parse(localStorage.getItem(key) || "null"), storageKey);
   expect(saved).toEqual({ version: 1, lines: [{ variantId, quantity: 1 }] });
   await state(request, "sold-out");

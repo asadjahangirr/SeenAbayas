@@ -30,6 +30,8 @@ export const mediaPages = [
   "/terms-conditions",
   "/cookie-policy",
   "/bag",
+  "/checkout",
+  "/order-confirmation",
 ] as const;
 export const mediaSectionSchema = z
   .object({
@@ -117,7 +119,7 @@ export const defaultDocument: SiteDocument = {
   },
   announcement: {
     enabled: true,
-    text: "Complimentary UK delivery on orders over {threshold}",
+    text: "Complimentary UK delivery on orders of {threshold} or more",
     link: "/shipping-delivery",
     background: "#171717",
     ink: "#ffffff",
@@ -139,6 +141,13 @@ export function deliveryThresholdFor(document: SiteDocument) {
     minimumFractionDigits: 0,
     maximumFractionDigits: 2,
   }).format(document.commerce.freeDeliveryThresholdPence / 100);
+}
+export function announcementTextFor(document: SiteDocument) {
+  // Upgrade the previous stock message without overwriting custom announcements.
+  const text = document.announcement.text === "Complimentary UK delivery on orders over {threshold}"
+    ? "Complimentary UK delivery on orders of {threshold} or more"
+    : document.announcement.text;
+  return text.replaceAll("{threshold}", deliveryThresholdFor(document));
 }
 export function replaceCopy(value: string, document: SiteDocument) {
   return (

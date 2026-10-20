@@ -21,7 +21,7 @@ export function SiteFooter() {
         <div className="footer-brand" id="delivery">
           <BrandLogo />
           <p><Copy text={"Elegance that speaks for itself."} /></p>
-          {document.commerce.freeDeliveryEnabled && <Link className="footer-delivery" href="/shipping-delivery" prefetch={false}><Copy text={"Complimentary standard UK delivery on orders over "} /><Copy text={deliveryThreshold} /><Copy text={"."} /></Link>}
+          {document.commerce.freeDeliveryEnabled && <Link className="footer-delivery" href="/shipping-delivery" prefetch={false}><Copy text={"Complimentary standard UK delivery on orders of "} /><Copy text={deliveryThreshold} /><Copy text={" or more."} /></Link>}
         </div>
 
         <nav className="footer-column" aria-label="Explore SEEN">

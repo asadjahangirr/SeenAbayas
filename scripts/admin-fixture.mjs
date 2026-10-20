@@ -4,6 +4,7 @@ import { createHmac } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { PGlite } from "@electric-sql/pglite";
 const db = new PGlite();
+export { db, serial };
 const owner = "10000000-0000-4000-8000-000000000010";
 const factor = "10000000-0000-4000-8000-000000000020";
 const challenge = "10000000-0000-4000-8000-000000000021";
@@ -19,6 +20,7 @@ for (const file of [
   "20261019000300_storefront_sync.sql",
   "20261019000400_product_delete.sql",
   "20261019000500_product_visibility.sql",
+  "20261020000100_payments.sql",
 ])
   await db.exec(await readFile(`supabase/migrations/${file}`, "utf8"));
 await db.query("insert into auth.users(id) values($1)", [owner]);
@@ -86,6 +88,22 @@ const rpc = {
   admin_delete_record: ["record_id", "expected_version"],
   is_published_seen_media: ["object_name"],
   check_bag_availability: ["requested_lines"],
+  payment_health: [],
+  payment_get_order: ["order_id", "owner_hash"],
+  payment_get_request: ["request_id", "owner_hash", "request_hash"],
+  payment_prepare_order: [
+    "request_id",
+    "owner_hash",
+    "request_hash",
+    "details",
+    "requested_lines",
+    "shipping_method",
+    "expected_delivery",
+    "return_origin",
+  ],
+  payment_apply_session: ["order_id", "event_id", "event_type", "session"],
+  payment_pending_orders: ["batch_size"],
+  payment_release_orphan: ["order_id"],
 };
 let recoveryIssued = false;
 async function reset(enroll = false) {
@@ -106,7 +124,7 @@ async function reset(enroll = false) {
   uploads.clear();
   uploadNames.clear();
   await db.exec(
-    "reset role;delete from seen_private.admin_records;delete from seen_private.admin_audit;delete from seen_private.site_history;update seen_private.site_documents set version=0,draft='{}',published=null,published_at=null;delete from seen_private.inventory;delete from public.product_variants;delete from public.products;delete from storage.objects;",
+    "reset role;delete from seen_private.stripe_event_receipts;delete from seen_private.checkout_items;delete from seen_private.checkout_orders;delete from seen_private.admin_records;delete from seen_private.admin_audit;delete from seen_private.site_history;update seen_private.site_documents set version=0,draft='{}',published=null,published_at=null;delete from seen_private.inventory;delete from public.product_variants;delete from public.products;delete from storage.objects;",
   );
   await db.query("select set_config('request.jwt.claims',$1,false)", [
     JSON.stringify({ sub: owner, aal: "aal2" }),
@@ -318,7 +336,12 @@ const server = http.createServer(async (req, res) => {
           await db.query("select set_config('request.jwt.claims',$1,true)", [
             JSON.stringify(aal ? { sub: owner, aal } : {}),
           ]);
-          await db.exec(`set local role ${aal ? "authenticated" : "anon"}`);
+          const service =
+            name.startsWith("payment_") &&
+            bearer === "sb_secret_SEEN_LOCAL_FIXTURE_ONLY";
+          await db.exec(
+            `set local role ${service ? "service_role" : aal ? "authenticated" : "anon"}`,
+          );
           const args = rpc[name].map((k) =>
             k === "requested_lines"
               ? JSON.stringify(body[k])

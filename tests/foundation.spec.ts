@@ -175,7 +175,7 @@ test("reduced-motion preference disables smooth scrolling", async ({ page }) => 
   expect(await page.evaluate(() => getComputedStyle(document.documentElement).scrollBehavior)).toBe("auto");
   await expect(page.getByRole("button", { name: "Pause delivery announcement" })).not.toBeVisible();
   expect(await page.locator(".announcement__track").evaluate((track) => getComputedStyle(track).animationName)).toBe("none");
-  await expect(page.getByRole("link", { name: "Complimentary UK delivery on orders over £80" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Complimentary UK delivery on orders of £80 or more" })).toBeVisible();
   const staticMessage = page.locator(".announcement__message:visible");
   await expect(staticMessage).toHaveCount(1);
   const staticBounds = await staticMessage.boundingBox();
@@ -194,7 +194,7 @@ test("delivery announcement has no pause button and holds on hover or keyboard f
   await expect(page.locator(".announcement button")).toHaveCount(0);
   expect(await page.locator(".announcement__viewport").evaluate((element) => Math.abs(element.getBoundingClientRect().width - innerWidth))).toBeLessThan(2);
 
-  const offer = page.getByRole("link", { name: "Complimentary UK delivery on orders over £80" });
+  const offer = page.getByRole("link", { name: "Complimentary UK delivery on orders of £80 or more" });
   await offer.hover();
   await expect.poll(playState).toBe("paused");
   await page.mouse.move(2, 180);

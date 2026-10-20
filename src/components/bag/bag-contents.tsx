@@ -8,7 +8,6 @@ import { ArrowUpRight, Minus, Plus } from "lucide-react";
 import Image from "@/components/cms/image";
 import Link from "@/components/cms/link";
 import { ButtonLink } from "@/components/ui/button";
-import { store } from "@/config/store";
 import { MAX_LINE_QUANTITY } from "@/lib/bag/model";
 import { formatGbp } from "@/lib/money";
 import { useBag } from "./bag-provider";
@@ -46,20 +45,19 @@ export function BagDelivery() {
   const deliveryThreshold = deliveryThresholdFor(document);
   const threshold = document.commerce.freeDeliveryThresholdPence;
   if (!document.commerce.freeDeliveryEnabled) return null;
-  const remaining = threshold + 1 - quote.subtotalPence;
-  return <div className="bag-delivery"><p>{quote.freeDelivery ? <Copy text={"Your selection qualifies for complimentary standard UK delivery."} /> : <><Copy text={"Add "} /><Copy text={formatGbp(remaining)} /><Copy text={" for complimentary standard UK delivery."} /></>}</p><progress aria-label="Progress towards complimentary UK delivery" max={threshold + 1} value={Math.min(quote.subtotalPence, threshold + 1)} /><span><Copy text={"Complimentary on orders over "} /><Copy text={deliveryThreshold} /><Copy text={"."} /></span></div>;
+  const remaining = Math.max(0, threshold - quote.subtotalPence);
+  return <div className="bag-delivery"><p>{quote.freeDelivery ? <Copy text={"Your selection qualifies for complimentary standard UK delivery."} /> : <><Copy text={"Add "} /><Copy text={formatGbp(remaining)} /><Copy text={" for complimentary standard UK delivery."} /></>}</p><progress aria-label="Progress towards complimentary UK delivery" max={Math.max(1, threshold)} value={Math.min(quote.subtotalPence, Math.max(1, threshold))} /><span><Copy text={"Complimentary on orders of "} /><Copy text={deliveryThreshold} /><Copy text={" or more."} /></span></div>;
 }
 
 export function BagSummary({ drawer = false, close }: { drawer?: boolean; close?: () => void }) {
   const { quote, busy } = useBag();
   const hasIssues = quote.lines.some((line) => line.issue);
-  const enquiry = `mailto:${store.supportEmail}?subject=${encodeURIComponent("SEEN shopping bag enquiry")}&body=${encodeURIComponent(quote.lines.map((line) => line.piece ? `${line.piece.name} (${line.piece.id}), size ${line.piece.size}, quantity ${line.quantity}, ${formatGbp(line.piece.pricePence)} each${line.issue ? " — availability needs checking" : ""}` : "An unavailable piece needs checking.").join("\n"))}`;
   return <div className="bag-summary" aria-busy={busy}>
     {!drawer && <h2><Copy text={"Your selection"} /></h2>}
     <BagDelivery />
     <div className="bag-subtotal"><span><Copy text={hasIssues ? "Available items subtotal" : "Subtotal"} /></span><strong key={quote.subtotalPence}><Copy text={formatGbp(quote.subtotalPence)} /></strong></div>
     <p className="bag-summary__note"><Copy text={"Items in your bag are not reserved."} /></p>
-    <ButtonLink href={drawer ? "/bag" : enquiry} onClick={close}><Copy text={drawer ? "View shopping bag" : "Enquire about your bag"} /><ArrowUpRight size={17} strokeWidth={1.3} aria-hidden="true" /></ButtonLink>
+    <ButtonLink href={drawer ? "/bag" : "/checkout"} onClick={close}><Copy text={drawer ? "View shopping bag" : "Continue to checkout"} /><ArrowUpRight size={17} strokeWidth={1.3} aria-hidden="true" /></ButtonLink>
     <Link className="bag-continue" href="/collection" onClick={close}><Copy text={"Continue exploring"} /></Link>
   </div>;
 }

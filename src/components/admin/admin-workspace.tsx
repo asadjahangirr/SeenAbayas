@@ -341,7 +341,10 @@ export function AdminWorkspace({
   const received =
     snapshot.statistics?.paidPence ??
     orders
-      .filter((r) => r.payload.payment_status === "paid")
+      .filter(
+        (r) =>
+          r.payload.payment_status === "paid" && r.payload.is_test !== true,
+      )
       .reduce(
         (s, r) =>
           s +
@@ -590,7 +593,10 @@ export function AdminWorkspace({
                       },
                       {
                         label: "Orders",
-                        value: snapshot.statistics?.orderCount ?? orders.length,
+                        value:
+                          snapshot.statistics?.orderCount ??
+                          orders.filter((r) => r.payload.is_test !== true)
+                            .length,
                         note: "Checkout integration pending",
                       },
                       {
@@ -740,6 +746,24 @@ export function AdminWorkspace({
                 <OrderManager
                   records={orders}
                   busy={busy}
+                  reconcile={() =>
+                    run(async () => {
+                      const response = await fetch(
+                        "/api/admin/payments/reconcile",
+                        { method: "POST" },
+                      );
+                      const result = await response.json();
+                      if (!response.ok)
+                        throw new Error(
+                          result.error || "Payment refresh failed.",
+                        );
+                      await refresh();
+                      if (result.retryRequired)
+                        throw new Error(
+                          "Some payments still need another check. Their reservations have been retained safely.",
+                        );
+                    }, "Stripe payment statuses checked. Test payments are excluded from commercial totals.")
+                  }
                   save={(d, r) => saveRecord("order", d, r)}
                 />
               )}
@@ -1289,7 +1313,7 @@ export function AdminWorkspace({
                   />
                   <Panel
                     title="Shipping & order settings"
-                    description="The offer and bag progress update from these settings. Payment-stage minimum order enforcement is reserved for the future checkout."
+                    description="The offer and bag progress update from these settings. Checkout rechecks the published delivery rules and minimum order before opening payment."
                   >
                     <div className="admin-fields">
                       <Field label="Complimentary UK delivery">
@@ -2519,10 +2543,12 @@ function OrderManager({
   records,
   busy,
   save,
+  reconcile,
 }: {
   records: AdminRecord[];
   busy: boolean;
   save: (d: unknown, r: AdminRecord) => Promise<void | boolean>;
+  reconcile: () => Promise<void | boolean>;
 }) {
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
@@ -2542,6 +2568,7 @@ function OrderManager({
         "Payment status",
         "Order status",
         "Tracking",
+        "Test order",
       ],
       ...list.map((r) => [
         r.payload.order_number || r.id,
@@ -2552,6 +2579,7 @@ function OrderManager({
         r.payload.payment_status,
         r.payload.status,
         r.payload.tracking,
+        r.payload.is_test === true ? "Yes" : "No",
       ]),
     ];
     const url = URL.createObjectURL(
@@ -2599,9 +2627,17 @@ function OrderManager({
         <button onClick={exportOrders} disabled={!list.length}>
           Export CSV
         </button>
+        <button
+          onClick={() => {
+            void reconcile();
+          }}
+          disabled={busy}
+        >
+          Refresh payment statuses
+        </button>
       </div>
       {!list.length && (
-        <Empty text="No orders to show. Customer checkout has not been connected yet." />
+        <Empty text="No matching orders. Test checkouts appear here when payment setup is enabled." />
       )}
       {list.map((r) => (
         <details key={r.id} className="admin-record">
@@ -2612,6 +2648,12 @@ function OrderManager({
             · {String(r.payload.name || "Customer")} ·{" "}
             {formatGbp(Number(r.payload.total_pence || 0))}{" "}
             <Status>{String(r.payload.status)}</Status>
+            {r.payload.is_test === true && (
+              <Status>Test · Do not dispatch</Status>
+            )}
+            {r.payload.needs_attention === true && (
+              <Status>Payment needs review</Status>
+            )}
           </summary>
           <dl className="admin-detail-list">
             {Object.entries(r.payload).map(([k, v]) => (
@@ -2627,7 +2669,12 @@ function OrderManager({
               </div>
             ))}
           </dl>
-          <OrderForm record={r} save={save} busy={busy} />
+          <OrderForm
+            key={`${r.id}:${r.version}`}
+            record={r}
+            save={save}
+            busy={busy}
+          />
         </details>
       ))}
     </Panel>
@@ -2667,10 +2714,26 @@ function OrderForm({
             "completed",
             "cancelled",
           ].map((s) => (
-            <option key={s}>{s}</option>
+            <option
+              key={s}
+              disabled={
+                (["processing", "shipped", "completed"].includes(s) &&
+                  (record.payload.is_test === true ||
+                    record.payload.needs_attention === true)) ||
+                (s === "cancelled" && record.payload.stock_state === "reserved")
+              }
+            >
+              {s}
+            </option>
           ))}
         </select>
       </Field>
+      {record.payload.is_test === true && (
+        <p className="admin-help">
+          Sandbox payment: no real money was charged. Test orders cannot be
+          dispatched. Payment completion releases their temporary reservation.
+        </p>
+      )}
       <Field label="Royal Mail / courier tracking reference">
         <input
           value={tracking}

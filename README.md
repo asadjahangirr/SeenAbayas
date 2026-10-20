@@ -2,9 +2,13 @@
 
 A Next.js App Router storefront for the SEEN ABAYAS brand. The original client brief is preserved in [docs/MASTER_PLAN.md](docs/MASTER_PLAN.md).
 
+**Continuing this project in a new chat/account? Read [docs/PROJECT_HANDOVER.md](docs/PROJECT_HANDOVER.md) first.** It consolidates the current implementation, later decisions, verification limits and remaining phases; some older notes below describe previous checkpoints.
+
 Current working decisions, including the requested temporary sizes/stock and implemented admin dashboard, are recorded in [docs/DEVELOPMENT_NOTES.md](docs/DEVELOPMENT_NOTES.md).
 
-## Current checkpoint: Storefront, shopping bag, admin and policy drafts
+## Current checkpoint: Storefront, admin and test payment integration
+
+Latest update (20 October): UK checkout, private order-status UI and Stripe-hosted **test** payments are implemented with server prices, atomic stock reservations, signed/idempotent payment updates and admin test-order protection. Live charging stays disabled. The developer applied the payment migration and protected hosted health checks now pass; Dashboard webhook/deployment and actual Stripe sandbox checkout remain to verify. Free standard delivery starts at **GBP 80 inclusive**. VAT and lower-order delivery charges remain unconfirmed. Use [docs/STRIPE_SETUP.md](docs/STRIPE_SETUP.md); older preview-only notes below are historical.
 
 - White/ivory design tokens, locally hosted Inter and Cormorant Garamond, shared buttons and accessible text inputs.
 - Responsive header/footer, real supplied logo, working page/anchor navigation, and a native mobile navigation dialog. Collection navigation and homepage buttons lead to `/collection`; the active navigation item is marked on that page.
@@ -67,6 +71,7 @@ npm run test:catalog
 npm run test:catalog-ui
 npm run test:development-ui
 npm run test:contact-ui
+npm run test:checkout-ui
 npm run check:bag
 ```
 

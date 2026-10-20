@@ -19,6 +19,8 @@ export const mediaPageNames: Record<string, string> = {
   "/terms-conditions": "Terms & Conditions",
   "/cookie-policy": "Cookie Policy",
   "/bag": "Shopping Bag",
+  "/checkout": "Checkout",
+  "/order-confirmation": "Payment confirmation",
 };
 export function createMediaSection(src: string): MediaSection {
   return {

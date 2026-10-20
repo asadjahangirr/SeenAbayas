@@ -18,6 +18,8 @@ for (const file of [
   ...walk("src/app"),
   ...walk("src/components"),
   ...walk("src/config"),
+  ...walk("src/lib/checkout"),
+  ...walk("src/lib/payments"),
 ].filter((f) => /\.tsx?$/.test(f) && !/[\\/](admin|cms)[\\/]/.test(f))) {
   const source = fs.readFileSync(file, "utf8");
   const tree = ts.createSourceFile(
@@ -41,6 +43,7 @@ for (const file of [
         ts.isPropertyAssignment(p) &&
         [
           "label",
+          "error",
           "title",
           "question",
           "answer",
@@ -66,9 +69,16 @@ for (const file of [
           "alt",
           "title",
           "label",
+          "error",
           "category",
           "current",
         ].includes(p.name.getText(tree))
+      )
+        allowed = true;
+      if (
+        /^src\/lib\/(checkout|payments)\//.test(file.replaceAll("\\", "/")) &&
+        text.length > 20 &&
+        text.includes(" ")
       )
         allowed = true;
       if (ts.isBinaryExpression(p) || ts.isConditionalExpression(p))

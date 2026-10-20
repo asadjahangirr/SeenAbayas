@@ -33,5 +33,5 @@ export function parseBagLines(input: unknown): BagRequestLine[] | null {
 
 export function summarizeBag(lines: BagLine[], delivery = { freeDeliveryEnabled: true, freeDeliveryThresholdPence: store.freeStandardDeliveryThresholdPence as number }): BagQuote {
   const subtotalPence = lines.reduce((sum, line) => sum + (line.piece && !line.issue ? line.piece.pricePence * line.quantity : 0), 0);
-  return { lines, subtotalPence, freeDelivery: delivery.freeDeliveryEnabled && subtotalPence > delivery.freeDeliveryThresholdPence };
+  return { lines, subtotalPence, freeDelivery: delivery.freeDeliveryEnabled && subtotalPence > 0 && subtotalPence >= delivery.freeDeliveryThresholdPence };
 }

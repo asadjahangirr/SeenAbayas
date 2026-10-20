@@ -47,7 +47,7 @@ test("shipping shows unconfirmed fees honestly and links to real Royal Mail trac
   await page.goto("/shipping-delivery");
   await expect(page.locator("#standard-delivery")).toContainText("To be confirmed");
   await expect(page.locator("#express-delivery")).toContainText("To be confirmed");
-  await expect(page.locator("#complimentary-delivery")).toContainText("An order of exactly £80 does not qualify");
+  await expect(page.locator("#complimentary-delivery")).toContainText("An order of exactly £80 qualifies");
   await expect(page.getByRole("link", { name: "Track your Royal Mail item" })).toHaveAttribute("href", "https://www.royalmail.com/track-your-item");
   await page.setViewportSize({ width: 390, height: 844 });
   const jump = page.locator(".policy-mobile-contents");
@@ -64,7 +64,7 @@ test("footer and mobile navigation expose the new delivery and policy pages", as
     expect(footerPaths).toContain(path);
     expect((await request.get(path)).status()).toBe(200);
   }
-  await expect(page.getByRole("link", { name: "Complimentary UK delivery on orders over £80", exact: true })).toHaveAttribute("href", "/shipping-delivery");
+  await expect(page.getByRole("link", { name: "Complimentary UK delivery on orders of £80 or more", exact: true })).toHaveAttribute("href", "/shipping-delivery");
   await page.setViewportSize({ width: 390, height: 844 });
   await page.getByRole("button", { name: "Open navigation menu" }).click();
   const dialog = page.getByRole("dialog", { name: "Explore SEEN" });

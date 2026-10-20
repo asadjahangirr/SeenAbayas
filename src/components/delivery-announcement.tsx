@@ -3,12 +3,12 @@
 import { CmsAnchor } from "@/components/cms/anchor";
 
 import { Copy, useSiteDocument } from "@/components/cms/content-provider";
-import { deliveryThresholdFor } from "@/lib/cms/model";
+import { announcementTextFor } from "@/lib/cms/model";
 import type { CSSProperties } from "react";
 
 export function DeliveryAnnouncement() {
   const document = useSiteDocument();
-  const message = document.announcement.text.replaceAll("{threshold}", deliveryThresholdFor(document));
+  const message = announcementTextFor(document);
   if (!document.announcement.enabled) return null;
 
   return (

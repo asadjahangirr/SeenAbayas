@@ -1,12 +1,14 @@
 # Business information and policy drafts
 
+Latest clarification (20 October 2026): free standard UK delivery applies at **GBP 80 or more**, including exactly GBP 80. This supersedes the earlier strict-over wording. A checkout review preview is implemented; payments/order placement remain unavailable. See [CHECKOUT_SETUP.md](CHECKOUT_SETUP.md).
+
 ## Confirmed from the client's message
 
 - Brand: SEEN ABAYAS. Slogan: “Made to Be Seen.”
 - The full Our Story wording and Returns & Exchanges policy are supplied in `MASTER_PLAN.md` and were supplied again by the developer on 19 October 2026. Preserve those paragraphs.
 - Contact form: name, email, phone and message, delivered to `info@seenabayas.co.uk`.
 - Intended delivery partner: Royal Mail.
-- Complimentary standard UK delivery on eligible merchandise subtotals **over £80**. Exactly £80 does not qualify.
+- Complimentary standard UK delivery on eligible merchandise subtotals **£80 or more**. Exactly £80 qualifies (latest clarification).
 - Requested future payment options: pay now, Apple Pay, Klarna and Clearpay. The developer's latest client update prioritizes Apple Pay and Klarna for checkout. Clearpay was requested earlier and is not yet active. No payment method is currently enabled, and provider/customer eligibility still applies. Client payout bank details belong in the payment provider's private onboarding, not repository files or public pages; the supplied bank address does not confirm a legal trading or returns address.
 - Intended public domain: `www.seenabayas.co.uk`, purchased through Namecheap. This does not configure DNS, hosting or email. Keep the development site URL while working locally; set the final HTTPS origin when preparing deployment.
 - Eight intended designs. Seven photograph groups currently exist; do not manufacture the eighth product or image.

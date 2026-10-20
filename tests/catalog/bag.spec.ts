@@ -26,10 +26,12 @@ test("bag input rejects forged prices, duplicate IDs, invalid quantities and ove
   for (const lines of [null, {}, [{ variantId: variant, quantity: 0 }], [{ variantId: variant, quantity: 11 }], [{ variantId: variant, quantity: 1.5 }], [{ variantId: variant, quantity: "2" }], [{ variantId: "invalid", quantity: 1 }], [{ variantId: variant, quantity: 1, pricePence: 1 }], [{ variantId: variant, quantity: 1 }, { variantId: variant.toUpperCase(), quantity: 1 }], Array(21).fill({ variantId: variant, quantity: 1 })]) expect(parseBagLines(lines)).toBeNull();
 });
 
-test("delivery requires strictly over GBP80 and unavailable lines are excluded from totals", () => {
+test("delivery includes exactly GBP80 and unavailable lines are excluded from totals", () => {
   const piece = { id: "design-01", name: "TEST ONLY", size: "TEST S", pricePence: 8000, photo: collectionPieces[0].photos[0] };
   const line = { variantId: variant, quantity: 1, piece, issue: null };
-  expect(summarizeBag([line]).freeDelivery).toBe(false);
+  expect(summarizeBag([line]).freeDelivery).toBe(true);
+  expect(summarizeBag([{ ...line, piece: { ...piece, pricePence: 7999 } }]).freeDelivery).toBe(false);
+  expect(summarizeBag([]).freeDelivery).toBe(false);
   expect(summarizeBag([{ ...line, piece: { ...piece, pricePence: 8001 } }]).freeDelivery).toBe(true);
   expect(summarizeBag([{ ...line, issue: "unavailable" }]).subtotalPence).toBe(0);
 });

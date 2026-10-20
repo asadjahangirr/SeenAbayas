@@ -1,0 +1,57 @@
+import { NextResponse } from "next/server";
+import { z } from "zod";
+import { readPaymentBody } from "@/lib/payments/http";
+import { paymentServices, getPaymentOrder } from "@/lib/payments/server";
+import { applyProviderSession } from "@/lib/payments/provider";
+import { PaymentError } from "@/lib/payments/model";
+
+export const maxDuration = 60;
+const supported = new Set([
+  "checkout.session.completed",
+  "checkout.session.async_payment_succeeded",
+  "checkout.session.async_payment_failed",
+  "checkout.session.expired",
+]);
+export async function POST(request: Request) {
+  const reply = (body: unknown, status = 200) =>
+    NextResponse.json(body, {
+      status,
+      headers: { "Cache-Control": "private, no-store" },
+    });
+  try {
+    const { stripe, config } = paymentServices();
+    const signature = request.headers.get("stripe-signature");
+    if (!signature) return reply({ error: "Missing payment signature." }, 400);
+    const raw = await readPaymentBody(request, 262144, true);
+    let event;
+    try {
+      event = stripe.webhooks.constructEvent(
+        raw,
+        signature,
+        config.webhookSecret,
+      );
+    } catch {
+      return reply({ error: "Invalid payment signature." }, 400);
+    }
+    if (event.livemode)
+      return reply({ error: "Live payment events are not enabled." }, 400);
+    if (!supported.has(event.type)) return reply({ received: true });
+    const reference = event.data.object as {
+      id: string;
+      metadata?: { order_id?: string };
+    };
+    const orderId = z.uuid().safeParse(reference.metadata?.order_id);
+    if (!orderId.success) return reply({ received: true });
+    const order = await getPaymentOrder(orderId.data);
+    if (!order) return reply({ received: true });
+    // Re-read Stripe to avoid trusting stale, reordered event snapshots.
+    const session = await stripe.checkout.sessions.retrieve(reference.id);
+    await applyProviderSession(order, session, event.id, event.type);
+    return reply({ received: true });
+  } catch (error) {
+    return reply(
+      { error: "Payment verification will be retried." },
+      error instanceof PaymentError && error.status === 413 ? 413 : 503,
+    );
+  }
+}

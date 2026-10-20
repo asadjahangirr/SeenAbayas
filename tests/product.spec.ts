@@ -133,7 +133,7 @@ test("sizing and delivery disclosures use keyboard controls and confirmed delive
   await expect(sizing.locator("p")).not.toBeVisible();
   const delivery = page.locator("details").filter({ hasText: "UK delivery" });
   await delivery.locator("summary").click();
-  await expect(delivery.locator("p")).toContainText("Complimentary standard UK delivery on orders over £80.");
+  await expect(delivery.locator("p")).toContainText("Complimentary standard UK delivery on orders of £80 or more.");
   await expect(delivery.getByRole("link", { name: "View delivery information" })).toHaveAttribute("href", "/shipping-delivery");
 });
 
