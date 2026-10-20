@@ -1,0 +1,128 @@
+{
+  "batch": "catalog-intake-20261020-v1",
+  "stockNote": "Client-approved prices and photo matches, 20 October 2026. Only Burgundy Roselle has stock: 54 x 1, 56 x 1, 58 x 2. All other designs are visible but sold out. Available size labels are 54, 56 and 58.",
+  "sizes": [
+    "54",
+    "56",
+    "58"
+  ],
+  "products": [
+    {
+      "id": "design-01",
+      "name": "Burgundy Roselle Edit",
+      "tone": "Burgundy",
+      "pricePence": 4500,
+      "ready": true,
+      "description": "Deep burgundy tones meet a flowing, full-length silhouette in the Roselle Edit. Covered buttons and softly flared sleeves bring a considered finish, creating an elegant piece for everyday dressing and special occasions alike.",
+      "stock": {
+        "54": 1,
+        "56": 1,
+        "58": 2
+      }
+    },
+    {
+      "id": "design-02",
+      "name": "Black Sequin Abaya",
+      "tone": "Black",
+      "pricePence": 5000,
+      "ready": true,
+      "description": "Tonal botanical sequin detailing traces a black, full-length silhouette, adding subtle definition to the front and sleeves. The flowing shape gives this piece an understated presence, with its detail revealed up close.",
+      "stock": {
+        "54": 0,
+        "56": 0,
+        "58": 0
+      }
+    },
+    {
+      "id": "design-03",
+      "name": "Black Lace Abaya",
+      "tone": "Black",
+      "pricePence": 5000,
+      "ready": true,
+      "description": "A black silhouette framed by delicate lace detailing along the opening and sleeves. The full-length shape and contrasting textures create a refined statement that moves easily from considered daytime styling to an evening occasion.",
+      "stock": {
+        "54": 0,
+        "56": 0,
+        "58": 0
+      }
+    },
+    {
+      "id": "design-04",
+      "name": "Teal Abaya",
+      "tone": "Teal",
+      "pricePence": 4000,
+      "ready": true,
+      "description": "Rich teal tones, covered buttons and gently flared sleeves define this full-length abaya. Its simple, flowing silhouette makes room for personal styling, offering quiet elegance with an uncluttered finish.",
+      "stock": {
+        "54": 0,
+        "56": 0,
+        "58": 0
+      }
+    },
+    {
+      "id": "design-05",
+      "name": "Tie Dye Blue Abaya",
+      "tone": "Blue",
+      "pricePence": 4000,
+      "ready": true,
+      "description": "A blue tie-dye pattern brings depth to a flowing, full-length silhouette. The simple neckline and wide sleeves allow the pattern to take the lead, creating a distinctive piece with an understated finish.",
+      "stock": {
+        "54": 0,
+        "56": 0,
+        "58": 0
+      }
+    },
+    {
+      "id": "design-06",
+      "name": "Polka Dot Abaya",
+      "tone": "Black",
+      "pricePence": 4500,
+      "ready": true,
+      "description": "Ivory polka dots punctuate a black, full-length silhouette for a playful take on everyday elegance. The flowing shape and wide sleeves keep the overall look relaxed and considered, with the print providing its distinctive character.",
+      "stock": {
+        "54": 0,
+        "56": 0,
+        "58": 0
+      }
+    },
+    {
+      "id": "design-07",
+      "name": "Cream Abaya",
+      "tone": "Cream",
+      "pricePence": 4500,
+      "ready": true,
+      "description": "Soft cream tones, covered buttons and a flowing, full-length shape create an understated foundation for your wardrobe. The clean silhouette and gently flared sleeves make this an elegant piece to style in your own way.",
+      "stock": {
+        "54": 0,
+        "56": 0,
+        "58": 0
+      }
+    },
+    {
+      "id": "design-08",
+      "name": "Brown Abaya",
+      "tone": "Brown",
+      "pricePence": 4000,
+      "ready": true,
+      "description": "Rich brown tones, covered buttons and wide sleeves create a flowing silhouette with understated detail. An easy foundation for a considered everyday look, this full-length piece brings warmth and simplicity to your styling.",
+      "stock": {
+        "54": 0,
+        "56": 0,
+        "58": 0
+      }
+    },
+    {
+      "id": "design-09",
+      "name": "Olive Abaya",
+      "tone": "Olive",
+      "pricePence": 4000,
+      "ready": true,
+      "description": "An olive silhouette with covered buttons and wide sleeves. The simple lines and flowing, full-length shape bring quiet elegance to everyday dressing, with a rich colour that lends itself to considered, individual styling.",
+      "stock": {
+        "54": 0,
+        "56": 0,
+        "58": 0
+      }
+    }
+  ]
+}

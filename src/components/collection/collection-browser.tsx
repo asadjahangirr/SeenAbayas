@@ -15,6 +15,9 @@ import type { StorefrontCategory } from "@/lib/storefront/model";
 const colourSearchTerms: Partial<Record<PhotographTone, string[]>> = {
   Burgundy: ["red", "maroon", "wine"],
   Charcoal: ["grey", "gray"],
+  Teal: ["blue", "green"],
+  Olive: ["green"],
+  Cream: ["ivory", "neutral", "beige"],
 };
 
 function searchWords(value: string) {
@@ -33,7 +36,7 @@ export function CollectionBrowser({ pieces: collectionPieces, categories: savedC
     if (tone !== "All" && colour !== tone) return false;
     if (category && piece.category !== category) return false;
     // Match word beginnings instead of incidental letters in photo captions.
-    const words = searchWords([piece.visualLabel, colour || "", ...(colourSearchTerms[colour as PhotographTone] || []), photographDescriptions[piece.id] || ""].join(" "));
+    const words = searchWords([piece.visualLabel, colour || "", ...(colourSearchTerms[colour as PhotographTone] || []), piece.commerce?.description || photographDescriptions[piece.id] || ""].join(" "));
     return terms.every((term) => words.some((word) => word.startsWith(term)));
   });
   if (sort === "az") pieces.sort((a, b) => a.visualLabel.localeCompare(b.visualLabel, "en-GB"));

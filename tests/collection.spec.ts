@@ -17,8 +17,8 @@ for (const width of [320, 390, 768, 1024, 1440, 1920]) {
     await settle(page);
     await expect(page).toHaveTitle("The Collection | SEEN ABAYAS");
     await expect(page.getByRole("heading", { level: 1 })).toHaveAccessibleName("The Collection");
-    await expect(page.locator(".catalog-card")).toHaveCount(7);
-    await expect(page.locator(".catalog-toolbar").getByRole("status")).toHaveText("7 pieces");
+    await expect(page.locator(".catalog-card")).toHaveCount(9);
+    await expect(page.locator(".catalog-toolbar").getByRole("status")).toHaveText("9 pieces");
     await expect(page.locator(".catalog-intro img")).toHaveCount(0);
     const heading = await page.locator(".catalog-heading").boundingBox();
     expect(heading!.height).toBeLessThan(160);
@@ -54,21 +54,21 @@ test("colour filters combine with multi-word search, and empty results can be re
   await expect(status).toHaveText("0 pieces");
   await expect(page.getByRole("heading", { name: "No pieces match your search." })).toBeVisible();
   await page.getByRole("button", { name: "View all pieces", exact: true }).click();
-  await expect(status).toHaveText("7 pieces");
+  await expect(status).toHaveText("9 pieces");
   await expect(page.getByRole("searchbox")).toHaveValue("");
   await expect(colours.getByRole("button", { name: "All pieces", exact: true })).toHaveAttribute("aria-pressed", "true");
-  await page.getByRole("searchbox").fill("  CHARCOAL  ");
-  await expect(status).toHaveText("2 pieces");
+  await page.getByRole("searchbox").fill("  TEAL  ");
+  await expect(status).toHaveText("1 piece");
   await page.getByRole("button", { name: "Clear search", exact: true }).click();
   await expect(page.getByRole("searchbox")).toBeFocused();
-  await expect(status).toHaveText("7 pieces");
+  await expect(status).toHaveText("9 pieces");
 });
 
 test("sorting changes the displayed order without dropping the selected colour", async ({ page }) => {
   await page.goto("/collection");
   const names = page.locator(".catalog-card__name");
   await page.getByRole("combobox", { name: "Sort by" }).selectOption("za");
-  await expect(names.first()).toHaveText("Textured charcoal");
+  await expect(names.first()).toHaveText("Tie dye blue");
   await page.getByRole("group", { name: "Filter by photographed colour" }).getByRole("button", { name: "Black", exact: true }).click();
   await expect(names).toHaveText(["Polka dots", "Lace detailing", "Botanical detailing"]);
   await page.getByRole("combobox", { name: "Sort by" }).selectOption("az");
@@ -79,9 +79,9 @@ test("sorting changes the displayed order without dropping the selected colour",
 test("collection photographs open the product directly without a quick-view action", async ({ page }) => {
   await page.goto("/collection");
   await expect(page.locator(".catalog-card__quickview")).toHaveCount(0);
-  await page.getByRole("link", { name: "View piece: Soft neutral", exact: true }).click();
+  await page.getByRole("link", { name: "View piece: Cream", exact: true }).click();
   await expect(page).toHaveURL(/\/collection\/design-07$/);
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Soft neutral");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Cream");
   await expect(page.locator(".piece-gallery__meta")).toHaveText("Front1 / 2");
   await expect(page.getByRole("button", { name: "Add to bag", exact: true })).toBeVisible();
 });
@@ -107,9 +107,9 @@ test("touch navigation and colour filters lead directly to the chosen product", 
     await page.getByRole("dialog", { name: "Explore SEEN" }).getByRole("link", { name: "Collection", exact: true }).tap();
     await expect(page).toHaveURL(/\/collection$/);
     await expect(page.getByRole("dialog", { name: "Explore SEEN" })).not.toBeVisible();
-    await page.getByRole("group", { name: "Filter by photographed colour" }).getByRole("button", { name: "Neutral", exact: true }).tap();
+    await page.getByRole("group", { name: "Filter by photographed colour" }).getByRole("button", { name: "Cream", exact: true }).tap();
     await expect(page.locator(".catalog-card")).toHaveCount(1);
-    await page.getByRole("link", { name: "View piece: Soft neutral", exact: true }).tap();
+    await page.getByRole("link", { name: "View piece: Cream", exact: true }).tap();
     await expect(page).toHaveURL(/\/collection\/design-07$/);
     await page.getByRole("button", { name: "Next product photograph", exact: true }).tap();
     await expect(page.locator(".piece-gallery__meta")).toHaveText("Details2 / 2");
@@ -148,8 +148,8 @@ test("collection respects reduced motion while preserving browsing controls", as
   await page.goto("/collection");
   await page.locator(".catalog-card").last().scrollIntoViewIfNeeded();
   expect(await page.locator("main").evaluate((main) => main.getAnimations({ subtree: true }).length)).toBe(0);
-  await page.getByRole("group", { name: "Filter by photographed colour" }).getByRole("button", { name: "Charcoal", exact: true }).click();
-  await expect(page.locator(".catalog-card")).toHaveCount(2);
+  await page.getByRole("group", { name: "Filter by photographed colour" }).getByRole("button", { name: "Teal", exact: true }).click();
+  await expect(page.locator(".catalog-card")).toHaveCount(1);
   expect(await page.locator("main").evaluate((main) => main.getAnimations({ subtree: true }).length)).toBe(0);
 });
 
@@ -158,7 +158,7 @@ test("collection HTML retains photographs without client JavaScript", async ({ b
   try {
     const page = await context.newPage();
     await page.goto("/collection");
-    await expect(page.locator(".catalog-card")).toHaveCount(7);
+    await expect(page.locator(".catalog-card")).toHaveCount(9);
     await expect(page.locator(".catalog-card").first()).toBeVisible();
     expect(await page.locator(".catalog-grid > div").first().evaluate((element) => getComputedStyle(element).opacity)).toBe("1");
   } finally { await context.close(); }

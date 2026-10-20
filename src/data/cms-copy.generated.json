@@ -1752,13 +1752,7 @@
     ]
   },
   {
-    "text": "A length label describes the garment length in inches, rather than a UK dress size. These conversions explain the temporary length options shown in our preview collection.",
-    "groups": [
-      "content · size-guide"
-    ]
-  },
-  {
-    "text": "A length reference.",
+    "text": "Abaya length",
     "groups": [
       "content · size-guide"
     ]
@@ -1770,7 +1764,19 @@
     ]
   },
   {
+    "text": "Choose your abaya length using the SEEN size guide below. Sizes 54, 56 and 58 describe garment length in inches, rather than a UK dress size.",
+    "groups": [
+      "content · size-guide"
+    ]
+  },
+  {
     "text": "cm",
+    "groups": [
+      "content · size-guide"
+    ]
+  },
+  {
+    "text": "Finding your perfect length.",
     "groups": [
       "content · size-guide"
     ]
@@ -1782,43 +1788,37 @@
     ]
   },
   {
-    "text": "inches",
-    "groups": [
-      "content · size-guide"
-    ]
-  },
-  {
     "text": "Inches",
     "groups": [
       "content · size-guide"
     ]
   },
   {
-    "text": "Length (",
+    "text": "SEEN abaya lengths and suggested heights. Centimetre lengths are rounded.",
     "groups": [
       "content · size-guide"
     ]
   },
   {
-    "text": "Length label",
+    "text": "SEEN ABAYAS — The size guide",
     "groups": [
       "content · size-guide"
     ]
   },
   {
-    "text": "Reference conversions only — confirmed SEEN garment measurements will be added for each design.",
+    "text": "Size",
     "groups": [
       "content · size-guide"
     ]
   },
   {
-    "text": "This is a conversion reference, not a confirmed size chart. Bust, sleeve, fit and actual garment lengths are being confirmed. Please contact us for measurements before choosing a size.",
+    "text": "Suggested height",
     "groups": [
       "content · size-guide"
     ]
   },
   {
-    "text": "Understanding length",
+    "text": "Suggested heights are a guide. Your preferred hem length, footwear and the shape of each design can affect the fit. Check each product for available sizes and contact us for chest, sleeve or other measurements.",
     "groups": [
       "content · size-guide"
     ]

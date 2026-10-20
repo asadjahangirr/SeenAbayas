@@ -56,7 +56,7 @@ test("approved catalog rows merge with actual photography and display exact GBP 
 
 test("unphotographed designs and empty published catalogs never fall back to preview merchandise", () => {
   expect(mapCatalogRows([], collectionPieces)).toEqual([]);
-  expect(mapCatalogRows([{ ...fixture(), design_reference: "design-08" }], collectionPieces)).toEqual([]);
+  expect(mapCatalogRows([{ ...fixture(), design_reference: "design-9999" }], collectionPieces)).toEqual([]);
 });
 
 test("malformed or unexpectedly private catalog data fails closed", () => {

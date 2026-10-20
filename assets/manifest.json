@@ -1,64 +1,202 @@
 {
   "brand": "brand/logo.jpeg",
-  "expectedDesignCount": 8,
-  "heroIds": ["design-01", "design-02", "design-06"],
-  "featuredIds": ["design-01", "design-02", "design-03", "design-06"],
+  "expectedDesignCount": 9,
+  "heroIds": [
+    "design-01",
+    "design-02",
+    "design-06"
+  ],
+  "featuredIds": [
+    "design-01",
+    "design-02",
+    "design-03",
+    "design-06"
+  ],
   "pieces": [
     {
       "id": "design-01",
       "visualLabel": "Burgundy",
       "images": [
-        { "file": "IMG_8245.JPG.jpeg", "view": "front", "label": "Front", "alt": "Front view of a burgundy abaya with a matching scarf." },
-        { "file": "IMG_8239.JPG.jpeg", "view": "back", "label": "Back", "alt": "Back view of the burgundy abaya against ivory studio draping." },
-        { "file": "IMG_8183.JPG.jpeg", "view": "detail", "label": "Details", "alt": "Covered buttons and sleeve details on the burgundy abaya." },
-        { "file": "IMG_8184.JPG.jpeg", "view": "alternate", "label": "Another angle", "alt": "Another front view of the burgundy abaya." }
+        {
+          "file": "IMG_8245.JPG.jpeg",
+          "view": "front",
+          "label": "Front",
+          "alt": "Front view of a burgundy abaya with a matching scarf."
+        },
+        {
+          "file": "IMG_8239.JPG.jpeg",
+          "view": "back",
+          "label": "Back",
+          "alt": "Back view of the burgundy abaya against ivory studio draping."
+        },
+        {
+          "file": "IMG_8183.JPG.jpeg",
+          "view": "detail",
+          "label": "Details",
+          "alt": "Covered buttons and sleeve details on the burgundy abaya."
+        },
+        {
+          "file": "IMG_8184.JPG.jpeg",
+          "view": "alternate",
+          "label": "Another angle",
+          "alt": "Another front view of the burgundy abaya."
+        }
       ]
     },
     {
       "id": "design-02",
       "visualLabel": "Botanical detailing",
       "images": [
-        { "file": "IMG_8002.JPG.jpeg", "view": "front", "label": "Front", "alt": "Black abaya with tonal botanical details on the front and sleeves." },
-        { "file": "IMG_8203.JPG.jpeg", "view": "back", "label": "Back", "alt": "Back view of the black abaya with tonal botanical details." }
+        {
+          "file": "IMG_8002.JPG.jpeg",
+          "view": "front",
+          "label": "Front",
+          "alt": "Black abaya with tonal botanical details on the front and sleeves."
+        },
+        {
+          "file": "IMG_8203.JPG.jpeg",
+          "view": "back",
+          "label": "Back",
+          "alt": "Back view of the black abaya with tonal botanical details."
+        }
       ]
     },
     {
       "id": "design-03",
       "visualLabel": "Lace detailing",
       "images": [
-        { "file": "IMG_8024.JPG.jpeg", "view": "front", "label": "Front", "alt": "Black abaya with lace detailing along the opening and sleeves." },
-        { "file": "IMG_8023.JPG.jpeg", "view": "detail", "label": "Details", "alt": "Closer view of the black abaya's lace sleeve and front details." }
+        {
+          "file": "IMG_8024.JPG.jpeg",
+          "view": "front",
+          "label": "Front",
+          "alt": "Black abaya with lace detailing along the opening and sleeves."
+        },
+        {
+          "file": "IMG_8023.JPG.jpeg",
+          "view": "detail",
+          "label": "Details",
+          "alt": "Closer view of the black abaya's lace sleeve and front details."
+        }
       ]
     },
     {
       "id": "design-04",
-      "visualLabel": "Soft charcoal",
+      "visualLabel": "Teal",
       "images": [
-        { "file": "IMG_8025.JPG.jpeg", "view": "front", "label": "Front", "alt": "Front view of a plain charcoal abaya with covered buttons." },
-        { "file": "IMG_8271.JPG.jpeg", "view": "styled", "label": "Styled view", "alt": "Seated view of the charcoal abaya with a matching scarf." }
+        {
+          "file": "IMG_8025.JPG.jpeg",
+          "view": "front",
+          "label": "Front",
+          "alt": "Front view of a plain teal abaya with covered buttons."
+        },
+        {
+          "file": "IMG_8271.JPG.jpeg",
+          "view": "styled",
+          "label": "Styled view",
+          "alt": "Seated view of the teal abaya with a matching scarf."
+        }
       ]
     },
     {
       "id": "design-05",
-      "visualLabel": "Textured charcoal",
+      "visualLabel": "Tie dye blue",
       "images": [
-        { "file": "IMG_8028.JPG.jpeg", "view": "front", "label": "Front", "alt": "Charcoal abaya with a textured-looking surface and matching scarf." }
+        {
+          "file": "IMG_8028.JPG.jpeg",
+          "view": "front",
+          "label": "Front",
+          "alt": "Blue tie-dye abaya with a flowing shape and wide sleeves."
+        }
       ]
     },
     {
       "id": "design-06",
       "visualLabel": "Polka dots",
       "images": [
-        { "file": "IMG_8003.JPG.jpeg", "view": "front", "label": "Front", "alt": "Black abaya and matching scarf with ivory polka dots." },
-        { "file": "IMG_8270.JPG.jpeg", "view": "styled", "label": "Styled view", "alt": "Seated campaign view of the black and ivory polka-dot abaya." }
+        {
+          "file": "IMG_8003.JPG.jpeg",
+          "view": "front",
+          "label": "Front",
+          "alt": "Black abaya and matching scarf with ivory polka dots."
+        },
+        {
+          "file": "IMG_8270.JPG.jpeg",
+          "view": "styled",
+          "label": "Styled view",
+          "alt": "Seated campaign view of the black and ivory polka-dot abaya."
+        }
       ]
     },
     {
       "id": "design-07",
-      "visualLabel": "Soft neutral",
+      "visualLabel": "Cream",
       "images": [
-        { "file": "IMG_8267.JPG.jpeg", "view": "front", "label": "Front", "alt": "Full-length mirror photograph of a soft neutral abaya and scarf." },
-        { "file": "IMG_8193.JPG.jpeg", "view": "detail", "label": "Details", "alt": "Close view of the neutral abaya's covered buttons and sleeve." }
+        {
+          "file": "IMG_8267.JPG.jpeg",
+          "view": "front",
+          "label": "Front",
+          "alt": "Full-length mirror photograph of a cream abaya and scarf."
+        },
+        {
+          "file": "IMG_8193.JPG.jpeg",
+          "view": "detail",
+          "label": "Details",
+          "alt": "Close view of the cream abaya's covered buttons and sleeve."
+        }
+      ]
+    },
+    {
+      "id": "design-08",
+      "visualLabel": "Brown",
+      "images": [
+        {
+          "file": "brown-front.png",
+          "view": "front",
+          "label": "Front",
+          "alt": "Full-length front view of a brown abaya with covered buttons and wide sleeves."
+        },
+        {
+          "file": "brown-detail.png",
+          "view": "detail",
+          "label": "Details",
+          "alt": "Closer view of the brown abaya neckline, covered buttons and sleeve."
+        },
+        {
+          "file": "brown-styled.png",
+          "view": "styled",
+          "label": "Styled view",
+          "alt": "Seated view showing the drape of the brown abaya."
+        },
+        {
+          "file": "brown-lifestyle.jpeg",
+          "view": "alternate",
+          "label": "Another angle",
+          "alt": "Lifestyle view of the brown abaya worn while seated."
+        }
+      ]
+    },
+    {
+      "id": "design-09",
+      "visualLabel": "Olive",
+      "images": [
+        {
+          "file": "olive-front.png",
+          "view": "front",
+          "label": "Front",
+          "alt": "Front view of an olive abaya with covered buttons and wide sleeves."
+        },
+        {
+          "file": "olive-detail.png",
+          "view": "detail",
+          "label": "Details",
+          "alt": "Closer view of the olive abaya sleeve and button detailing."
+        },
+        {
+          "file": "olive-styled.jpeg",
+          "view": "styled",
+          "label": "Styled view",
+          "alt": "Seated view of the olive abaya showing its flowing shape."
+        }
       ]
     }
   ]

@@ -255,6 +255,6 @@ test("home edit remains four pieces and the collection contains all seven", asyn
   await expect(page.getByRole("button", { name: /View more pieces|Show fewer pieces/ })).toHaveCount(0);
   await page.locator(".collection-more").getByRole("link", { name: "Explore the collection" }).click();
   await expect(page).toHaveURL(/\/collection$/);
-  await expect(page.locator(".catalog-card")).toHaveCount(7);
+  await expect(page.locator(".catalog-card")).toHaveCount(9);
   await expect(page.locator(".catalog-intro img")).toHaveCount(0);
 });

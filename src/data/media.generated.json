@@ -71,28 +71,28 @@
     },
     {
       "id": "design-04",
-      "visualLabel": "Soft charcoal",
+      "visualLabel": "Teal",
       "photos": [
         {
           "src": "/images/products/design-04/front.webp",
           "label": "Front",
-          "alt": "Front view of a plain charcoal abaya with covered buttons."
+          "alt": "Front view of a plain teal abaya with covered buttons."
         },
         {
           "src": "/images/products/design-04/styled.webp",
           "label": "Styled view",
-          "alt": "Seated view of the charcoal abaya with a matching scarf."
+          "alt": "Seated view of the teal abaya with a matching scarf."
         }
       ]
     },
     {
       "id": "design-05",
-      "visualLabel": "Textured charcoal",
+      "visualLabel": "Tie dye blue",
       "photos": [
         {
           "src": "/images/products/design-05/front.webp",
           "label": "Front",
-          "alt": "Charcoal abaya with a textured-looking surface and matching scarf."
+          "alt": "Blue tie-dye abaya with a flowing shape and wide sleeves."
         }
       ]
     },
@@ -114,17 +114,64 @@
     },
     {
       "id": "design-07",
-      "visualLabel": "Soft neutral",
+      "visualLabel": "Cream",
       "photos": [
         {
           "src": "/images/products/design-07/front.webp",
           "label": "Front",
-          "alt": "Full-length mirror photograph of a soft neutral abaya and scarf."
+          "alt": "Full-length mirror photograph of a cream abaya and scarf."
         },
         {
           "src": "/images/products/design-07/detail.webp",
           "label": "Details",
-          "alt": "Close view of the neutral abaya's covered buttons and sleeve."
+          "alt": "Close view of the cream abaya's covered buttons and sleeve."
+        }
+      ]
+    },
+    {
+      "id": "design-08",
+      "visualLabel": "Brown",
+      "photos": [
+        {
+          "src": "/images/products/design-08/front.webp",
+          "label": "Front",
+          "alt": "Full-length front view of a brown abaya with covered buttons and wide sleeves."
+        },
+        {
+          "src": "/images/products/design-08/detail.webp",
+          "label": "Details",
+          "alt": "Closer view of the brown abaya neckline, covered buttons and sleeve."
+        },
+        {
+          "src": "/images/products/design-08/styled.webp",
+          "label": "Styled view",
+          "alt": "Seated view showing the drape of the brown abaya."
+        },
+        {
+          "src": "/images/products/design-08/alternate.webp",
+          "label": "Another angle",
+          "alt": "Lifestyle view of the brown abaya worn while seated."
+        }
+      ]
+    },
+    {
+      "id": "design-09",
+      "visualLabel": "Olive",
+      "photos": [
+        {
+          "src": "/images/products/design-09/front.webp",
+          "label": "Front",
+          "alt": "Front view of an olive abaya with covered buttons and wide sleeves."
+        },
+        {
+          "src": "/images/products/design-09/detail.webp",
+          "label": "Details",
+          "alt": "Closer view of the olive abaya sleeve and button detailing."
+        },
+        {
+          "src": "/images/products/design-09/styled.webp",
+          "label": "Styled view",
+          "alt": "Seated view of the olive abaya showing its flowing shape."
         }
       ]
     }

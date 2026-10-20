@@ -6,17 +6,17 @@ import sharp from "sharp";
 import { z } from "zod";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
-const id = z.string().regex(/^design-0[1-8]$/);
+const id = z.string().regex(/^design-[0-9]{2,4}$/);
 const manifest = z.object({
   brand: z.literal("brand/logo.jpeg"),
-  expectedDesignCount: z.literal(8),
+  expectedDesignCount: z.number().int().positive(),
   heroIds: z.array(id),
   featuredIds: z.array(id),
   pieces: z.array(z.object({
     id,
     visualLabel: z.string().min(1),
     images: z.array(z.object({
-      file: z.string().regex(/^IMG_[0-9]+\.JPG\.jpeg$/),
+      file: z.string().regex(/^[a-zA-Z0-9_-]+(?:\.[a-zA-Z0-9_-]+)*\.(?:jpe?g|png)$/i),
       view: z.enum(["front", "back", "detail", "alternate", "styled"]),
       label: z.string().min(1),
       alt: z.string().min(1),

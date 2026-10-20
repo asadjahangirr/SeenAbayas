@@ -1,6 +1,6 @@
 {
-  "expectedDesignCount": 8,
-  "photographedDesignCount": 7,
+  "expectedDesignCount": 9,
+  "photographedDesignCount": 9,
   "images": [
     {
       "source": "assets/source/brand/logo.jpeg",
@@ -129,6 +129,62 @@
       "width": 1467,
       "height": 2200,
       "bytes": 157072
+    },
+    {
+      "source": "assets/source/products/design-08/brown-front.png",
+      "sourceSha256": "82ef0e8272807948cba02276dabd7f7fc5be92c65a4a7359998dc5de9aa544ad",
+      "output": "public/images/products/design-08/front.webp",
+      "width": 1287,
+      "height": 2200,
+      "bytes": 86252
+    },
+    {
+      "source": "assets/source/products/design-08/brown-detail.png",
+      "sourceSha256": "9f7b364da7eef55156b9fde56b4632a4fbcccef4ce503ca3250cd5b8f3047e24",
+      "output": "public/images/products/design-08/detail.webp",
+      "width": 1254,
+      "height": 2200,
+      "bytes": 70486
+    },
+    {
+      "source": "assets/source/products/design-08/brown-styled.png",
+      "sourceSha256": "68f0f9c654ce24cf07439d150d3526b74e75e615362b6722a85c63d20f5c5305",
+      "output": "public/images/products/design-08/styled.webp",
+      "width": 1319,
+      "height": 2200,
+      "bytes": 226814
+    },
+    {
+      "source": "assets/source/products/design-08/brown-lifestyle.jpeg",
+      "sourceSha256": "ad5f0c444babc22e3b812343188756c7371803616c505ae5e144359eafa90758",
+      "output": "public/images/products/design-08/alternate.webp",
+      "width": 1238,
+      "height": 2200,
+      "bytes": 412442
+    },
+    {
+      "source": "assets/source/products/design-09/olive-front.png",
+      "sourceSha256": "f499e17f5c4408cc5c8316b90c2df6376c1a907e29e308b3e5f7a6feb53d4477",
+      "output": "public/images/products/design-09/front.webp",
+      "width": 1233,
+      "height": 2200,
+      "bytes": 59978
+    },
+    {
+      "source": "assets/source/products/design-09/olive-detail.png",
+      "sourceSha256": "eae9fd3676666fb763599432ef28a46a1c23eefd076543cf0e4aeacd31797083",
+      "output": "public/images/products/design-09/detail.webp",
+      "width": 1298,
+      "height": 2030,
+      "bytes": 120532
+    },
+    {
+      "source": "assets/source/products/design-09/olive-styled.jpeg",
+      "sourceSha256": "b616d5b17d01072f30678c8199ca4ab0b0d5aacb111b59dde627a9b30884ec48",
+      "output": "public/images/products/design-09/styled.webp",
+      "width": 1320,
+      "height": 1404,
+      "bytes": 381826
     }
   ]
 }

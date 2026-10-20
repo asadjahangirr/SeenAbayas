@@ -48,7 +48,7 @@ test("story preserves every official paragraph and links to the collection", asy
   await expect(page.getByRole("link", { name: "Shop the collection", exact: true })).toHaveAttribute("href", "/collection");
 });
 
-test("size reference converts inches accurately and product dialog restores focus", async ({ page }) => {
+test("client size guide shares confirmed lengths and suggested heights with the product dialog", async ({ page }) => {
   await page.goto("/collection/design-01");
   const trigger = page.getByRole("button", { name: "Size guide", exact: true });
   await trigger.click();
@@ -56,7 +56,9 @@ test("size reference converts inches accurately and product dialog restores focu
   await expect(dialog).toBeVisible();
   await expect(dialog.getByRole("button", { name: "Close size guide" })).toBeFocused();
   await dialog.getByRole("button", { name: "Centimetres", exact: true }).click();
-  for (const value of ["132.08", "137.16", "142.24", "147.32", "152.40"]) await expect(dialog.getByRole("cell", { name: value, exact: true })).toBeVisible();
+  for (const value of ["137 cm / 54 in", "142 cm / 56 in", "147 cm / 58 in"]) await expect(dialog.getByRole("cell", { name: value, exact: true })).toBeVisible();
+  await expect(dialog.getByRole("rowheader")).toHaveText(["54", "56", "58"]);
+  await expect(dialog.getByText("155–160 cm", { exact: true })).toBeVisible();
   await page.keyboard.press("Escape");
   await expect(dialog).not.toBeVisible();
   await expect(trigger).toBeFocused();
@@ -64,6 +66,8 @@ test("size reference converts inches accurately and product dialog restores focu
   await dialog.getByRole("link", { name: "View the full size guide" }).click();
   await expect(page).toHaveURL(/\/size-guide$/);
   await expect(page.getByRole("dialog")).not.toBeVisible();
+  await expect(page.getByRole("rowheader")).toHaveText(["54", "56", "58"]);
+  await expect(page.getByRole("cell", { name: "54 in / 137 cm", exact: true })).toBeVisible();
 });
 
 test("FAQ accordions work with a keyboard and expose honest preview answers", async ({ page }) => {

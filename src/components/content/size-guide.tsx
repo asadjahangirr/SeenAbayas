@@ -3,23 +3,24 @@ import { Copy } from "@/components/cms/content-provider";
 
 
 import { useState } from "react";
-export function LengthReference({ lengths }: { lengths: readonly number[] }) {
+import { sizeGuide } from "@/data/size-guide";
+export function LengthReference() {
   const [unit, setUnit] = useState<"in" | "cm">("in");
   return (
     <section className="length-reference" aria-labelledby="length-reference-title">
-      <div className="length-reference__heading"><div><p className="eyebrow"><Copy text={"Understanding length"} /></p><h2 id="length-reference-title"><Copy text={"A length reference."} /></h2></div>
+      <div className="length-reference__heading"><div><p className="eyebrow"><Copy text={"SEEN ABAYAS — The size guide"} /></p><h2 id="length-reference-title"><Copy text={"Finding your perfect length."} /></h2></div>
         <div className="unit-switch" role="group" aria-label="Measurement unit">
           <button type="button" aria-pressed={unit === "in"} onClick={() => setUnit("in")}><Copy text={"Inches"} /></button>
           <button type="button" aria-pressed={unit === "cm"} onClick={() => setUnit("cm")}><Copy text={"Centimetres"} /></button>
         </div>
       </div>
-      <p><Copy text={"A length label describes the garment length in inches, rather than a UK dress size. These conversions explain the temporary length options shown in our preview collection."} /></p>
+      <p><Copy text={"Choose your abaya length using the SEEN size guide below. Sizes 54, 56 and 58 describe garment length in inches, rather than a UK dress size."} /></p>
       <div className="length-reference__table-wrap"><table>
-        <caption><Copy text={"Reference conversions only — confirmed SEEN garment measurements will be added for each design."} /></caption>
-        <thead><tr><th scope="col"><Copy text={"Length label"} /></th><th scope="col"><Copy text={"Length ("} /><Copy text={unit === "in" ? "inches" : "cm"} /><Copy text={")"} /></th></tr></thead>
-        <tbody>{lengths.map((length) => <tr key={length}><th scope="row"><Copy text={length} /></th><td><Copy text={unit === "in" ? length : (length * 2.54).toFixed(2)} /></td></tr>)}</tbody>
+        <caption><Copy text={"SEEN abaya lengths and suggested heights. Centimetre lengths are rounded."} /></caption>
+        <thead><tr><th scope="col"><Copy text={"Size"} /></th><th scope="col"><Copy text={"Abaya length"} /></th><th scope="col"><Copy text={"Suggested height"} /></th></tr></thead>
+        <tbody>{sizeGuide.map((row) => <tr key={row.size}><th scope="row">{row.size}</th><td>{unit === "in" ? `${row.size} in / ${row.lengthCm} cm` : `${row.lengthCm} cm / ${row.size} in`}</td><td><span>{unit === "in" ? row.heightFeet : row.heightCm}</span><span className="length-reference__secondary">{unit === "in" ? `(${row.heightCm})` : `(${row.heightFeet})`}</span></td></tr>)}</tbody>
       </table></div>
-      <p className="content-note"><Copy text={"This is a conversion reference, not a confirmed size chart. Bust, sleeve, fit and actual garment lengths are being confirmed. Please contact us for measurements before choosing a size."} /></p>
+      <p className="content-note"><Copy text={"Suggested heights are a guide. Your preferred hem length, footwear and the shape of each design can affect the fit. Check each product for available sizes and contact us for chest, sleeve or other measurements."} /></p>
     </section>
   );
 }

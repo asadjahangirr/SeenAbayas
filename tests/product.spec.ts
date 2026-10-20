@@ -84,7 +84,7 @@ test("hover magnification follows the pointer without opening a viewer or moving
 
 test("single-photo pieces retain inline details without redundant gallery controls", async ({ page }) => {
   await page.goto("/collection/design-05");
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Textured charcoal");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Tie dye blue");
   await expect(page.locator(".piece-gallery__meta")).toHaveText("Front1 / 1");
   await expect(page.locator(".piece-thumbnails")).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Next product photograph", exact: true })).toHaveCount(0);

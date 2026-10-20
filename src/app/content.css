@@ -73,7 +73,9 @@
 .length-reference__table-wrap { margin-top: 24px; }
 .length-reference table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; }
 .length-reference caption { padding-block: 0 16px; color: var(--secondary-text); font-size: 11px; text-align: left; }
-.length-reference th, .length-reference td { width: 50%; padding: 14px 16px; border-bottom: 1px solid var(--border); }
+.length-reference th, .length-reference td { padding: 14px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+.length-reference th:first-child { width: 15%; }
+.length-reference__secondary { display: block; margin-top: 4px; color: var(--secondary-text); font-size: 11px; }
 .length-reference thead { background: var(--surface); }
 .length-reference th { font-weight: 500; }
 .length-reference td { font-variant-numeric: tabular-nums; }

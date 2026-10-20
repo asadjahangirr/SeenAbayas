@@ -9,7 +9,6 @@ import { ArrowUpRight } from "lucide-react";
 import { PageBreadcrumb } from "@/components/content/page-breadcrumb";
 import { LengthReference } from "@/components/content/size-guide";
 import { Reveal } from "@/components/ui/reveal";
-import developmentCatalog from "@/data/development-catalog.json";
 import "../content.css";
 
 const baseMetadata: Metadata = { title: "Size Guide", description: "How to measure for an abaya, understand length labels and ask the SEEN team for design-specific sizing advice." };
@@ -31,7 +30,7 @@ export default function SizeGuidePage() {
           <ol><li><h3><Copy text={"Garment length"} /></h3><p><Copy text={"Measure from the highest point of the shoulder beside the neckline down to the hem. Consider the shoes you intend to wear."} /></p></li><li><h3><Copy text={"Chest"} /></h3><p><Copy text={"Measure straight across the garment from underarm to underarm. Double this flat measurement when comparing it with a full chest circumference."} /></p></li><li><h3><Copy text={"Sleeve"} /></h3><p><Copy text={"Measure from the shoulder seam to the cuff. Dropped shoulders and different sleeve shapes can change how this measurement is taken."} /></p></li></ol>
         </Reveal>
       </div>
-      <Reveal><LengthReference lengths={developmentCatalog.lengthsInches} /></Reveal>
+      <Reveal><LengthReference /></Reveal>
       <Reveal className="help-page__assistance"><div><p className="eyebrow"><Copy text={"A little guidance"} /></p><h2><Copy text={"Between sizes?"} /><br /><em><Copy text={"Let's find your fit."} /></em></h2></div><div><p><Copy text={"Length and body fit are different measurements. If you are between lengths, or need more room through the chest or sleeves, share the design and your measurements with our team so we can help you compare."} /></p><Link className="text-link" href="/contact"><Copy text={"Ask about sizing"} /><ArrowUpRight size={17} strokeWidth={1.3} aria-hidden="true" /></Link></div></Reveal>
     </div>
   );

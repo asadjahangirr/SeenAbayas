@@ -4,13 +4,11 @@ Updated 20 October 2026. The Stripe-hosted payment flow is implemented for **tes
 
 ## Status
 
-The developer reports Cards, Apple Pay, Klarna and Afterpay/Clearpay enabled in the client sandbox. Read-only requests accepted the privately configured Stripe test key and Supabase server key; no key, balance or customer details were printed. At that check the new payment migration and webhook were absent. Run `npm.cmd run check:payments` for a fresh read-only check.
+The developer pushed aff54b1, configured Vercel's main deployment and enabled PAYMENTS_MODE=test. Checkout returns 200; webhook GET returns 405 as expected. Unsigned requests are rejected. A signed diagnostic for a nonexistent order performed only a protected lookup, with no payment/order/stock mutation. The public review API verifies test payment availability, GBP totals, secure ownership cookies and private/no-store responses. CLI access is disabled for this invitation; Dashboard webhook setup is working without it.
 
-CLI access is reported disabled. **Use the Dashboard webhook below; the CLI is optional.** The Checkout product's Preview badge is not proof of test mode. No agent-created provider sessions, hosted stock changes or hosted SQL installation have been performed; browser tests use isolated dummy credentials and PGlite.
+The first hosted card sandbox payment is independently verified: Stripe marked it paid in test mode, GBP 225 matched the saved private paid order, its reservation was released, and the actual completion event had zero outstanding webhook deliveries. Clearpay success is now independently verified too: the actual method was `afterpay_clearpay`, its PaymentIntent succeeded, GBP 300 matched the saved paid test order, the reservation was released, and its completion event had zero outstanding webhook deliveries. These checks were read-only; the developer completed the payments in their browser. The intended test endpoint is enabled at https://seenabayas.vercel.app/api/payments/stripe/webhook. Stripe's default sandbox configuration reports card, Apple Pay, Klarna and Clearpay available/display on. Klarna is visible but its completed test and a physical Apple Pay test remain pending.
 
-Latest hosted check: the developer applied the payment migration and corrected the server credential privately. Stripe test connectivity, Supabase connectivity and `payment_health` now pass. The webhook secret is still pending and payments remain disabled at this check. The selected public test website is **https://seenabayas.vercel.app** and the exact Dashboard endpoint is **https://seenabayas.vercel.app/api/payments/stripe/webhook**. This is the intended address, not proof that the latest code or endpoint has been deployed.
-
-Later update: the developer created the Dashboard destination and added its signing secret privately. The read-only check now reports all three connections/configuration requirements ready, with mode still disabled. A direct public GET to the webhook currently returns **404**, confirming the new endpoint is not deployed at that address yet. Vercel settings and deployment have been requested. After deployment, a browser GET may return **405 Method Not Allowed** because the webhook accepts POST; verify Stripe Event deliveries rather than treating a browser GET as a payment test.
+The reported wrong-card concern was clarified as using Stripe's published 4242 success card with a changed three-digit CVC. That card accepts any valid three-digit CVC; the provider recorded the simulated check as passed. Use explicit decline fixtures below to simulate failure. No code fix was needed for this expected behaviour. Local mode was not edited by the agent; Vercel test mode was verified remotely. The numbered setup steps below are also retained for fresh environments; do not rerun completed migrations blindly. Live charging remains unsupported.
 
 ## 1. Install the database update
 
@@ -108,3 +106,38 @@ git push
 ```
 
 These commands include the already-reviewed earlier checkout/delivery/handover work still uncommitted in this workspace. .env.local is ignored; .env.example is intentionally tracked with blank secrets. Inspect git status before committing any additional unrelated work. The agent has not executed these commands.
+
+## Separate payment-method acceptance tests
+
+Run one checkout at a time using sandbox keys. A failed attempt can leave its Stripe session open for retry; use the site's explicit Cancel this test checkout flow if abandoning it. Closing a browser does not immediately release its reservation. The saved bag is deliberately retained for repeated tests. Enabled/visible methods are not proof of a completed payment for every method.
+
+### Card success and failure
+
+Stripe's success card `4242 4242 4242 4242` accepts any valid three-digit CVC and future expiry. Changing 123 to 456 does not simulate an incorrect CVC. To test that failure, use `4000 0000 0000 0127` with any three-digit CVC and future expiry. A generic decline uses `4000 0000 0000 0002`. Neither attempt should lead to a paid order unless a subsequent actual successful test payment is made. A malformed number, two-digit CVC or invalid expiry month should be rejected as invalid input. Reference: [Stripe testing](https://docs.stripe.com/testing).
+
+### Clearpay
+
+Start a fresh checkout from the saved bag, choose Clearpay on Stripe and click Pay. Complete the successful simulated authentication on the sandbox redirect page. Stripe also documents a **Fail test payment** action on the test redirect for a separate failure scenario. Confirm the SEEN return page, actual provider method `afterpay_clearpay`, saved order totals/state and eventual reservation release. Reference: [Stripe Clearpay checkout testing](https://docs.stripe.com/payments/afterpay-clearpay/accept-a-payment?payment-ui=checkout).
+
+### Klarna - published UK sandbox fixtures
+
+Current investigation (20 October): the developer reports a blank page on `pay.test.klarna.com` in laptop Chrome after using arbitrary customer details. Read-only checks found two unfinished Klarna test sessions: both unpaid with PaymentIntent `requires_action`, no recorded last payment error/decline, and matching private open orders with reservations retained. The browser has reached Klarna's external sandbox; the reason its page is blank is not yet established. Do not describe this as a successful Klarna test, infer that arbitrary data caused the blank page, or loosen the store's CSP. Cancel abandoned sessions through their SEEN confirmation page before creating more; closing a tab alone does not cancel them. Retry with the approved UK fixtures below. If it still fails, inspect the first browser console/network failure without sharing private redirect URLs, tokens or customer details. An extension-free Chrome profile is a useful isolation check; begin the entire checkout there to retain its own ownership cookie.
+
+Start a fresh SEEN checkout using Stripe's published approved UK Klarna test customer details, rather than arbitrary identity data. This is test-provider data, not the client's identity:
+
+- First name: Test; last name: Person-uk.
+- Email: `customer@email.uk` (approved scenario).
+- Address line 1: `10 New Burlington Street`; line 2: `Apt 214`.
+- Town/city: London; postcode: `W1S 3BE`; country: United Kingdom.
+- Test phone: `+447755564318`.
+- If Klarna requests date of birth: `10-07-1970`.
+- Select Klarna on Stripe, click Pay and follow the sandbox redirect. If it asks for a two-step code, `123456` is valid; `999999` simulates authentication failure.
+- If a test repayment credit card is requested inside Klarna, its published test number is `4111 1111 1111 1111`, CVV `123`, with any valid future expiry. These are Klarna test-flow values, separate from the initial Stripe card test.
+
+Use the provider's documented declined-customer fixtures for a separate failure scenario. Repayment plans depend on provider eligibility. Reference: [Stripe Klarna checkout testing](https://docs.stripe.com/payments/klarna/accept-a-payment?payment-ui=checkout).
+
+### Apple Pay
+
+Use an eligible Apple device/browser with Apple Wallet configured; iPhone Safari is a suitable first device check. Stripe-hosted Checkout needs no additional website-domain registration for Apple Pay. In Stripe test mode, the wallet uses an existing real card in Apple Wallet to generate a test token without charging it. Do not try adding `4242…4242` to Wallet: Stripe documents that those test cards cannot be added to Apple Pay for this test. Never paste a real card number into chat or into these test instructions. An Android/desktop card test does not verify Apple Pay rendering or authorization. Reference: [Stripe Apple Pay testing](https://docs.stripe.com/apple-pay?platform=web#test-apple-pay).
+
+Record each method separately: appeared, redirect/wallet opened, success/failure simulation, truthful SEEN return state, matching provider/private order and reservation settlement. Keep live charging disabled until the remaining commercial and operational work is complete.

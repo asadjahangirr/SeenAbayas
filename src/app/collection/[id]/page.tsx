@@ -17,7 +17,6 @@ import { SizeGuideTrigger } from "@/components/product/size-guide-trigger";
 import { Reveal } from "@/components/ui/reveal";
 import { store } from "@/config/store";
 import { photographDescriptions, toneByDesign } from "@/data/collection";
-import developmentCatalog from "@/data/development-catalog.json";
 
 import { getStorefrontCatalog } from "@/lib/catalog/server";
 import { formatGbp } from "@/lib/money";
@@ -60,7 +59,7 @@ export default async function PiecePage({ params }: PiecePageProps) {
           {piece.commerce && <p className="piece-price"><Copy text={formatGbp(piece.commerce.pricePence)} /></p>}
           <div className="piece-colour"><span><Copy text={"Photographed in"} /></span><span><span className={`piece-colour__swatch piece-colour__swatch--${(piece.tone || toneByDesign[piece.id])?.toLowerCase()}`} aria-hidden="true" /><Copy text={piece.tone || toneByDesign[piece.id]} /></span></div>
           <ProductPurchase key={piece.id} commerce={piece.commerce} />
-          <SizeGuideTrigger lengths={developmentCatalog.lengthsInches} />
+          <SizeGuideTrigger />
           <CmsAnchor className="text-link piece-customer-care" href={enquiry}><Copy text={"Ask about sizing or availability"} /><ArrowUpRight size={16} strokeWidth={1.3} aria-hidden="true" /></CmsAnchor>
           <p className="piece-description"><Copy text={piece.commerce?.description || photographDescriptions[piece.id] || piece.photos[0].alt} /></p>
           <div className="piece-information__details">
