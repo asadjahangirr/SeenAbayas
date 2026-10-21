@@ -1,4 +1,5 @@
-import { NextResponse, type NextRequest } from "next/server";
+import { after, NextResponse, type NextRequest } from "next/server";
+import { deliverOrderEmails } from "@/lib/order-emails/server";
 import { z } from "zod";
 import {
   checkoutOwnerCookie,
@@ -38,6 +39,11 @@ export async function GET(request: NextRequest) {
       order = await reconcileOrder(order);
     } catch {
       checking = true;
+    }
+    if (order.state === "paid") {
+      const paidId = order.id;
+      const isTest = order.is_test;
+      after(async () => { await deliverOrderEmails(paidId, isTest); });
     }
     return reply({ order: customerOrder(order), checking });
   } catch (error) {

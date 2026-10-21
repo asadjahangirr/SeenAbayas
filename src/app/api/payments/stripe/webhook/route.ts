@@ -1,4 +1,5 @@
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
+import { deliverOrderEmails } from "@/lib/order-emails/server";
 import { z } from "zod";
 import { readPaymentBody } from "@/lib/payments/http";
 import { paymentServices, getPaymentOrder } from "@/lib/payments/server";
@@ -44,7 +45,8 @@ export async function POST(request: Request) {
     if (!order) return reply({ received: true });
     // Re-read Stripe to avoid trusting stale, reordered event snapshots.
     const session = await stripe.checkout.sessions.retrieve(reference.id);
-    await applyProviderSession(order, session, event.id, event.type);
+    const updated = await applyProviderSession(order, session, event.id, event.type);
+    if (updated.state === "paid") after(async () => { await deliverOrderEmails(updated.id, updated.is_test); });
     return reply({ received: true });
   } catch (error) {
     return reply(

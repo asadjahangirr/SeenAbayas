@@ -1,6 +1,7 @@
 import type { AdminRecord } from "@/lib/admin/model";
 import { orderDate, orderDetails } from "@/lib/admin/orders";
 import { formatGbp } from "@/lib/money";
+import { OrderEmailStatus } from "./order-email-status";
 
 const amount = (value: number | null) => value === null ? "Not recorded" : formatGbp(value);
 
@@ -13,6 +14,7 @@ export function OrderDetails({ record }: { record: AdminRecord }) {
       {d.isTest && <p className="admin-help">Sandbox purchases release their reservation without reducing physical stock. Do not dispatch test orders.</p>}
       <p className="admin-help">Dates use UK time. Confirmation times are recorded when the store verifies payment. Older orders may not have a recorded confirmation time.</p>
     </div>
+    {record.payload.source === "stripe_checkout" && <OrderEmailStatus orderId={record.id} />}
     <div className="admin-order-columns">
       <section aria-label="Customer contact"><h3>Customer contact</h3><p>{d.contactName || "Not recorded"}</p><p>{d.email ? <a href={`mailto:${encodeURIComponent(d.email)}`}>{d.email}</a> : "Email not recorded"}</p><p>{d.phone || "Phone not provided"}</p></section>
       <section aria-label="Delivery address"><h3>Delivery address</h3>{d.address.length ? <address>{[d.recipientName, ...d.address].filter(Boolean).map((line,index) => <span key={index}>{line}</span>)}</address> : <p>Address not recorded for this order.</p>}<p className="admin-order-delivery">{d.deliveryLabel || "Delivery service not recorded"}</p></section>

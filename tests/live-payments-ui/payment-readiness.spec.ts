@@ -5,15 +5,23 @@ test("payment readiness requires owner MFA, reveals no credentials and makes no 
   await request.get("http://127.0.0.1:3108/__test/reset");
   const endpoint = "/api/admin/payments/readiness";
   const providerEndpoint = `${endpoint}?stripe=read&mode=test`;
+  const emailEndpoint = "/api/admin/order-emails";
   const options = { headers: { Origin: "http://127.0.0.1:3107" } };
   expect((await request.get(endpoint)).status()).toBe(401);
   expect((await request.get(providerEndpoint)).status()).toBe(401);
+  expect((await request.get(emailEndpoint)).status()).toBe(401);
   expect((await request.post("/api/admin/auth", { ...options, data: { action: "login", email: "owner@example.test", password: "Test-password-only-123" } })).status()).toBe(200);
   expect((await request.get(endpoint)).status()).toBe(403);
   expect((await request.get(providerEndpoint)).status()).toBe(403);
+  expect((await request.get(emailEndpoint)).status()).toBe(403);
   const profile = await (await request.get("/api/admin/auth")).json();
   expect((await request.post("/api/admin/auth", { ...options, data: { action: "verify", factorId: profile.factors[0].id, code: "123456" } })).status()).toBe(200);
   const before = await (await request.get("http://127.0.0.1:3108/__test/state")).json();
+  const emailStatus = await request.get(emailEndpoint);
+  expect(emailStatus.status()).toBe(200);
+  expect(emailStatus.headers()["cache-control"]).toBe("private, no-store");
+  expect(await emailStatus.json()).toMatchObject({ configured: false, database: "ready", ready: true, messages: [], counts: {} });
+  expect((await request.get(`${emailEndpoint}?order=invalid`)).status()).toBe(400);
   const response = await request.get(endpoint);
   expect(response.status()).toBe(200);
   expect(response.headers()["cache-control"]).toBe("private, no-store");
@@ -47,6 +55,7 @@ test("payment readiness requires owner MFA, reveals no credentials and makes no 
     await request.post("http://127.0.0.1:3108/__test/admin-role", { data: { role: "editor" } });
     expect((await request.get(endpoint)).status()).toBe(403);
     expect((await request.get(providerEndpoint)).status()).toBe(403);
+    expect((await request.get(emailEndpoint)).status()).toBe(403);
   } finally {
     await request.post("http://127.0.0.1:3108/__test/admin-role", { data: { role: "owner" } });
   }

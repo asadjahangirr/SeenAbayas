@@ -1,6 +1,8 @@
 import { test, expect } from "@playwright/test";
 import { PGlite } from "@electric-sql/pglite";
 import { readFile } from "node:fs/promises";
+import { processOrderEmails, type EmailRpc } from "../../src/lib/order-emails/worker";
+import { emailPurchaseSchema, type EmailClaim, type OrderEmailConfig } from "../../src/lib/order-emails/model";
 
 let db: PGlite;
 const owner = "10000000-0000-4000-8000-000000000010";
@@ -38,6 +40,7 @@ test.beforeAll(async () => {
     "20261020000200_order_records.sql",
     "20261020000300_stock_management.sql",
     "20261021000100_live_payments.sql",
+    "20261021000200_order_emails.sql",
   ])
     await db.exec(await readFile(`supabase/migrations/${file}`, "utf8"));
   await db.query("insert into auth.users(id) values($1)", [owner]);
@@ -452,4 +455,179 @@ test("one provider payment cannot settle two purchases and projection backfill i
   const stockMigration=(await readFile("supabase/migrations/20261020000300_stock_management.sql","utf8")).replace(/^begin;$/m,"").replace(/^commit;$/m,"");
   await db.exec(stockMigration);await db.exec(stockMigration);
   expect((await db.query("select count(*)::int count from seen_private.admin_records where kind='order'")).rows[0]).toEqual({count:2});
+});
+
+const emailConfig: OrderEmailConfig = { apiKey: "re_UNIT_TEST_ONLY", from: "orders@mail.seenabayas.co.uk", origin: "https://www.seenabayas.co.uk", mode: "live" };
+const emailArguments: Record<string, string[]> = {
+  order_email_claim: ["target_order", "batch_size", "payment_mode"], order_email_freeze: ["email_id", "claim", "message"],
+  order_email_finish: ["email_id", "claim", "outcome", "provider_id"], order_email_status: ["target_order"],
+};
+const emailRpc: EmailRpc = async <T>(name: string, args: Record<string, unknown> = {}) => {
+  const values = emailArguments[name].map(key => args[key] ?? (key === "payment_mode" ? "live" : null));
+  return (await db.query<{ data: T }>(`select public.${name}(${values.map((_, i) => "$" + (i + 1)).join(",")}) data`, values)).rows[0].data;
+};
+async function liveForEmail() {
+  return (await db.query<any>("select public.payment_prepare_order_v2($1,$2,$3,$4,$5,'standard',0,'https://www.seenabayas.co.uk','live') data", [
+    requestId, ownerHash, requestHash, details, [{ variant_id: variant, quantity: 2, unit_price_pence: 8000 }],
+  ])).rows[0].data;
+}
+const acceptedResponse = () => Response.json({ id: "80000000-0000-4000-8000-000000000001" });
+
+test("email queue starts at verified confirmation, freezes purchased facts and ignores payment replays", async () => {
+  const order = await liveForEmail();
+  expect((await db.query("select * from seen_private.order_emails")).rows).toHaveLength(0);
+  await apply(order, "pending");
+  expect((await db.query("select * from seen_private.order_emails")).rows).toHaveLength(0);
+  await apply(order, "paid", "evt_email_paid");
+  await apply(order, "paid", "evt_email_paid");
+  await apply(order, "expired", "evt_email_late_expiry");
+  await db.query("update public.products set name='New display name',price_pence=12000");
+  const rows = (await db.query<any>("select kind,snapshot from seen_private.order_emails order by kind")).rows;
+  expect(rows.map(r => r.kind)).toEqual(["customer_confirmation", "owner_notification"]);
+  for (const row of rows) {
+    const saved = emailPurchaseSchema.parse(row.snapshot);
+    expect(saved.total_pence).toBe(16000);
+    expect(saved.items[0]).toMatchObject({ name: "TEST ONLY", size: "54", quantity: 2, unit_price_pence: 8000 });
+    expect(JSON.stringify(row.snapshot)).not.toMatch(/owner_hash|request_hash|session_id|checkout_url/);
+  }
+  const migration = (await readFile("supabase/migrations/20261021000200_order_emails.sql", "utf8")).replace(/^begin;$/m, "").replace(/^commit;$/m, "");
+  await db.exec(migration); await db.exec(migration);
+  expect((await db.query("select * from seen_private.order_emails")).rows).toHaveLength(2);
+});
+
+test("email worker sends two separate receipts, records acceptance once and does not change payment or stock", async () => {
+  const order = await liveForEmail(); await apply(order, "paid");
+  const requests: any[] = [];
+  const fetcher: typeof fetch = async (url, init) => {
+    expect(String(url)).toBe("https://api.resend.com/emails");
+    requests.push(JSON.parse(init!.body as string));
+    return acceptedResponse();
+  };
+  expect(await processOrderEmails(emailConfig, emailRpc, order.id, fetcher)).toMatchObject({ accepted: 2, retryRequired: 0 });
+  expect(requests.map(r => r.to[0]).sort()).toEqual([details.email, "info@seenabayas.co.uk"].sort());
+  const customer = requests.find(r => r.to[0] === details.email);
+  expect(customer.reply_to).toBe("info@seenabayas.co.uk");
+  expect(customer.text).toContain("Size 54 | Quantity 2 | £80.00 each | £160.00");
+  expect(customer.text).toContain("SW1A 1AA");
+  expect(requests.find(r => r.to[0] === "info@seenabayas.co.uk").reply_to).toBe(details.email);
+  expect(await processOrderEmails(emailConfig, emailRpc, order.id, fetcher)).toMatchObject({ checked: 0 });
+  expect(requests).toHaveLength(2);
+  expect(await stock()).toEqual({ on_hand: 3, reserved: 0 });
+  const status = await emailRpc<any>("order_email_status", { target_order: order.id });
+  expect(status.counts).toEqual({ accepted: 2 });
+  expect(JSON.stringify(status)).not.toMatch(/example.test|owner_hash|request_hash|re_UNIT|from|html/);
+});
+
+test("a lost acceptance acknowledgement replays the identical frozen message and key after lease recovery", async () => {
+  const order = await liveForEmail(); await apply(order, "paid");
+  let lost = false;
+  const unreliableRpc: EmailRpc = async <T>(name: string, args?: Record<string, unknown>) => {
+    if (!lost && name === "order_email_finish" && args?.outcome === "accepted") { lost = true; throw new Error("Simulated lost DB acknowledgement"); }
+    return emailRpc<T>(name, args);
+  };
+  const seen = new Map<string, string>();
+  const fetcher: typeof fetch = async (_url, init) => {
+    const key = (init!.headers as Record<string, string>)["Idempotency-Key"];
+    const body = init!.body as string;
+    if (seen.has(key)) expect(body).toBe(seen.get(key));
+    else seen.set(key, body);
+    return acceptedResponse();
+  };
+  expect(await processOrderEmails(emailConfig, unreliableRpc, order.id, fetcher)).toMatchObject({ accepted: 1, retryRequired: 1 });
+  await db.exec("update seen_private.order_emails set lease_until=clock_timestamp()-interval '1 second' where state='sending'");
+  expect(await processOrderEmails({ ...emailConfig, from: "changed@mail.seenabayas.co.uk" }, emailRpc, order.id, fetcher)).toMatchObject({ accepted: 1, retryRequired: 0 });
+  expect(seen.size).toBe(2);
+});
+
+test("partial email failure retries only the failed recipient while the paid order stays confirmed", async () => {
+  const order = await liveForEmail(); await apply(order, "paid");
+  const first = await processOrderEmails(emailConfig, emailRpc, order.id, async (_url, init) => {
+    return JSON.parse(init!.body as string).to[0] === "info@seenabayas.co.uk" ? Response.json({}, { status: 429 }) : acceptedResponse();
+  });
+  expect(first).toMatchObject({ accepted: 1, retryRequired: 1 });
+  expect((await db.query<any>("select state from seen_private.checkout_orders where id=$1", [order.id])).rows[0].state).toBe("paid");
+  await db.exec("update seen_private.order_emails set next_attempt_at=clock_timestamp()-interval '1 second' where state='queued'");
+  const targets: string[] = [];
+  const result = await processOrderEmails(emailConfig, emailRpc, undefined, async (_url, init) => {
+    targets.push(JSON.parse(init!.body as string).to[0]); return acceptedResponse();
+  });
+  expect(result.accepted).toBe(1); expect(targets).toEqual(["info@seenabayas.co.uk"]);
+});
+
+test("sandbox mail is suppressed by default and both test messages use a controlled inbox when enabled", async () => {
+  const order = await prepare(); await apply(order, "paid");
+  expect(await processOrderEmails({ ...emailConfig, mode: "test" }, emailRpc, order.id, async () => { throw new Error("Must not send"); })).toMatchObject({ suppressed: 2 });
+  // A new sandbox purchase can deliberately test delivery, never using its fictional address.
+  const second = await prepare("50000000-0000-4000-8000-000000000005");
+  await apply(second, "paid", "evt_sandbox_email_2", { payment_intent: "pi_second_email", id: "cs_test_second_email" });
+  const messages: any[] = [];
+  expect(await processOrderEmails({ ...emailConfig, mode: "test", testRecipient: "controlled@example.test" }, emailRpc, second.id, async (_url, init) => {
+    messages.push(JSON.parse(init!.body as string)); return acceptedResponse();
+  })).toMatchObject({ accepted: 2 });
+  for (const message of messages) {
+    expect(message.to).toEqual(["controlled@example.test"]);
+    expect(message.subject).toMatch(/^\[TEST\]/); expect(message.text).toContain("Do not dispatch");
+  }
+  expect(await stock()).toEqual({ on_hand: 5, reserved: 0 });
+});
+
+test("mail leases exclude competing workers and stale acknowledgements; expired idempotency windows require review", async () => {
+  const order = await liveForEmail(); await apply(order, "paid");
+  const first = await emailRpc<EmailClaim[]>("order_email_claim", { target_order: order.id, batch_size: 2 });
+  expect(first).toHaveLength(2);
+  expect(await emailRpc("order_email_claim", { target_order: order.id, batch_size: 2 })).toEqual([]);
+  await db.exec("update seen_private.order_emails set lease_until=clock_timestamp()-interval '1 second'");
+  const second = await emailRpc<EmailClaim[]>("order_email_claim", { target_order: order.id, batch_size: 2 });
+  expect(second[0].claim_token).not.toBe(first[0].claim_token);
+  expect(await emailRpc("order_email_finish", { email_id: first[0].id, claim: first[0].claim_token, outcome: "accepted", provider_id: "old" })).toBe(false);
+  await denied(() => emailRpc("order_email_freeze", { email_id: first[0].id, claim: first[0].claim_token, message: {} }));
+  await db.exec("update seen_private.order_emails set first_attempt_at=clock_timestamp()-interval '25 hours',lease_until=clock_timestamp()-interval '1 second'");
+  expect(await emailRpc("order_email_claim", { target_order: order.id, batch_size: 2 })).toEqual([]);
+  expect((await emailRpc<any>("order_email_status", { target_order: order.id })).counts).toEqual({ review: 2 });
+});
+
+test("pending, failed and attention orders never send a customer confirmation", async () => {
+  const order = await prepare(); await apply(order, "pending"); await apply(order, "failed"); await apply(order, "paid", "evt_late_email_attention");
+  expect((await db.query("select * from seen_private.order_emails")).rows).toHaveLength(0);
+});
+
+test("private email payloads are inaccessible to browsers and RPCs require the service role", async () => {
+  const order = await liveForEmail(); await apply(order, "paid");
+  for (const role of ["anon", "authenticated", "service_role"]) {
+    await db.exec(`set local role ${role}`);
+    await denied(() => db.query("select * from seen_private.order_emails"));
+    if (role !== "service_role") {
+      await denied(() => emailRpc("order_email_claim", { target_order: order.id, batch_size: 2 }));
+      await denied(() => emailRpc("order_email_status", { target_order: order.id }));
+      await denied(() => emailRpc("order_email_freeze", { email_id: order.id, claim: order.id, message: {} }));
+      await denied(() => emailRpc("order_email_finish", { email_id: order.id, claim: order.id, outcome: "retry" }));
+    } else expect((await emailRpc<any>("order_email_status", { target_order: order.id })).counts).toEqual({ queued: 2 });
+    await db.exec("reset role");
+  }
+});
+
+test("invalid saved details and permanent provider rejection stop for review without repeating sends", async () => {
+  const order = await liveForEmail(); await apply(order, "paid");
+  await db.exec("update seen_private.order_emails set snapshot=snapshot||'{\"total_pence\":1}'::jsonb where kind='customer_confirmation'");
+  let sends = 0;
+  const fetcher: typeof fetch = async () => { sends++; return Response.json({ message: "Private recipient detail must not be saved" }, { status: 422 }); };
+  expect(await processOrderEmails(emailConfig, emailRpc, order.id, fetcher)).toMatchObject({ review: 2 });
+  expect(sends).toBe(1);
+  expect(await processOrderEmails(emailConfig, emailRpc, order.id, fetcher)).toMatchObject({ checked: 0 });
+  const status = await emailRpc<any>("order_email_status", { target_order: order.id });
+  expect(status.messages.map((m: any) => m.error).sort()).toEqual(["invalid_snapshot", "provider_rejected"]);
+  expect(JSON.stringify(status)).not.toContain("Private recipient");
+});
+
+test("a sandbox worker cannot claim live notifications even when the Supabase project is shared", async () => {
+  const live = await liveForEmail(); await apply(live, "paid");
+  const sandbox = await prepare("50000000-0000-4000-8000-000000000009", "f".repeat(64));
+  await apply(sandbox, "paid", "evt_shared_email_test", { payment_intent: "pi_sandbox_separate", id: "cs_test_separate" });
+  const messages: any[] = [];
+  const result = await processOrderEmails({ ...emailConfig, mode: "test", testRecipient: "controlled@example.test" }, emailRpc, undefined, async (_url, init) => {
+    messages.push(JSON.parse(init!.body as string)); return acceptedResponse();
+  });
+  expect(result.accepted).toBe(2);
+  for (const message of messages) expect(message.to).toEqual(["controlled@example.test"]);
+  expect((await emailRpc<any>("order_email_status", { target_order: live.id })).counts).toEqual({ queued: 2 });
 });

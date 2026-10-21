@@ -669,6 +669,10 @@ export function AdminWorkspace({
                         Check Stripe read access
                         <ArrowUpRight size={16} />
                       </a>
+                      <a className="admin-inline-link" href="/api/admin/order-emails" target="_blank" rel="noopener noreferrer">
+                        Check order email setup
+                        <ArrowUpRight size={16} />
+                      </a>
                       </>
                     )}
                   </Panel>

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { reconcilePayments } from "@/lib/payments/reconcile";
 import { recoveryAuthorised } from "@/lib/payments/recovery-auth";
+import { deliverOrderEmails } from "@/lib/order-emails/server";
 
 export const maxDuration = 60;
 export async function GET(request: Request) {
@@ -12,8 +13,10 @@ export async function GET(request: Request) {
       { status: 401, headers: { "Cache-Control": "private, no-store" } },
     );
   try {
-    const result = await reconcilePayments();
-    return NextResponse.json(result, {
+    const [payments, emails] = await Promise.allSettled([reconcilePayments(), deliverOrderEmails()]);
+    if (payments.status === "rejected") throw payments.reason;
+    const result = payments.value;
+    return NextResponse.json({ ...result, emails: emails.status === "fulfilled" ? emails.value : { retryRequired: 1 } }, {
       status: result.retryRequired ? 503 : 200,
       headers: { "Cache-Control": "private, no-store" },
     });
