@@ -36,7 +36,8 @@
     "groups": [
       "api · bag · route",
       "api · checkout · review · route",
-      "checkout · checkout-page"
+      "checkout · checkout-page",
+      "src · lib · checkout · information"
     ]
   },
   {
@@ -100,6 +101,8 @@
       "api · checkout · review · route",
       "api · checkout · session · route",
       "checkout · checkout-page",
+      "src · lib · checkout · public-copy",
+      "src · lib · payments · readiness",
       "src · lib · payments · server"
     ]
   },
@@ -178,6 +181,15 @@
     ]
   },
   {
+    "text": "paid",
+    "groups": [
+      "api · checkout · status · route",
+      "api · payments · stripe · webhook · route",
+      "checkout · order-confirmation",
+      "src · lib · payments · provider"
+    ]
+  },
+  {
     "text": "This checkout is unavailable in this browser.",
     "groups": [
       "api · checkout · status · route"
@@ -196,6 +208,20 @@
     ]
   },
   {
+    "text": "email",
+    "groups": [
+      "api · contact · route",
+      "contact",
+      "cookie-policy"
+    ]
+  },
+  {
+    "text": "inbox",
+    "groups": [
+      "api · contact · route"
+    ]
+  },
+  {
     "text": "info@seenabayas.co.uk",
     "groups": [
       "api · contact · route",
@@ -204,9 +230,23 @@
     ]
   },
   {
+    "text": "fulfilled",
+    "groups": [
+      "api · payments · reconcile · route",
+      "src · lib · payments · reconcile"
+    ]
+  },
+  {
     "text": "Reconciliation will need another attempt.",
     "groups": [
       "api · payments · reconcile · route"
+    ]
+  },
+  {
+    "text": "rejected",
+    "groups": [
+      "api · payments · reconcile · route",
+      "src · lib · payments · reconcile"
     ]
   },
   {
@@ -385,7 +425,8 @@
   {
     "text": "unavailable",
     "groups": [
-      "bag · bag-contents"
+      "bag · bag-contents",
+      "src · lib · payments · readiness"
     ]
   },
   {
@@ -586,8 +627,7 @@
   {
     "text": "Checkout preview",
     "groups": [
-      "checkout · checkout-page",
-      "privacy-policy"
+      "checkout · checkout-page"
     ]
   },
   {
@@ -973,6 +1013,7 @@
     "text": "test",
     "groups": [
       "checkout · checkout-page",
+      "src · lib · payments · readiness",
       "src · lib · payments · server"
     ]
   },
@@ -1143,16 +1184,15 @@
     ]
   },
   {
-    "text": "Order summary",
+    "text": "Order reference",
     "groups": [
       "checkout · order-confirmation"
     ]
   },
   {
-    "text": "paid",
+    "text": "Order summary",
     "groups": [
-      "checkout · order-confirmation",
-      "src · lib · payments · provider"
+      "checkout · order-confirmation"
     ]
   },
   {
@@ -1843,7 +1883,7 @@
     ]
   },
   {
-    "text": "Business details and delivery arrangements are being confirmed. This page is a draft for review; online ordering is not yet available.",
+    "text": "Business details and delivery arrangements are being confirmed. This page remains a draft pending the business's review. Check the current checkout and contact customer care if you need clarification.",
     "groups": [
       "content · policy-page"
     ]
@@ -1910,10 +1950,9 @@
     ]
   },
   {
-    "text": "To be confirmed before ordering opens",
+    "text": "To be confirmed by the business",
     "groups": [
-      "content · policy-page",
-      "shipping-delivery"
+      "content · policy-page"
     ]
   },
   {
@@ -2050,12 +2089,6 @@
     ]
   },
   {
-    "text": "Contact sending is not yet configured. The Turnstile widget does not load while the form is unavailable.",
-    "groups": [
-      "cookie-policy"
-    ]
-  },
-  {
     "text": "Cookie Policy",
     "groups": [
       "cookie-policy",
@@ -2167,13 +2200,19 @@
     ]
   },
   {
+    "text": "The inbox-only contact form uses validation, a honeypot and shared server-side rate limits. It does not load a CAPTCHA widget or set a contact-tracking cookie.",
+    "groups": [
+      "cookie-policy"
+    ]
+  },
+  {
     "text": "The storefront uses first-party local storage to remember product variant references and quantities in your bag. It does not save payment card details, your name, email or delivery address in those entries.",
     "groups": [
       "cookie-policy"
     ]
   },
   {
-    "text": "This draft describes cookies and similar browser technologies used by the current storefront preview, including the shopping bag you choose to save.",
+    "text": "This draft describes cookies and similar browser technologies used by the current storefront, including the shopping bag you choose to save.",
     "groups": [
       "cookie-policy"
     ]
@@ -2239,19 +2278,13 @@
     ]
   },
   {
-    "text": " are not a confirmed garment size chart. Please ask us for design-specific measurements.",
-    "groups": [
-      "faqs"
-    ]
-  },
-  {
     "text": " explains eligible cancellation rights and includes an optional cancellation form. You do not have to accept an exchange instead of an eligible refund.",
     "groups": [
       "faqs"
     ]
   },
   {
-    "text": " explains the planned services, tracking and details being confirmed before ordering opens.",
+    "text": " explains the available delivery information and any service details still being confirmed.",
     "groups": [
       "faqs"
     ]
@@ -2263,25 +2296,25 @@
     ]
   },
   {
+    "text": " for the supplied length and suggested-height guidance. Check the available size options on the product page and ask our team for design-specific fit measurements before purchasing if you are unsure.",
+    "groups": [
+      "faqs"
+    ]
+  },
+  {
+    "text": " provides the supplied length references. For widths, sleeves or other design-specific measurements, please contact our team.",
+    "groups": [
+      "faqs"
+    ]
+  },
+  {
     "text": " qualifies.",
     "groups": [
       "faqs"
     ]
   },
   {
-    "text": " to understand garment length and how to measure. Compare the specific design's measurements, as silhouettes can vary. Preview sizes are temporary and need confirmation before purchase.",
-    "groups": [
-      "faqs"
-    ]
-  },
-  {
     "text": " with your order reference. Our ",
-    "groups": [
-      "faqs"
-    ]
-  },
-  {
-    "text": ", select an available size on a product page and add it to your bag. You can review your contact and delivery details in the checkout preview. Reviewing does not place an order or reserve stock. If test payment is enabled, continuing creates a private sandbox checkout with a temporary reservation. It does not make a real purchase.",
     "groups": [
       "faqs"
     ]
@@ -2323,12 +2356,6 @@
     ]
   },
   {
-    "text": "Confirmed measurements will be listed with each design. The reference conversions in our ",
-    "groups": [
-      "faqs"
-    ]
-  },
-  {
     "text": "contact our team",
     "groups": [
       "faqs"
@@ -2336,12 +2363,6 @@
   },
   {
     "text": "Contact us with the design and size you are looking for. We can help with current availability; a restock date is only confirmed when we have one.",
-    "groups": [
-      "faqs"
-    ]
-  },
-  {
-    "text": "Dispatch times are still being confirmed. Once ordering and fulfilment are active, dispatch confirmation will include tracking details. For an existing order enquiry, please contact us with your order reference.",
     "groups": [
       "faqs"
     ]
@@ -2427,6 +2448,13 @@
     ]
   },
   {
+    "text": "Our ",
+    "groups": [
+      "faqs",
+      "terms-conditions"
+    ]
+  },
+  {
     "text": "Our customer care team is here to help with the collection, sizing and order enquiries.",
     "groups": [
       "faqs"
@@ -2445,12 +2473,6 @@
     ]
   },
   {
-    "text": "Real-money payments are not enabled. Test checkout supports cards, Apple Pay, Klarna and Clearpay where Stripe makes them available. No real money is charged during testing.",
-    "groups": [
-      "faqs"
-    ]
-  },
-  {
     "text": "Returns & Exchanges policy",
     "groups": [
       "faqs",
@@ -2460,6 +2482,12 @@
   },
   {
     "text": "Royal Mail is the planned UK delivery partner. Our ",
+    "groups": [
+      "faqs"
+    ]
+  },
+  {
+    "text": "See Shipping & Delivery for confirmed dispatch and service information. If you have been given a tracking number, use Royal Mail's tracking service. For help with an order or its tracking, contact our team with your order reference.",
     "groups": [
       "faqs"
     ]
@@ -2488,12 +2516,6 @@
   },
   {
     "text": "Start with our ",
-    "groups": [
-      "faqs"
-    ]
-  },
-  {
-    "text": "The store is being configured for Apple Pay, Klarna and Clearpay. Stripe shows eligible options for the account, customer, device and order; an enabled method is not guaranteed for every checkout. Real purchasing remains unavailable during testing.",
     "groups": [
       "faqs"
     ]
@@ -2865,13 +2887,13 @@
     ]
   },
   {
-    "text": "Contact enquiries",
+    "text": "Checkout and orders",
     "groups": [
       "privacy-policy"
     ]
   },
   {
-    "text": "Customer accounts, real-money payments and newsletter subscriptions are not active in this preview. Sandbox payments may be enabled for testing; test orders are private and do not purchase garments. The business must confirm test-order retention and the final order/payment privacy disclosures before launch. The storefront has no analytics or advertising trackers. This notice must be updated before new collection or tracking begins.",
+    "text": "Contact enquiries",
     "groups": [
       "privacy-policy"
     ]
@@ -2919,7 +2941,7 @@
     ]
   },
   {
-    "text": "How the SEEN ABAYAS preview handles shopping bag information, enquiries and website security, with business disclosures awaiting confirmation.",
+    "text": "How SEEN ABAYAS handles shopping bags, checkout, order information, enquiries and website security.",
     "groups": [
       "privacy-policy"
     ]
@@ -2931,19 +2953,25 @@
     ]
   },
   {
-    "text": "Information supports the shopping bag you request, responses to your enquiries and protection of the site against abuse. Contact messages are not used to automatically subscribe you to marketing.",
+    "text": "Information supports the shopping bag and checkout you request, payment verification, order handling and related emails when those features are enabled, responses to your enquiries and protection of the site against abuse. Ordering or sending a contact message does not automatically subscribe you to marketing.",
     "groups": [
       "privacy-policy"
     ]
   },
   {
-    "text": "Information used by this preview",
+    "text": "Information used by this website",
     "groups": [
       "privacy-policy"
     ]
   },
   {
     "text": "Please avoid sending payment card details or unnecessary sensitive information. If you choose not to supply a required form field, the form cannot send your enquiry; you can still browse the collection or email us.",
+    "groups": [
+      "privacy-policy"
+    ]
+  },
+  {
+    "text": "Private order records and email-delivery records have no automated retention schedule configured in the application; the business must confirm appropriate retention arrangements. Your saved bag remains in local browser storage until removed or cleared by you or your browser. Inbox abuse-prevention receipts use server-keyed hashes of the email address and, on Vercel, the platform-provided network address. The raw network address is not stored in those receipts. Receipts older than 24 hours are pruned on the next accepted message; messages themselves remain until deleted by an authorised administrator. Inbox delivery stores verified enquiries privately in Supabase for customer care. Contact email delivery can optionally copy provider-accepted enquiries to the same inbox. Authorised administrators can read, archive and delete those messages; the business must confirm its enquiry retention period before launch.",
     "groups": [
       "privacy-policy"
     ]
@@ -2967,13 +2995,19 @@
     ]
   },
   {
-    "text": "SEEN ABAYAS is the brand operating this storefront. The legal identity and address of the organisation responsible for your information have not yet been supplied.",
+    "text": "SEEN ABAYAS is the brand operating this storefront. The business details currently provided for this website are listed below.",
     "groups": [
       "privacy-policy"
     ]
   },
   {
     "text": "Service providers and transfers",
+    "groups": [
+      "privacy-policy"
+    ]
+  },
+  {
+    "text": "Supabase stores private order records and the information needed to manage purchases when checkout is enabled. Stripe provides hosted payment processing. Resend delivers customer confirmations and store order notifications when order emails are enabled, and enquiry emails only when contact email delivery is selected. Inbox-only contact messages use validation, a honeypot and shared database rate limits. Optional contact email delivery uses Cloudflare Turnstile for automated-activity checks. Hosting and support-mailbox arrangements, processing locations and any necessary international-transfer safeguards still require confirmation by the business.",
     "groups": [
       "privacy-policy"
     ]
@@ -2991,12 +3025,6 @@
     ]
   },
   {
-    "text": "The checkout preview sends your entered contact and UK delivery details to our server when you request a review. They are validated and returned to the current page, without being saved as an order or stored in your browser. Reloading clears those details. Reviewing alone does not collect payment details or reserve stock. When test payments are enabled, continuing saves a private test order in Supabase, temporarily reserves stock and sends the required customer, delivery and item details to Stripe-hosted Checkout. Use test customer details. Payment details are entered on Stripe, not on this website.",
-    "groups": [
-      "privacy-policy"
-    ]
-  },
-  {
     "text": "The contact form is configured to send enquiries.",
     "groups": [
       "privacy-policy"
@@ -3009,7 +3037,13 @@
     ]
   },
   {
-    "text": "This draft explains the information used by the current SEEN ABAYAS preview. The legal identity, handling arrangements and final policy are being confirmed before launch.",
+    "text": "This draft explains how the SEEN ABAYAS storefront uses information. Business disclosures and handling arrangements remain subject to the business's review.",
+    "groups": [
+      "privacy-policy"
+    ]
+  },
+  {
+    "text": "This website does not decide eligibility for buy-now-pay-later credit. Any such eligibility checks and payment terms are handled by the payment provider.",
     "groups": [
       "privacy-policy"
     ]
@@ -3033,12 +3067,6 @@
     ]
   },
   {
-    "text": "We do not use this preview to make automated purchase or credit decisions.",
-    "groups": [
-      "privacy-policy"
-    ]
-  },
-  {
     "text": "Website requests and security checks may involve your IP address, browser or device information and request metadata. Hosting and logging arrangements are still being confirmed.",
     "groups": [
       "privacy-policy"
@@ -3052,12 +3080,6 @@
   },
   {
     "text": "When enabled, a Cloudflare Turnstile check helps protect the contact form. A check can reject an automated submission; customer care remains available by email. Read the ",
-    "groups": [
-      "privacy-policy"
-    ]
-  },
-  {
-    "text": "When the contact form is enabled, Resend processes enquiry emails for delivery to our support inbox and Cloudflare Turnstile checks whether a form submission appears automated. See Cloudflare’s privacy information below. The hosting provider, support mailbox provider, processing locations and any necessary international-transfer safeguards are still being confirmed.",
     "groups": [
       "privacy-policy"
     ]
@@ -3088,12 +3110,6 @@
   },
   {
     "text": "Your information",
-    "groups": [
-      "privacy-policy"
-    ]
-  },
-  {
-    "text": "Your saved bag remains in local browser storage until removed or cleared by you or your browser. Short-lived anti-abuse counters use a hashed email identifier; expired entries are removed on subsequent requests or when the server process restarts. An optional private Supabase inbox can retain verified, successfully emailed enquiries for customer care when its server integration is enabled. Authorised administrators can read, archive and delete those messages; the business must confirm its enquiry retention period before launch.",
     "groups": [
       "privacy-policy"
     ]
@@ -3701,6 +3717,12 @@
     ]
   },
   {
+    "text": "To be confirmed before ordering opens",
+    "groups": [
+      "shipping-delivery"
+    ]
+  },
+  {
     "text": "To be confirmed for the available service and destination",
     "groups": [
       "shipping-delivery"
@@ -3990,6 +4012,90 @@
     ]
   },
   {
+    "text": ", select an available size and add it to your bag. At checkout, enter your contact and UK delivery details, review the final total and continue to secure payment with Stripe. Continuing reserves the selected pieces temporarily. Your order is confirmed after payment is verified. If a delivery charge is unavailable, that selection cannot proceed to payment.",
+    "groups": [
+      "src · lib · checkout · public-copy"
+    ]
+  },
+  {
+    "text": ", select an available size on a product page and add it to your bag. You can review your contact and delivery details in the checkout preview. Reviewing does not place an order or reserve stock. If test payment is enabled, continuing creates a private sandbox checkout with a temporary reservation. It does not make a real purchase.",
+    "groups": [
+      "src · lib · checkout · public-copy"
+    ]
+  },
+  {
+    "text": "Choose an available product and size, review your bag, enter your delivery and contact details and review the payable total before continuing to Stripe. You can correct your details before continuing. Payment creates a confirmed store order only after verification; a failed or pending payment is not shown as a confirmed purchase. Adding to the bag or reviewing details alone does not reserve stock or take payment. Final contract-acceptance wording remains subject to the business's review of these draft terms.",
+    "groups": [
+      "src · lib · checkout · public-copy"
+    ]
+  },
+  {
+    "text": "Customer accounts and newsletter subscriptions are not active. Real-money checkout processes order and payment information as described above. The storefront has no analytics or advertising trackers. The business must confirm order, email and provider retention arrangements and complete review of this draft policy.",
+    "groups": [
+      "src · lib · checkout · public-copy"
+    ]
+  },
+  {
+    "text": "Customer accounts, real-money payments and newsletter subscriptions are not active in this checkout mode. Sandbox payments may be enabled for testing; test orders are private and do not purchase garments. The business must confirm test-order retention and the final order/payment privacy disclosures before launch. The storefront has no analytics or advertising trackers.",
+    "groups": [
+      "src · lib · checkout · public-copy"
+    ]
+  },
+  {
+    "text": "Live payments are not enabled in this checkout mode. Test checkout uses sandbox totals without charging real money. The final commercial payable total, any applicable taxes, delivery costs and available payment methods must be disclosed before live payment. An option is available only when shown at the active checkout.",
+    "groups": [
+      "src · lib · checkout · public-copy"
+    ]
+  },
+  {
+    "text": "Real-money payments are not enabled for this checkout. Test checkout supports cards, Apple Pay, Klarna and Clearpay where Stripe makes them available. No real money is charged during testing.",
+    "groups": [
+      "src · lib · checkout · public-copy"
+    ]
+  },
+  {
+    "text": "Reviewing checkout sends your contact and UK delivery details to our server for validation. Continuing to payment saves a private order in Supabase, temporarily reserves stock and sends the necessary customer, delivery and item information to Stripe-hosted Checkout. Payment details are entered on Stripe, not on this website. The website verifies payment before confirming the order. A secure browser cookie authorises access to your order status; it is not a public order lookup. When order emails are enabled, the confirmed purchase details are used for your confirmation and the store's order notification.",
+    "groups": [
+      "src · lib · checkout · public-copy"
+    ]
+  },
+  {
+    "text": "Secure checkout supports card payments and eligible Apple Pay, Klarna and Clearpay options through Stripe. The methods available for your device, order and eligibility are shown on the payment page.",
+    "groups": [
+      "src · lib · checkout · public-copy"
+    ]
+  },
+  {
+    "text": "Stripe shows eligible options for the account, customer, device and order. Apple Pay requires a compatible device and wallet setup. Klarna and Clearpay make their own eligibility decisions and display their applicable payment terms before you choose them.",
+    "groups": [
+      "src · lib · checkout · public-copy"
+    ]
+  },
+  {
+    "text": "The checkout preview sends your entered contact and UK delivery details to our server when you request a review. They are validated and returned to the current page, without being saved as an order or stored in your browser. Reloading clears those details. Reviewing alone does not collect payment details or reserve stock. When test payments are enabled, continuing saves a private test order in Supabase, temporarily reserves stock and sends the required customer, delivery and item details to Stripe-hosted Checkout. Use test customer details. Payment details are entered on Stripe, not on this website.",
+    "groups": [
+      "src · lib · checkout · public-copy"
+    ]
+  },
+  {
+    "text": "The final GBP total, delivery charge and any added tax are displayed for review before payment. The current checkout adds no tax; this statement does not establish VAT registration or exemption. Payments use Stripe-hosted Checkout. Available methods are shown there and remain subject to provider, customer and device eligibility.",
+    "groups": [
+      "src · lib · checkout · public-copy"
+    ]
+  },
+  {
+    "text": "The store is being configured for Apple Pay, Klarna and Clearpay. Stripe shows eligible options for the account, customer, device and order; an enabled method is not guaranteed for every checkout. Real purchasing remains unavailable during testing.",
+    "groups": [
+      "src · lib · checkout · public-copy"
+    ]
+  },
+  {
+    "text": "The website supports browsing, a shopping bag and a checkout review preview. Real-money payments and commercial order placement are not available in this checkout mode. Sandbox checkout may be enabled for testing: it saves private test orders and temporarily reserves stock, without a purchase contract or dispatch. Adding a piece or reviewing your details does not reserve stock, take payment or create a purchase contract.",
+    "groups": [
+      "src · lib · checkout · public-copy"
+    ]
+  },
+  {
     "text": "Invalid payment request.",
     "groups": [
       "src · lib · payments · http"
@@ -4117,15 +4223,39 @@
     ]
   },
   {
-    "text": "fulfilled",
+    "text": "live_migration_required",
     "groups": [
-      "src · lib · payments · reconcile"
+      "src · lib · payments · readiness"
     ]
   },
   {
-    "text": "rejected",
+    "text": "not_ready",
     "groups": [
-      "src · lib · payments · reconcile"
+      "src · lib · payments · readiness"
+    ]
+  },
+  {
+    "text": "ready",
+    "groups": [
+      "src · lib · payments · readiness"
+    ]
+  },
+  {
+    "text": "The deployed project's payment_health must report live_payments_ready=true. Verify 20261021000100_live_payments.sql in that project.",
+    "groups": [
+      "src · lib · payments · readiness"
+    ]
+  },
+  {
+    "text": "The deployed server could not read payment_health. Check its Supabase project, server key and installed functions.",
+    "groups": [
+      "src · lib · payments · readiness"
+    ]
+  },
+  {
+    "text": "The payment database health check did not report ready.",
+    "groups": [
+      "src · lib · payments · readiness"
     ]
   },
   {
@@ -4201,19 +4331,13 @@
     ]
   },
   {
-    "text": " explain the current preview's information handling. Visit ",
+    "text": " explain this website's information handling. Visit ",
     "groups": [
       "terms-conditions"
     ]
   },
   {
     "text": " explains exchanges, eligible online cancellations, refunds and faulty or incorrect items.",
-    "groups": [
-      "terms-conditions"
-    ]
-  },
-  {
-    "text": " explains how to measure and labels its reference conversions clearly; it is not a confirmed garment size chart.",
     "groups": [
       "terms-conditions"
     ]
@@ -4226,6 +4350,12 @@
   },
   {
     "text": " or more",
+    "groups": [
+      "terms-conditions"
+    ]
+  },
+  {
+    "text": " provides the supplied abaya length references and suggested heights. It does not replace design-specific width and fit measurements; contact customer care if you need help choosing.",
     "groups": [
       "terms-conditions"
     ]
@@ -4255,19 +4385,19 @@
     ]
   },
   {
-    "text": "Displayed collection prices use pounds sterling (GBP). Preview prices are for review while the catalogue is being completed. VAT registration and tax treatment are being confirmed with the business.",
+    "text": "Checkout and ordering",
     "groups": [
       "terms-conditions"
     ]
   },
   {
-    "text": "Draft SEEN ABAYAS website and sale information, including preview ordering status, delivery and consumer cancellation rights.",
+    "text": "Displayed collection prices use pounds sterling (GBP). Check the current product and final checkout total before paying.",
     "groups": [
       "terms-conditions"
     ]
   },
   {
-    "text": "Final ordering steps, how errors can be corrected and when an order is accepted will be explained before purchasing is enabled. These draft pages do not indicate that a preview selection has been accepted as an order.",
+    "text": "Draft SEEN ABAYAS website and sale information, including checkout, payments, delivery and consumer cancellation rights.",
     "groups": [
       "terms-conditions"
     ]
@@ -4279,37 +4409,19 @@
     ]
   },
   {
-    "text": "Live payments are not enabled. Test checkout uses sandbox totals without charging real money. The final commercial payable total, any applicable taxes, delivery costs and available payment methods will be disclosed before payment. Requested payment options are subject to merchant activation and eligibility; an option is available only when shown at the active checkout.",
-    "groups": [
-      "terms-conditions"
-    ]
-  },
-  {
-    "text": "Our ",
-    "groups": [
-      "terms-conditions"
-    ]
-  },
-  {
     "text": "Our supplied ",
     "groups": [
       "terms-conditions"
     ]
   },
   {
-    "text": "Please read this draft alongside our delivery, returns and privacy information. Final sale terms and business details will be confirmed before online ordering opens.",
+    "text": "Please read this draft alongside our delivery, returns and privacy information. Final sale terms and business details remain subject to the business's review.",
     "groups": [
       "terms-conditions"
     ]
   },
   {
     "text": "Please use the site lawfully. Do not attempt to compromise its security, misuse forms or interfere with other visitors. If you find an error or need help accessing a page, contact our team.",
-    "groups": [
-      "terms-conditions"
-    ]
-  },
-  {
-    "text": "Preview and ordering",
     "groups": [
       "terms-conditions"
     ]
@@ -4351,31 +4463,25 @@
     ]
   },
   {
-    "text": "Sizes and quantities shown in the development collection are temporary. The ",
-    "groups": [
-      "terms-conditions"
-    ]
-  },
-  {
     "text": "Store information",
     "groups": [
       "terms-conditions"
     ]
   },
   {
-    "text": "The storefront trades under the SEEN ABAYAS brand. The legal trading name and postal address are awaiting confirmation.",
+    "text": "The ",
+    "groups": [
+      "terms-conditions"
+    ]
+  },
+  {
+    "text": "The storefront trades under the SEEN ABAYAS brand. The business details currently provided for this website are listed below.",
     "groups": [
       "terms-conditions"
     ]
   },
   {
     "text": "The voluntary exchange conditions do not remove statutory cancellation or faulty-goods rights. You can email a clear cancellation statement or use the optional ",
-    "groups": [
-      "terms-conditions"
-    ]
-  },
-  {
-    "text": "The website supports browsing, a shopping bag and a checkout review preview. Real-money payments and commercial order placement are not available. Sandbox checkout may be enabled for testing: it saves private test orders and temporarily reserves stock, without a purchase contract or dispatch. Adding a piece or reviewing your details does not reserve stock, take payment or create a purchase contract.",
     "groups": [
       "terms-conditions"
     ]

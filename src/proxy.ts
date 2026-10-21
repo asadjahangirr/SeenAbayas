@@ -7,7 +7,7 @@ export async function proxy(request: NextRequest) {
   const isDevelopment = process.env.NODE_ENV === "development";
   // The allowlist must survive client navigation from another page to Contact.
   // Only the Turnstile frame origin is allowed, and only when its widget is configured.
-  const contactVerification = Boolean(process.env.CONTACT_TURNSTILE_SITE_KEY);
+  const contactVerification = process.env.CONTACT_DELIVERY === "email" && Boolean(process.env.CONTACT_TURNSTILE_SITE_KEY);
   const isAdmin = request.nextUrl.pathname === "/admin" || request.nextUrl.pathname.startsWith("/admin/") || request.nextUrl.pathname.startsWith("/api/admin");
   const supabase = readCatalogConfig(process.env).supabase;
   let uploadOrigin = "";

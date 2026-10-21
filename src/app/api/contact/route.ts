@@ -9,9 +9,9 @@ const handleContact = createContactHandler();
 
 export async function POST(request: Request) {
   const config = getContactConfig();
-  if (config) {
+  if (config?.delivery === "email") {
     const address = (await getSiteDocument()).text["info@seenabayas.co.uk"] || "info@seenabayas.co.uk";
     config.recipient = z.email().parse(address);
   }
-  return handleContact(request, config, fetch, storeVerifiedEnquiry);
+  return handleContact(request, config, fetch, data => storeVerifiedEnquiry(data, config?.delivery === "inbox", request));
 }

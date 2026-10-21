@@ -81,6 +81,8 @@ test("FAQ accordions work with a keyboard and expose honest preview answers", as
   await expect(details).not.toHaveAttribute("open", "");
   await page.getByRole("link", { name: "Sizing & fit", exact: true }).click();
   await expect(page).toHaveURL(/#sizing$/);
+  await page.getByText("Which payment methods do you accept?", { exact: true }).click();
+  await expect(page.locator("#payments")).toContainText("Real-money payments are not enabled");
 });
 
 test("unconfigured contact form has all required fields and cannot claim delivery", async ({ page, request }) => {

@@ -1,4 +1,5 @@
 import { defineConfig, devices } from "@playwright/test";
+import { isolatedEnvironment } from "./scripts/test-environment.mjs";
 export default defineConfig({
   testDir: "./tests/admin-ui",
   outputDir: "test-results/admin-ui",
@@ -24,7 +25,7 @@ export default defineConfig({
       url: "http://127.0.0.1:3107/admin/login",
       reuseExistingServer: false,
       timeout: 60000,
-      env: {
+      env: isolatedEnvironment(3107, {
         NEXT_PUBLIC_SITE_URL: "http://127.0.0.1:3107",
         NEXT_PUBLIC_SUPABASE_URL: "http://127.0.0.1:3106",
         NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY:
@@ -42,7 +43,7 @@ export default defineConfig({
         STRIPE_SECRET_KEY: "",
         STRIPE_WEBHOOK_SECRET: "",
         PAYMENTS_FIXTURE_ORIGIN: "",
-      },
+      }),
     },
   ],
 });

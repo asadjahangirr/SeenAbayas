@@ -5,6 +5,24 @@ import AxeBuilder from "@axe-core/playwright";
 const headers={Origin:"http://127.0.0.1:3107","Content-Type":"application/json"};
 const details={email:"live-fixture@example.test",firstName:"Test",lastName:"Shopper",phone:"",addressLine1:"1 Example Street",addressLine2:"",city:"London",postcode:"SW1A 1AA",country:"GB"};
 test.beforeEach(async({request})=>{await request.get("http://127.0.0.1:3106/__test/reset");await request.get("http://127.0.0.1:3108/__test/reset");});
+
+test("live FAQs and policies explain active checkout without hiding outstanding business review", async ({ page }) => {
+  await page.goto("/faqs");
+  await page.getByText("How do I place an order?", { exact: true }).click();
+  await expect(page.locator("#ordering")).toContainText("confirmed after payment is verified");
+  await page.getByText("Which payment methods do you accept?", { exact: true }).click();
+  await expect(page.locator("#payments")).toContainText("Secure checkout supports card payments");
+  await expect(page.locator("#payments")).not.toContainText("Real-money payments are not enabled");
+  await page.goto("/terms-conditions");
+  await expect(page.locator("#ordering")).toContainText("confirmed store order only after verification");
+  await expect(page.locator("#prices-payments")).toContainText("current checkout adds no tax");
+  await expect(page.getByRole("complementary", { name: "Policy preview notice" })).toBeVisible();
+  await page.goto("/privacy-policy");
+  await expect(page.locator("#information")).toContainText("private order in Supabase");
+  await expect(page.locator("#information")).toContainText("secure browser cookie");
+  await expect(page.locator("#providers")).toContainText("Resend delivers customer confirmations");
+  await expect(page.locator("#future-features")).not.toContainText("real-money payments");
+});
 for(const width of [393,1440]) test(`simulated live success deducts once and shows a verified order at ${width}px`,async({page,request})=>{
   await page.setViewportSize({width,height:900});
   await page.goto("/collection/design-01");await page.getByRole("button",{name:"54",exact:true}).click();await page.getByRole("button",{name:"Add to bag",exact:true}).click();
@@ -20,6 +38,8 @@ for(const width of [393,1440]) test(`simulated live success deducts once and sho
   const state=await(await request.get("http://127.0.0.1:3108/__test/state")).json();const orderId=state.sessions[0].metadata.order_id;expect(state.sessions[0].livemode).toBe(true);expect(state.stock[0]).toEqual({on_hand:5,reserved:2});
   for(let i=0;i<2;i++)expect((await(await request.post("http://127.0.0.1:3108/__test/event",{data:{sessionId:state.sessions[0].id,state:"paid",eventId:"evt_live_fixture"}})).json()).status).toBe(200);
   await page.goto(`/order-confirmation?order=${orderId}`);await expect(page.getByRole("heading",{name:"Thank you. Your order is confirmed.",exact:true})).toBeVisible();
+  await expect(page.locator(".confirmation-reference")).toContainText("Order reference");
+  await expect(page.locator(".confirmation-reference")).not.toContainText("Test reference");
   await expect.poll(async()=>page.evaluate(()=>localStorage.getItem("seen.bag.v1"))).toBeNull();
   const after=await(await request.get("http://127.0.0.1:3108/__test/state")).json();expect(after.stock[0]).toEqual({on_hand:3,reserved:0});
   expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);

@@ -27,13 +27,14 @@ declare global {
 }
 
 export function ContactForm({
+  enabled = false,
   siteKey,
   nonce,
 }: {
+  enabled?: boolean;
   siteKey?: string;
   nonce?: string;
 }) {
-  const enabled = Boolean(siteKey);
   const [scriptReady, setScriptReady] = useState(false);
   const [token, setToken] = useState("");
   const [securityError, setSecurityError] = useState("");
@@ -119,7 +120,7 @@ export function ContactForm({
       return;
     }
     setErrors({});
-    if (!token) {
+    if (siteKey && !token) {
       setError(
         "Please complete the security check before sending your message.",
       );
@@ -347,7 +348,7 @@ export function ContactForm({
           }
         />
       </p>
-      {enabled && (
+      {enabled && siteKey && (
         <>
           <Script
             id="contact-turnstile"

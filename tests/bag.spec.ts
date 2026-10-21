@@ -1,9 +1,11 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
+import { revealHomeNavigation } from "./helpers/navigation";
 
 for (const width of [320, 768, 1440]) test(`empty shopping bag is responsive and accessible at ${width}px`, async ({ page }) => {
   await page.setViewportSize({ width, height: 900 });
   await page.goto("/");
+  await revealHomeNavigation(page);
   const trigger = page.getByRole("button", { name: "Open shopping bag, 0 items", exact: true });
   await trigger.click();
   const dialog = page.getByRole("dialog", { name: /^Your bag/ });

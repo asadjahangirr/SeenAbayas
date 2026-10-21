@@ -1,6 +1,6 @@
 import { createHash, randomUUID } from "node:crypto";
 
-import { contactRequestSchema, type ContactConfig, type ContactRequest } from "./model";
+import { ContactDeliveryError, contactRequestSchema, type ContactConfig, type ContactRequest } from "./model";
 
 const recipient = "info@seenabayas.co.uk";
 const unavailable = "We couldn't send your message. Please try again or email info@seenabayas.co.uk.";
@@ -54,6 +54,15 @@ export function createContactHandler() {
       if (data.website || age < -60_000 || age > 23 * 60 * 60_000) return json({ error: "Please refresh the form and try again." }, 400);
       if (!config) return json({ error: "Our contact form is currently unavailable. Please email info@seenabayas.co.uk." }, 503);
 
+      // Inbox-only delivery uses atomic database limits and never calls an
+      // email or CAPTCHA provider. A receipt requires durable message storage.
+      if (config.delivery === "inbox") {
+        if (!storeEnquiry) return json({ error: unavailable }, 503);
+        await storeEnquiry(data);
+        return json({ success: true });
+      }
+      if (!data.verificationToken) return json({ error: "Please complete the security check again." }, 400);
+
       const verification = await fetcher("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
         method: "POST", cache: "no-store", signal: AbortSignal.timeout(8_000),
         body: new URLSearchParams({ secret: config.turnstileSecret, response: data.verificationToken, idempotency_key: randomUUID() }),
@@ -80,6 +89,9 @@ export function createContactHandler() {
       if (typeof accepted?.id !== "string" || !accepted.id) return json({ error: unavailable }, 503);
       if (storeEnquiry) await storeEnquiry(data);
       return json({ success: true });
-    } catch { return json({ error: unavailable }, 503); }
+    } catch (error) {
+      if (error instanceof ContactDeliveryError) return json({ error: error.message }, error.status, error.status === 429 ? { "Retry-After": "900" } : {});
+      return json({ error: unavailable }, 503);
+    }
   };
 }

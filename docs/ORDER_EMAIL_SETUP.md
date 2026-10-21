@@ -1,6 +1,6 @@
 # Automatic order emails — SEEN ABAYAS
 
-Implemented 21 October 2026. Activation and genuine mailbox delivery still need the operator steps below. No email password is needed, and this is separate from Supabase Auth email or Stripe receipts.
+Implemented and operator setup completed 21 October 2026. The deployed owner diagnostic reports configured=true, issues=[], database=ready and ready=true. Both authorised [TEST] templates were accepted by Resend and the operator confirms both arrived in the controlled test inbox. The steps below are the setup/recovery reference; do not repeat them merely because they are listed. No email password is needed, and this is separate from Supabase Auth email or Stripe receipts.
 
 ## What happens
 
@@ -62,7 +62,7 @@ Install SQL before activating/deploying the sender so new confirmed orders are d
 4. Default sandbox behaviour with no controlled recipient is **Sandbox email skipped**. Suppressed older tests are not later resent when the recipient is configured. A new sandbox purchase is needed.
 5. Keep Production payment mode live as previously configured. When a genuine customer places a verified live order, their confirmation goes to their checkout email and the owner email goes to info@seenabayas.co.uk. A genuine charge is not required for installation or read-only checks; any deliberate real payment/refund acceptance test needs separate coordination.
 
-No live email delivery was verified while implementing this phase. Local tests use isolated database fixtures and mocked email responses; they do not send messages.
+Acceptance update (21 October): after explicit operator authorisation and private controlled-recipient setup, two [TEST] messages were submitted through the real Resend API using a disposable local PGlite order/queue. Both returned HTTP 200 and were recorded accepted, with no retries/duplicates. The operator then confirmed BOTH emails arrived in the controlled inbox. No real payment, hosted order or hosted inventory change occurred. The earlier automated implementation tests used mocked email responses and sent no messages. This isolated acceptance verifies sender/key/template/queue submission and actual receipt of both templates in that inbox, not every deployed payment-to-email path or delivery to the owner's distinct production mailbox.
 
 ## Reliability, privacy and troubleshooting
 

@@ -25,6 +25,7 @@ for (const file of [
   "20261020000300_stock_management.sql",
   "20261021000100_live_payments.sql",
   "20261021000200_order_emails.sql",
+  "20261021000300_contact_inbox.sql",
 ])
   await db.exec(await readFile(`supabase/migrations/${file}`, "utf8"));
 await db.query("insert into auth.users(id) values($1)", [owner]);
@@ -78,6 +79,7 @@ function serial(fn) {
   return next;
 }
 const rpc = {
+  submit_contact_enquiry: ["request_id", "message", "network_hash", "sender_hash"],
   admin_access: [],
   admin_snapshot: [],
   get_site_document: [],
@@ -133,7 +135,7 @@ async function reset(enroll = false) {
   uploads.clear();
   uploadNames.clear();
   await db.exec(
-    "reset role;delete from seen_private.order_emails;delete from seen_private.checkout_stock_events;delete from seen_private.stripe_event_receipts;delete from seen_private.checkout_items;delete from seen_private.checkout_orders;delete from seen_private.admin_records;delete from seen_private.admin_audit;delete from seen_private.site_history;update seen_private.site_documents set version=0,draft='{}',published=null,published_at=null;delete from seen_private.inventory;delete from public.product_variants;delete from public.products;delete from storage.objects;",
+    "reset role;delete from seen_private.contact_receipts;delete from seen_private.order_emails;delete from seen_private.checkout_stock_events;delete from seen_private.stripe_event_receipts;delete from seen_private.checkout_items;delete from seen_private.checkout_orders;delete from seen_private.admin_records;delete from seen_private.admin_audit;delete from seen_private.site_history;update seen_private.site_documents set version=0,draft='{}',published=null,published_at=null;delete from seen_private.inventory;delete from public.product_variants;delete from public.products;delete from storage.objects;",
   );
   await db.query("select set_config('request.jwt.claims',$1,false)", [
     JSON.stringify({ sub: owner, aal: "aal2" }),
@@ -346,7 +348,7 @@ const server = http.createServer(async (req, res) => {
             JSON.stringify(aal ? { sub: owner, aal } : {}),
           ]);
           const service =
-            (name.startsWith("payment_") || name.startsWith("order_email_")) &&
+            (name.startsWith("payment_") || name.startsWith("order_email_") || name === "submit_contact_enquiry") &&
             bearer === "sb_secret_SEEN_LOCAL_FIXTURE_ONLY";
           await db.exec(
             `set local role ${service ? "service_role" : aal ? "authenticated" : "anon"}`,

@@ -1,5 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
+import { revealHomeNavigation } from "./helpers/navigation";
 
 async function settleHero(page: Page) {
   await page.evaluate(() => document.fonts.ready);
@@ -28,6 +29,7 @@ for (const width of [320, 375, 768, 1024, 1440, 1920]) {
 test("mobile menu traps focus, closes with Escape, and restores focus", async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 });
   await page.goto("/");
+  await revealHomeNavigation(page);
 
   const trigger = page.getByRole("button", { name: "Open navigation menu" });
   const dialog = page.getByRole("dialog", { name: "Explore SEEN" });
@@ -55,6 +57,7 @@ test("mobile menu traps focus, closes with Escape, and restores focus", async ({
 test("resizing to desktop closes the mobile menu", async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 });
   await page.goto("/");
+  await revealHomeNavigation(page);
   await page.getByRole("button", { name: "Open navigation menu" }).click();
   await expect(page.getByRole("dialog")).toBeVisible();
   await page.setViewportSize({ width: 1280, height: 900 });
@@ -96,6 +99,7 @@ for (const width of [375, 1440]) {
     expect(results.violations).toEqual([]);
 
     if (width < 1024) {
+      await revealHomeNavigation(page);
       await page.getByRole("button", { name: "Open navigation menu" }).click();
       const menuResults = await new AxeBuilder({ page })
         .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
@@ -249,7 +253,7 @@ test("touch users can open the delivery page and mobile menu without a banner bu
 
 
 
-test("home edit remains four pieces and the collection contains all seven", async ({ page }) => {
+test("home edit remains four pieces and the collection contains all nine", async ({ page }) => {
   await page.goto("/");
   await expect(page.locator(".collection-card")).toHaveCount(4);
   await expect(page.getByRole("button", { name: /View more pieces|Show fewer pieces/ })).toHaveCount(0);

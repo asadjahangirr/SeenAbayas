@@ -1,4 +1,5 @@
 import { defineConfig, devices } from "@playwright/test";
+import { isolatedEnvironment } from "./scripts/test-environment.mjs";
 
 export default defineConfig({
   testDir: "./tests/catalog-ui",
@@ -20,13 +21,13 @@ export default defineConfig({
       command: "npm run start -- --hostname 127.0.0.1 --port 3102",
       url: "http://127.0.0.1:3102",
       reuseExistingServer: false,
-      env: {
+      env: isolatedEnvironment(3102, {
         CATALOG_SOURCE: "supabase",
         CMS_SOURCE: "files",
 
         NEXT_PUBLIC_SUPABASE_URL: "http://127.0.0.1:3101",
         NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "sb_publishable_TEST_ONLY",
-      },
+      }),
     },
   ],
 });

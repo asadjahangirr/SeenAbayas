@@ -19,6 +19,26 @@ async function addOne(page: Page) {
 }
 test.beforeEach(async ({ request }) => { await state(request, "ready"); });
 
+test("size selection waits for browser initialisation and the first hydrated choice is kept", async ({ page }) => {
+  let release!: () => void;
+  const hydration = new Promise<void>(resolve => { release = resolve; });
+  await page.route(/\/_next\/static\/.*\.js(?:\?.*)?$/, async route => { await hydration; await route.continue(); });
+  try {
+    await page.goto("/collection/design-01", { waitUntil: "commit" });
+    const size = page.getByRole("button", { name: "TEST S", exact: true });
+    await expect(size).toBeVisible();
+    await expect(size).toBeDisabled();
+    await expect(page.getByRole("button", { name: "Add to bag", exact: true })).toBeDisabled();
+    release();
+    await expect(size).toBeEnabled();
+    await size.click();
+    await expect(size).toHaveAttribute("aria-pressed", "true");
+    await page.getByRole("button", { name: "Add to bag", exact: true }).click();
+    await expect(drawer(page)).toBeVisible();
+    await expect(drawer(page).locator(".bag-line")).toHaveCount(1);
+  } finally { release(); }
+});
+
 test("add, merge, change quantities, prevent overselling and remove with a live badge", async ({ page }) => {
   await addOne(page);
   await expect(drawer(page).locator(".bag-subtotal strong")).toHaveText("£123.45");

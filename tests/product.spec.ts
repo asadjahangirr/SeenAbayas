@@ -184,7 +184,7 @@ test("reduced motion keeps photo navigation without animated transitions", async
 });
 
 test("all photographed pieces resolve, unknown IDs return a real unindexed 404", async ({ request }) => {
-  for (const id of ["01", "02", "03", "04", "05", "06", "07"]) {
+  for (const id of ["01", "02", "03", "04", "05", "06", "07", "08", "09"]) {
     const response = await request.get(`/collection/design-${id}`);
     expect(response.status()).toBe(200);
     expect(response.headers()["cache-control"]).toContain("no-store");
@@ -195,7 +195,7 @@ test("all photographed pieces resolve, unknown IDs return a real unindexed 404",
     expect(html).toContain('id="piece-title"');
     expect(html).toContain('name="robots" content="noindex, nofollow"');
   }
-  const unknown = await request.get("/collection/design-08");
+  const unknown = await request.get("/collection/design-9999");
   expect(unknown.status()).toBe(404);
   expect(await unknown.text()).toContain("This piece could not be found.");
 });

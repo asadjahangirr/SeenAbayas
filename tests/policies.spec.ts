@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
+import { revealHomeNavigation } from "./helpers/navigation";
 
 const routes = ["/shipping-delivery", "/returns-exchanges", "/privacy-policy", "/terms-conditions", "/cookie-policy"];
 for (const width of [320, 768, 1440]) for (const route of routes) {
@@ -66,6 +67,7 @@ test("footer and mobile navigation expose the new delivery and policy pages", as
   }
   await expect(page.getByRole("link", { name: "Complimentary UK delivery on orders of £80 or more", exact: true })).toHaveAttribute("href", "/shipping-delivery");
   await page.setViewportSize({ width: 390, height: 844 });
+  await revealHomeNavigation(page);
   await page.getByRole("button", { name: "Open navigation menu" }).click();
   const dialog = page.getByRole("dialog", { name: "Explore SEEN" });
   await expect(dialog.getByRole("link", { name: "Shipping & Delivery", exact: true })).toBeVisible();

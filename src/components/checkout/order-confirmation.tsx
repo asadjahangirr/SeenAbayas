@@ -211,7 +211,7 @@ export function OrderConfirmation({ orderId }: { orderId: string }) {
           >
             <div className="confirmation-reference">
               <span>
-                <Copy text={"Test reference"} />
+                <Copy text={order.isTest ? "Test reference" : "Order reference"} />
               </span>
               <strong>{order.number}</strong>
             </div>

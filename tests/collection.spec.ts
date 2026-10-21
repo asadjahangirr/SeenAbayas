@@ -1,5 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
+import { revealHomeNavigation } from "./helpers/navigation";
 
 async function settle(page: Page) {
   await page.evaluate(() => document.fonts.ready);
@@ -103,6 +104,7 @@ test("touch navigation and colour filters lead directly to the chosen product", 
   try {
     const page = await context.newPage();
     await page.goto("/");
+    await revealHomeNavigation(page);
     await page.getByRole("button", { name: "Open navigation menu" }).tap();
     await page.getByRole("dialog", { name: "Explore SEEN" }).getByRole("link", { name: "Collection", exact: true }).tap();
     await expect(page).toHaveURL(/\/collection$/);

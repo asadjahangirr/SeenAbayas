@@ -15,6 +15,7 @@
     "check:bag": "node scripts/check-bag.mjs",
     "test:development-ui": "playwright test --config playwright.development-ui.config.ts",
     "test:contact-ui": "playwright test --config playwright.contact-ui.config.ts",
+    "test:inbox-ui": "playwright test --config playwright.inbox-ui.config.ts",
     "test:film-ui": "playwright test --config playwright.film-ui.config.ts",
     "prepare:hero": "node scripts/prepare-hero-media.mjs",
     "prepare:brand": "node scripts/prepare-brand.mjs",

@@ -1,6 +1,7 @@
 import { PGlite } from "@electric-sql/pglite";
 import { readFile } from "node:fs/promises";
 import { test, expect } from "@playwright/test";
+import { createContactHandler } from "../../src/lib/contact/handler";
 import { defaultDocument } from "../../src/lib/cms/model";
 import {
   replaceCopy,
@@ -65,6 +66,7 @@ create table storage.objects(id uuid primary key default gen_random_uuid(),bucke
       "utf8",
     ),
   );
+  await db.exec(await readFile("supabase/migrations/20261021000300_contact_inbox.sql", "utf8"));
   await db.query("insert into auth.users(id) values($1),($2),($3)", [
     owner,
     editor,
@@ -957,6 +959,68 @@ test("inbox ingestion is restricted to the trusted server and idempotent", async
     email: input.email,
   });
 });
+test("an inbox-only contact submission becomes one unread admin message across retries without third-party calls", async () => {
+  await asUser(null, "aal1", "service_role");
+  const data = { name: "Contact Fixture", email: "contact-fixture@example.test", phone: "07700900123", message: "Please check the length of this abaya for me.", website: "", verificationToken: "fixture-only", requestId: stranger, submittedAt: new Date().toISOString() };
+  const handler = createContactHandler();
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const response = await handler(new Request("https://seen.example.test/api/contact", { method: "POST", headers: { host: "seen.example.test", origin: "https://seen.example.test", "content-type": "application/json" }, body: JSON.stringify(data) }), { delivery: "inbox" }, async () => { throw Error("No third-party calls"); }, async message => {
+      const { name, email, phone, submittedAt } = message;
+      await db.query("select public.submit_contact_enquiry($1,$2,$3,$4)", [message.requestId, { name, email, phone, submittedAt, message: message.message }, "a".repeat(64), "b".repeat(64)]);
+    });
+    expect(response.status).toBe(200);
+  }
+  await asUser(owner);
+  const snapshot = (await db.query<any>("select public.admin_snapshot() data")).rows[0].data;
+  expect(snapshot.records).toHaveLength(1);
+  expect(snapshot.records[0]).toMatchObject({ kind: "message", payload: { name: data.name, email: data.email, phone: data.phone, message: data.message, read: false, archived: false, submitted_at: data.submittedAt } });
+});
+
+test("inbox-only writer and throttle receipts are inaccessible to storefront and normal admin sessions", async () => {
+  for (const [id, role] of [[null, "anon"], [owner, "authenticated"]] as const) {
+    await asUser(id, "aal2", role);
+    await denied("select public.submit_contact_enquiry(gen_random_uuid(),'{}',$1,$2)", ["a".repeat(64), "b".repeat(64)], "42501");
+    await denied("select * from seen_private.contact_receipts", [], "42501");
+  }
+});
+
+const inboxMessage = () => ({ name: "Inbox fixture", email: "inbox@example.test", phone: "07700900123", message: "Please check this garment measurement.", submittedAt: new Date().toISOString() });
+const submitEnquiry = (message = inboxMessage(), network = "a".repeat(64), sender = "b".repeat(64), id = crypto.randomUUID()) =>
+  db.query<{ result: { accepted: boolean; duplicate: boolean } }>("select public.submit_contact_enquiry($1,$2,$3,$4) result", [id, message, network, sender]);
+
+test("inbox retries neither consume quota nor resurrect a message deleted by its owner", async () => {
+  await asUser(null, "aal1", "service_role");
+  const message = inboxMessage(), id = crypto.randomUUID();
+  expect((await submitEnquiry(message, undefined, undefined, id)).rows[0].result).toEqual({ accepted: true, duplicate: false });
+  for (let attempt = 0; attempt < 4; attempt++) expect((await submitEnquiry(message, undefined, undefined, id)).rows[0].result.duplicate).toBe(true);
+  await denied("select public.submit_contact_enquiry($1,$2,$3,$4)", [id, { ...message, message: "A different customer message for this reference." }, "a".repeat(64), "b".repeat(64)], "P0001");
+  await asUser(owner);
+  const record = (await db.query<any>("select public.admin_snapshot() data")).rows[0].data.records[0];
+  await db.query("select public.admin_delete_record($1,$2)", [id, record.version]);
+  await asUser(null, "aal1", "service_role");
+  expect((await submitEnquiry(message, undefined, undefined, id)).rows[0].result.duplicate).toBe(true);
+  await asUser(owner);
+  expect((await db.query<any>("select public.admin_snapshot() data")).rows[0].data.records).toHaveLength(0);
+});
+
+test("shared inbox quotas reject a fourth sender message or seventh network message without inserting either", async () => {
+  await asUser(null, "aal1", "service_role");
+  for (let i = 0; i < 3; i++) await submitEnquiry();
+  await denied("select public.submit_contact_enquiry($1,$2,$3,$4)", [crypto.randomUUID(), inboxMessage(), "c".repeat(64), "b".repeat(64)], "P0001");
+  for (let i = 0; i < 3; i++) await submitEnquiry(inboxMessage(), undefined, i.toString(16).padStart(64, "0"));
+  await denied("select public.submit_contact_enquiry($1,$2,$3,$4)", [crypto.randomUUID(), inboxMessage(), "a".repeat(64), "d".repeat(64)], "P0001");
+  await asUser(owner);
+  expect((await db.query<any>("select public.admin_snapshot() data")).rows[0].data.records).toHaveLength(6);
+});
+
+test("shared inbox global quota is enforced across distinct senders and networks", async () => {
+  await asUser(null, "aal1", "service_role");
+  for (let i = 0; i < 30; i++) await submitEnquiry(inboxMessage(), i.toString(16).padStart(64, "0"), i.toString(16).padStart(64, "1"));
+  await denied("select public.submit_contact_enquiry($1,$2,$3,$4)", [crypto.randomUUID(), inboxMessage(), "e".repeat(64), "f".repeat(64)], "P0001");
+  await asUser(owner);
+  expect((await db.query<any>("select public.admin_snapshot() data")).rows[0].data.records).toHaveLength(30);
+});
+
 test("request validation rejects unsafe media, arbitrary scripts, invalid prices and invalid percentages", () => {
   expect(
     documentRequestSchema.safeParse({

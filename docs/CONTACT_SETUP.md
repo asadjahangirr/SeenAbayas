@@ -1,37 +1,41 @@
-# Contact form setup
+﻿# Contact form: Admin Inbox delivery
 
-The `/contact` page and `/api/contact` endpoint are implemented. Email delivery is not enabled or verified against a real provider yet. Without all four valid settings below, the page shows the support email and disables submission; the server returns 503. It never simulates a successful send.
+The client requested website enquiries in **Admin → Inbox**, without contact emails or Turnstile. Purchase-confirmation and owner order emails remain separate.
 
-## Email delivery
+## Install and enable
 
-1. Create a Resend account for the store, preferably under the client's ownership when available.
-2. Add a domain you control in Resend and complete its DNS verification. A sending subdomain can be used. Do not replace existing inbox/MX records just to enable sending.
-3. Create a sending-only API key restricted to the verified sending domain where supported.
-4. Add `RESEND_API_KEY` to `.env.local`. Add `CONTACT_FROM_EMAIL` as a plain email address on that verified domain, without a display name or angle brackets. The application adds the SEEN ABAYAS display name.
+1. In the existing Supabase project → SQL Editor, run the complete `supabase/migrations/20261021000300_contact_inbox.sql`. Expected result: **Success. No rows returned.** It adds protected inbox ingestion, retry receipts and shared rate limits. Installation does not edit existing messages, orders, payments or stock. It is safe to rerun.
+2. Keep the existing Supabase URL, publishable key and server-only `SUPABASE_SECRET_KEY` in `.env.local` and Vercel Production.
+3. Set `CONTACT_DELIVERY=inbox` in both environments. Inbox is also the default if this variable is absent. `CONTACT_INBOX_ENABLED` only controls the optional copy in email mode; it is not required for inbox mode.
+4. Deploy the updated code after applying SQL. Restart the local server if changing local environment settings.
 
-The recipient is fixed server-side to `info@seenabayas.co.uk`. Confirm that this inbox exists and can receive mail. The customer's validated email address is used as Reply-To. The customer cannot choose the sender or recipient. Messages contain name, email, phone, plain-text message, a browser-generated submission timestamp in UTC and a request reference. No mailing-list signup is performed.
+No Cloudflare account, widget, CAPTCHA keys, contact sender or additional Resend configuration is needed for inbox delivery. Keep the existing Resend/order email settings for purchase notifications. Never expose a Supabase server secret through `NEXT_PUBLIC_` or paste credentials into chat.
 
-Official references: [domain verification](https://resend.com/docs/dashboard/domains/introduction), [send email](https://resend.com/docs/api-reference/emails/send-email), [idempotency](https://resend.com/docs/dashboard/emails/idempotency-keys).
+## Customer and admin behaviour
 
-## Bot protection
+- Name, email, phone and message are required. Client and server validate fields, origin, JSON/body size, honeypot and submission age.
+- The backend stores the message through a server-only protected RPC. It becomes unread in Admin → Inbox. Only authorised administrators with MFA can view it.
+- The customer sees success only after the database confirms storage. A failure preserves the message and permits retry. Repeating the same request reference/payload neither duplicates the message nor consumes another quota slot.
+- An owner deleting a message cannot have it reappear merely because a timed-out browser retries the original submission during its retry window.
+- Admin controls include read/unread, archive/unarchive, filters and deletion. Reply by email opens the administrator's email application; the form does not send a customer acknowledgement or marketing signup.
 
-1. Create a Cloudflare Turnstile **managed** widget for the store.
-2. Allow the actual store hostname. Add `localhost` and `127.0.0.1` when testing locally, as supported by the widget's hostname settings.
-3. Add `CONTACT_TURNSTILE_SITE_KEY` and `CONTACT_TURNSTILE_SECRET_KEY` to `.env.local`. The site key is public; the secret and Resend API key stay on the server. Do not use `NEXT_PUBLIC_` for these secrets.
-4. Restart the dev server after changing configuration.
+## Abuse limits and privacy
 
-The browser loads the widget only when the contact integration is fully configured. The CSP permits Cloudflare's challenge iframe when the widget has a configured site key; its script carries the document nonce. The server verifies the token, `contact` action and hostname before emailing. There is no production bypass. A honeypot, bounded request body, strict JSON validation, same-origin checks, duplicate submission lock and Resend idempotency also apply.
+The database atomically enforces **3 new messages per sender per 15 minutes**, **6 per network per 15 minutes**, and **30 total per minute**, shared across serverless instances. Retries do not consume limits. A limit produces HTTP 429 with retry feedback. A short row lock serialises quota checks and insertion.
 
-A bounded, process-local limiter permits at most three send attempts per email per fifteen minutes and thirty per minute per process. **Configure a shared hosting/WAF rate limit for `/api/contact` before launch**: process memory does not provide a global limit across instances or survive a restart. Do not trust client-supplied forwarding headers as a rate-limit identity.
+On Vercel the server uses the platform's `x-vercel-forwarded-for` address. Arbitrary `x-forwarded-for` headers are not trusted. Outside Vercel, the fallback network bucket is shared rather than trusting an unconfigured proxy. See [Vercel's request-header documentation](https://vercel.com/docs/headers/request-headers).
 
-Official references: [widget rendering](https://developers.cloudflare.com/turnstile/get-started/client-side-rendering/), [server verification](https://developers.cloudflare.com/turnstile/get-started/server-side-validation/), [CSP](https://developers.cloudflare.com/turnstile/reference/content-security-policy/).
+Rate identities are keyed HMAC hashes; raw network addresses are not saved in the receipt table. Receipts also contain a payload digest and request ID. Receipts older than 24 hours are pruned on the next accepted submission. This is not an exact timed erasure schedule. Messages remain private until an administrator deletes them; the business must confirm its retention policy. Hosting logs are governed separately by the hosting configuration. Shared-network limits can affect customers on the same network; email remains an alternative contact route.
 
-## Verification and launch
+## Verification
 
-- Local automated tests inject provider responses in memory; they send no email and make no Turnstile requests.
-- `npm run test:contact-ui` uses synthetic configuration and intercepts browser requests to exercise validation, retry feedback, duplicate submission prevention and the nonce CSP after client navigation. It does not test real providers.
-- After configuring real services, send a test enquiry from `/contact`, confirm it is accepted by Resend, arrives in the support inbox, and replies address the customer correctly.
-- Check failure handling and security challenge expiry, including navigation to Contact from another page.
-- The success state means the provider accepted the message; it does not prove inbox delivery.
-- Review contact data processing, Resend and Cloudflare disclosures, retention and the final privacy policy with the client's actual business details before launch. No contact records are currently stored in Supabase.
-- Add the same secrets to the eventual hosting environment. Never commit them or paste them into chat. `.env.example` contains blank configuration fields only.
+- Database/handler checks cover private access, durable insertion, duplicate protection, changed-payload rejection and shared sender/network/global limits.
+- `npm.cmd run test:inbox-ui` uses an isolated local database and the real Next.js contact API, without any email or CAPTCHA provider. It exercises the customer form and protected admin inbox controls on mobile and desktop. It shares ports with admin/payment suites, so run them sequentially.
+- The optional email-mode UI suite remains `npm.cmd run test:contact-ui` with synthetic provider configuration.
+- After deployment, submit one clearly labelled test message through `/contact`. Sign in with the owner account/MFA, open Admin → Inbox and verify its name, email, phone and message. Remove the test message when finished. Do not submit card details or other sensitive information.
+
+A disabled form indicates missing backend configuration. A submission error can indicate that the SQL has not been applied, server credentials do not match the project, or a network/database operation failed. Do not grant anonymous users access to the private inbox to work around an error.
+
+## Optional email delivery
+
+Only if the owner later requests contact emails, choose `CONTACT_DELIVERY=email` and configure a verified Resend sender plus Turnstile keys using the provider's official instructions. This legacy email path retains its security verification and process-local limiter; it does not weaken the inbox-only path. `CONTACT_INBOX_ENABLED=true` additionally copies provider-accepted emails to the private inbox. Order emails do not depend on this selection.

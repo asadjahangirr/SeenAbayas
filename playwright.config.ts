@@ -1,9 +1,10 @@
 import { defineConfig, devices } from "@playwright/test";
+import { isolatedEnvironment } from "./scripts/test-environment.mjs";
 
 export default defineConfig({
   testDir: "./tests",
   outputDir: "test-results/storefront",
-  testIgnore: ["**/catalog/**", "**/catalog-ui/**", "**/development-ui/**", "**/contact-ui/**", "**/film-ui/**", "**/admin-ui/**", "**/mobile-ui/**", "**/checkout-ui/**", "**/payments-ui/**"],
+  testIgnore: ["**/catalog/**", "**/catalog-ui/**", "**/development-ui/**", "**/contact-ui/**", "**/inbox-ui/**", "**/film-ui/**", "**/admin-ui/**", "**/mobile-ui/**", "**/checkout-ui/**", "**/payments-ui/**", "**/live-payments-ui/**"],
   fullyParallel: false,
   workers: 1,
   forbidOnly: Boolean(process.env.CI),
@@ -19,7 +20,7 @@ export default defineConfig({
     screenshot: "only-on-failure",
   },
   webServer: {
-    env: { CMS_SOURCE: "files", CATALOG_SOURCE: "preview", RESEND_API_KEY: "", CONTACT_FROM_EMAIL: "", CONTACT_TURNSTILE_SITE_KEY: "", CONTACT_TURNSTILE_SECRET_KEY: "" },
+    env: isolatedEnvironment(3100),
     command: "npm run start -- --hostname 127.0.0.1 --port 3100",
     url: "http://127.0.0.1:3100",
     reuseExistingServer: false,
