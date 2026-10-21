@@ -48,7 +48,7 @@ begin
   endpoint:=rtrim(btrim(url_value,E' \t\n\r'),'/');
   if endpoint is null or endpoint !~ '^https://[A-Za-z0-9.-]+/api/payments/reconcile$' then
     raise exception 'Vault entry seen_stock_recovery_url is not a valid recovery endpoint'
-      using hint='Use https://seenabayas.vercel.app/api/payments/reconcile as the secret VALUE, without quotes, Markdown, a query or fragment.';
+      using hint='Use https://www.seenabayas.co.uk/api/payments/reconcile as the secret VALUE, without quotes, Markdown, a query or fragment.';
   end if;
   signing_token:=token_value;
   return next;

@@ -6,7 +6,7 @@ import {
 } from "@/lib/checkout/model";
 import { getBagState } from "@/lib/bag/server";
 import { randomBytes } from "node:crypto";
-import { paymentReadiness } from "@/lib/payments/server";
+import { readyPaymentMode } from "@/lib/payments/server";
 import { checkoutOwnerCookie, reviewFingerprint } from "@/lib/payments/model";
 import { readPaymentOrigin } from "@/lib/payments/config.mjs";
 
@@ -105,10 +105,12 @@ export async function POST(request: NextRequest) {
       parsed.data.details,
       parsed.data.shippingMethod,
     );
-    const enabled = await paymentReadiness();
+    const mode = await readyPaymentMode();
+    const enabled = Boolean(mode);
+    review.mode = mode || "preview";
+    review.taxStatus = mode === "live" ? "none" : "unconfirmed";
     const response = reply({
       ...review,
-      mode: enabled ? "test" : "preview",
       paymentAvailable: enabled && review.delivery.chargePence !== null,
       ...(enabled ? { reviewFingerprint: reviewFingerprint(review) } : {}),
     });

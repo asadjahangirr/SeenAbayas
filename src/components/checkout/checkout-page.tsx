@@ -53,14 +53,15 @@ const fieldNames: Record<keyof CheckoutDetails, { label: string }> = {
 };
 
 export function CheckoutPageContent({
-  testPayments = false,
+  paymentMode = null,
 }: {
-  testPayments?: boolean;
+  paymentMode?: "test" | "live" | null;
 }) {
   const { quote, ready, busy: bagBusy, error: bagError, retry } = useBag();
   const document = useSiteDocument();
   const preview = useContentPreview();
-  const testMode = testPayments && !preview;
+  const testMode = paymentMode === "test" && !preview;
+  const liveMode = paymentMode === "live" && !preview;
   const [openingPayment, setOpeningPayment] = useState(false);
   const paymentAttempt = useRef<{ fingerprint: string; id: string } | null>(
     null,
@@ -174,7 +175,7 @@ export function CheckoutPageContent({
           retry();
         }
         throw new Error(
-          data.error || "We couldn't open test payment. Please try again.",
+          data.error || "We couldn't open payment. Please try again.",
         );
       }
       const destination = new URL(data.url, window.location.origin);
@@ -306,12 +307,14 @@ export function CheckoutPageContent({
       </div>
       <div className="checkout-preview">
         <span className="checkout-preview__label">
-          <Copy text={testMode ? "Test checkout" : "Checkout preview"} />
+          <Copy text={liveMode ? "Secure checkout" : testMode ? "Test checkout" : "Checkout preview"} />
         </span>
         <p>
           <Copy
             text={
-              testMode
+              liveMode
+                ? "Review your selection and delivery details, then pay securely with Stripe."
+                : testMode
                 ? "Test environment. No real money will be charged and no garments will be dispatched."
                 : "Explore the checkout and review your details. Online payment is not available yet, and no order will be placed."
             }
@@ -590,7 +593,9 @@ export function CheckoutPageContent({
                     <p>
                       <Copy
                         text={
-                          testMode
+                          liveMode
+                            ? "Reviewing does not place an order. Continue to secure payment to complete your purchase with Stripe."
+                            : testMode
                             ? "Reviewing does not place an order. Continuing to test payment saves a private test order and sends the required checkout details to Stripe. Use test customer details."
                             : "Your details are used for this preview only and are not saved. Reviewing does not place an order or reserve stock."
                         }
@@ -693,7 +698,9 @@ export function CheckoutPageContent({
                     <p>
                       <Copy
                         text={
-                          review.paymentAvailable
+                          review.paymentAvailable && review.mode === "live"
+                            ? "Continue to Stripe to complete your purchase securely. Your pieces are reserved while checkout is open."
+                            : review.paymentAvailable
                             ? "Continue to Stripe to test the enabled payment methods. Stock is reserved while the test checkout is open and released when it ends. No real money is charged."
                             : "Payment is not available yet. No order has been placed, no money has been taken and your pieces are not reserved."
                         }
@@ -708,7 +715,7 @@ export function CheckoutPageContent({
                         />
                       </p>
                     )}
-                    {review.mode === "test" && (
+                    {review.mode !== "preview" && (
                       <p className="checkout-methods">
                         <Copy text={"Cards · Apple Pay · Klarna · Clearpay"} />
                         <br />
@@ -730,7 +737,7 @@ export function CheckoutPageContent({
                           openingPayment
                             ? "Opening Stripe…"
                             : review.paymentAvailable
-                              ? "Continue to test payment"
+                              ? review.mode === "live" ? "Continue to secure payment" : "Continue to test payment"
                               : review.delivery.chargePence === null
                                 ? "Delivery rate unavailable"
                                 : "Payment unavailable"
@@ -840,12 +847,12 @@ export function CheckoutPageContent({
                     <Copy text={"Tax"} />
                   </dt>
                   <dd>
-                    <Copy text={"To be confirmed"} />
+                    <Copy text={liveMode ? "£0.00" : "To be confirmed"} />
                   </dd>
                 </div>
                 <div className="checkout-total">
                   <dt>
-                    <Copy text={"Estimated total"} />
+                    <Copy text={liveMode ? "Total" : "Estimated total"} />
                     <small>GBP</small>
                   </dt>
                   <dd>
@@ -860,7 +867,7 @@ export function CheckoutPageContent({
               <p className="checkout-estimate-note">
                 <Copy
                   text={
-                    "VAT treatment is being confirmed. Any amount shown is an estimate, not a final payable total."
+                    liveMode ? "No additional tax is charged. Delivery is included in the total shown when its rate is available." : "VAT treatment is being confirmed. Any amount shown is an estimate, not a final payable total."
                   }
                 />
               </p>

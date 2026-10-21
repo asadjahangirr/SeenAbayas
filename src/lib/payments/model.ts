@@ -20,6 +20,8 @@ export const hash = (value: string) =>
 export function reviewFingerprint(review: CheckoutReview) {
   return hash(
     JSON.stringify({
+      mode: review.mode,
+      taxStatus: review.taxStatus,
       details: review.details,
       lines: review.bag.lines
         .map((line) => ({
@@ -53,7 +55,7 @@ export type PaymentOrder = {
   owner_hash: string;
   request_hash: string;
   order_number: string;
-  is_test: true;
+  is_test: boolean;
   state:
     | "creating"
     | "open"
@@ -74,6 +76,7 @@ export type PaymentOrder = {
   delivery_pence: number;
   total_pence: number;
   refunded_pence: number;
+  tax_pence?: number;
   currency: "gbp";
   return_origin: string;
   session_id: string | null;
@@ -101,6 +104,7 @@ export function customerOrder(order: PaymentOrder) {
     totalPence: order.total_pence,
     currency: "GBP" as const,
     refundedPence: order.refunded_pence,
+    taxPence: order.tax_pence || 0,
     canCancel: order.state === "open" || order.state === "creating",
   };
 }

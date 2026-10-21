@@ -23,6 +23,7 @@
     "test:mobile-ui": "playwright test --config playwright.mobile-ui.config.ts",
     "test:checkout-ui": "playwright test --config playwright.checkout-ui.config.ts",
     "test:payments-ui": "playwright test --config playwright.payments-ui.config.ts",
+    "test:live-payments-ui": "playwright test --config playwright.live-payments-ui.config.ts",
     "check:payments": "node scripts/check-payments.mjs"
   },
   "engines": {

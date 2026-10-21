@@ -4,6 +4,7 @@ import { readPaymentBody } from "@/lib/payments/http";
 import { paymentServices, getPaymentOrder } from "@/lib/payments/server";
 import { applyProviderSession } from "@/lib/payments/provider";
 import { PaymentError } from "@/lib/payments/model";
+import type Stripe from "stripe";
 
 export const maxDuration = 60;
 const supported = new Set([
@@ -19,22 +20,19 @@ export async function POST(request: Request) {
       headers: { "Cache-Control": "private, no-store" },
     });
   try {
-    const { stripe, config } = paymentServices();
     const signature = request.headers.get("stripe-signature");
     if (!signature) return reply({ error: "Missing payment signature." }, 400);
     const raw = await readPaymentBody(request, 262144, true);
-    let event;
-    try {
-      event = stripe.webhooks.constructEvent(
-        raw,
-        signature,
-        config.webhookSecret,
-      );
-    } catch {
-      return reply({ error: "Invalid payment signature." }, 400);
+    let verified: { event: Stripe.Event; stripe: Stripe } | undefined;
+    for (const isTest of [true, false]) {
+      try {
+        const {stripe,config} = paymentServices(isTest);
+        const event = stripe.webhooks.constructEvent(raw, signature, config.webhookSecret);
+        if (event.livemode === !isTest) { verified = {event,stripe}; break; }
+      } catch { /* Try only the separately configured environment's signature. */ }
     }
-    if (event.livemode)
-      return reply({ error: "Live payment events are not enabled." }, 400);
+    if (!verified) return reply({ error: "Invalid payment signature." }, 400);
+    const {event,stripe} = verified;
     if (!supported.has(event.type)) return reply({ received: true });
     const reference = event.data.object as {
       id: string;

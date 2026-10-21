@@ -23,6 +23,7 @@ for (const file of [
   "20261020000100_payments.sql",
   "20261020000200_order_records.sql",
   "20261020000300_stock_management.sql",
+  "20261021000100_live_payments.sql",
 ])
   await db.exec(await readFile(`supabase/migrations/${file}`, "utf8"));
 await db.query("insert into auth.users(id) values($1)", [owner]);
@@ -103,6 +104,7 @@ const rpc = {
     "expected_delivery",
     "return_origin",
   ],
+  payment_prepare_order_v2: ["request_id","owner_hash","request_hash","details","requested_lines","shipping_method","expected_delivery","return_origin","payment_mode"],
   payment_apply_session: ["order_id", "event_id", "event_type", "session"],
   payment_pending_orders: ["batch_size"],
   payment_release_orphan: ["order_id"],

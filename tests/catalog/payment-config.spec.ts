@@ -2,6 +2,7 @@ import { test, expect } from "@playwright/test";
 import {
   readPaymentCredentials,
   testCheckoutEnabled,
+  checkoutPaymentMode,
 } from "../../src/lib/payments/config.mjs";
 const values = {
   NEXT_PUBLIC_SITE_URL: "http://127.0.0.1:3107",
@@ -33,6 +34,15 @@ test("payment configuration never accepts live keys or incomplete setup", () => 
   expect(
     readPaymentCredentials({ ...values, PAYMENTS_MODE: "disabled" }),
   ).not.toBeNull();
+});
+
+test("live checkout requires explicit mode, zero added tax, HTTPS and retained separate sandbox credentials", () => {
+  const live={...values,NEXT_PUBLIC_SITE_URL:"https://www.seenabayas.co.uk",PAYMENTS_MODE:"live",PAYMENTS_TAX_MODE:"none",STRIPE_SECRET_KEY:"sk_live_fixture_not_real",STRIPE_WEBHOOK_SECRET:"whsec_live_fixture",STRIPE_TEST_SECRET_KEY:values.STRIPE_SECRET_KEY,STRIPE_TEST_WEBHOOK_SECRET:values.STRIPE_WEBHOOK_SECRET};
+  expect(checkoutPaymentMode(live)).toBe("live");
+  expect(readPaymentCredentials(live,"test")?.stripeKey).toBe(values.STRIPE_SECRET_KEY);
+  for(const override of [{PAYMENTS_TAX_MODE:""},{PAYMENTS_MODE:"disabled"},{STRIPE_TEST_SECRET_KEY:""},{STRIPE_TEST_WEBHOOK_SECRET:""},{NEXT_PUBLIC_SITE_URL:"http://localhost:3000"},{STRIPE_WEBHOOK_SECRET:values.STRIPE_WEBHOOK_SECRET}])
+    expect(checkoutPaymentMode({...live,...override})).toBeNull();
+  expect(checkoutPaymentMode({...live,PAYMENTS_MODE:"test"})).toBe("test");
 });
 test("the isolated Stripe transport cannot use real credentials or a hosted database", () => {
   const fixture = {

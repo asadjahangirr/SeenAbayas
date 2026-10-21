@@ -93,13 +93,13 @@ export type CheckoutDelivery = {
   deliveryAim: string | null;
 };
 export type CheckoutReview = {
-  mode: "preview" | "test";
+  mode: "preview" | "test" | "live";
   currency: "GBP";
   bag: BagQuote;
   details: CheckoutDetails;
   delivery: CheckoutDelivery;
   estimatedTotalPence: number | null;
-  taxStatus: "unconfirmed";
+  taxStatus: "unconfirmed" | "none";
   paymentAvailable: boolean;
   reviewFingerprint?: string;
 };

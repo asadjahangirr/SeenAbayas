@@ -11,7 +11,7 @@ import {
   reviewFingerprint,
   type PaymentOrder,
 } from "@/lib/payments/model";
-import { paymentRpc, requireTestCheckout } from "@/lib/payments/server";
+import { paymentRpc, requireCheckout } from "@/lib/payments/server";
 import { openHostedCheckout } from "@/lib/payments/provider";
 
 export const maxDuration = 60;
@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
         "Review your checkout details before continuing.",
         400,
       );
-    await requireTestCheckout();
+    const mode = await requireCheckout();
     if (!siteOrigin || new URL(siteOrigin).host !== request.headers.get("host"))
       throw new PaymentError(
         "The checkout site address is not configured for this environment.",
@@ -65,6 +65,7 @@ export async function POST(request: NextRequest) {
         ),
         method: data.shippingMethod,
         review: data.reviewFingerprint,
+        mode,
       }),
     );
     let order = await paymentRpc<PaymentOrder | null>("payment_get_request", {
@@ -87,6 +88,8 @@ export async function POST(request: NextRequest) {
           data.details,
           data.shippingMethod,
         );
+        review.mode = mode;
+        review.taxStatus = mode === "live" ? "none" : "unconfirmed";
       } catch {
         throw new PaymentError(
           "Store settings changed. Please review your selection again.",
@@ -103,7 +106,7 @@ export async function POST(request: NextRequest) {
           "Delivery charges must be confirmed before this selection can proceed to payment.",
           409,
         );
-      order = await paymentRpc<PaymentOrder>("payment_prepare_order", {
+      order = await paymentRpc<PaymentOrder>(mode === "live" ? "payment_prepare_order_v2" : "payment_prepare_order", {
         request_id: data.requestId,
         owner_hash: ownerHash,
         request_hash: requestHash,
@@ -116,6 +119,7 @@ export async function POST(request: NextRequest) {
         shipping_method: data.shippingMethod,
         expected_delivery: review.delivery.chargePence,
         return_origin: siteOrigin,
+        ...(mode === "live" ? {payment_mode: mode} : {}),
       });
     }
     if (["expired", "failed"].includes(order.state))
@@ -124,14 +128,14 @@ export async function POST(request: NextRequest) {
         409,
       );
     const result = await openHostedCheckout(order);
-    return reply({ url: result.url, orderId: result.order.id, isTest: true });
+    return reply({ url: result.url, orderId: result.order.id, isTest: result.order.is_test });
   } catch (error) {
     return reply(
       {
         error:
           error instanceof PaymentError
             ? error.message
-            : "We couldn't open test payment. Your bag is saved; retry to recover the same checkout.",
+            : "We couldn't open payment. Your bag is saved; retry to recover the same checkout.",
       },
       error instanceof PaymentError ? error.status : 503,
     );

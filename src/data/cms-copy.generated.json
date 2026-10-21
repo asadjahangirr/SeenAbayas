@@ -35,7 +35,8 @@
     "text": "preview",
     "groups": [
       "api · bag · route",
-      "api · checkout · review · route"
+      "api · checkout · review · route",
+      "checkout · checkout-page"
     ]
   },
   {
@@ -94,6 +95,23 @@
     ]
   },
   {
+    "text": "live",
+    "groups": [
+      "api · checkout · review · route",
+      "api · checkout · session · route",
+      "checkout · checkout-page",
+      "src · lib · payments · server"
+    ]
+  },
+  {
+    "text": "none",
+    "groups": [
+      "api · checkout · review · route",
+      "api · checkout · session · route",
+      "ui · store-motion"
+    ]
+  },
+  {
     "text": "Please check your details and bag before continuing.",
     "groups": [
       "api · checkout · review · route"
@@ -115,16 +133,17 @@
     "text": "string",
     "groups": [
       "api · checkout · review · route",
+      "checkout · order-confirmation",
       "content · contact-form",
       "order-confirmation",
       "src · lib · payments · provider"
     ]
   },
   {
-    "text": "test",
+    "text": "unconfirmed",
     "groups": [
       "api · checkout · review · route",
-      "checkout · checkout-page"
+      "api · checkout · session · route"
     ]
   },
   {
@@ -141,7 +160,19 @@
     ]
   },
   {
-    "text": "We couldn't open test payment. Your bag is saved; retry to recover the same checkout.",
+    "text": "payment_prepare_order",
+    "groups": [
+      "api · checkout · session · route"
+    ]
+  },
+  {
+    "text": "payment_prepare_order_v2",
+    "groups": [
+      "api · checkout · session · route"
+    ]
+  },
+  {
+    "text": "We couldn't open payment. Your bag is saved; retry to recover the same checkout.",
     "groups": [
       "api · checkout · session · route"
     ]
@@ -186,12 +217,6 @@
   },
   {
     "text": "Invalid payment signature.",
-    "groups": [
-      "api · payments · stripe · webhook · route"
-    ]
-  },
-  {
-    "text": "Live payment events are not enabled.",
     "groups": [
       "api · payments · stripe · webhook · route"
     ]
@@ -613,6 +638,18 @@
     ]
   },
   {
+    "text": "Continue to secure payment",
+    "groups": [
+      "checkout · checkout-page"
+    ]
+  },
+  {
+    "text": "Continue to Stripe to complete your purchase securely. Your pieces are reserved while checkout is open.",
+    "groups": [
+      "checkout · checkout-page"
+    ]
+  },
+  {
     "text": "Continue to Stripe to test the enabled payment methods. Stock is reserved while the test checkout is open and released when it ends. No real money is charged.",
     "groups": [
       "checkout · checkout-page"
@@ -732,6 +769,12 @@
   },
   {
     "text": "Last name",
+    "groups": [
+      "checkout · checkout-page"
+    ]
+  },
+  {
+    "text": "No additional tax is charged. Delivery is included in the total shown when its rate is available.",
     "groups": [
       "checkout · checkout-page"
     ]
@@ -869,6 +912,18 @@
     ]
   },
   {
+    "text": "Review your selection and delivery details, then pay securely with Stripe.",
+    "groups": [
+      "checkout · checkout-page"
+    ]
+  },
+  {
+    "text": "Reviewing does not place an order. Continue to secure payment to complete your purchase with Stripe.",
+    "groups": [
+      "checkout · checkout-page"
+    ]
+  },
+  {
     "text": "Reviewing does not place an order. Continuing to test payment saves a private test order and sends the required checkout details to Stripe. Use test customer details.",
     "groups": [
       "checkout · checkout-page"
@@ -878,6 +933,13 @@
     "text": "Royal Mail",
     "groups": [
       "checkout · checkout-page"
+    ]
+  },
+  {
+    "text": "Secure checkout",
+    "groups": [
+      "checkout · checkout-page",
+      "cookie-policy"
     ]
   },
   {
@@ -908,10 +970,16 @@
     ]
   },
   {
-    "text": "Test checkout",
+    "text": "test",
     "groups": [
       "checkout · checkout-page",
-      "cookie-policy"
+      "src · lib · payments · server"
+    ]
+  },
+  {
+    "text": "Test checkout",
+    "groups": [
+      "checkout · checkout-page"
     ]
   },
   {
@@ -940,6 +1008,12 @@
     ]
   },
   {
+    "text": "Total",
+    "groups": [
+      "checkout · checkout-page"
+    ]
+  },
+  {
     "text": "Town or city",
     "groups": [
       "checkout · checkout-page"
@@ -965,7 +1039,7 @@
     ]
   },
   {
-    "text": "We couldn't open test payment. Please try again.",
+    "text": "We couldn't open payment. Please try again.",
     "groups": [
       "checkout · checkout-page"
     ]
@@ -1008,6 +1082,18 @@
   },
   {
     "text": "Awaiting confirmation.",
+    "groups": [
+      "checkout · order-confirmation"
+    ]
+  },
+  {
+    "text": "busy",
+    "groups": [
+      "checkout · order-confirmation"
+    ]
+  },
+  {
+    "text": "Cancel this checkout",
     "groups": [
       "checkout · order-confirmation"
     ]
@@ -1057,10 +1143,22 @@
     ]
   },
   {
+    "text": "Order summary",
+    "groups": [
+      "checkout · order-confirmation"
+    ]
+  },
+  {
     "text": "paid",
     "groups": [
       "checkout · order-confirmation",
       "src · lib · payments · provider"
+    ]
+  },
+  {
+    "text": "Payment has not been completed. You can return to Stripe using your browser, or cancel this checkout to release its reservation.",
+    "groups": [
+      "checkout · order-confirmation"
     ]
   },
   {
@@ -1090,11 +1188,18 @@
   {
     "text": "POST",
     "groups": [
-      "checkout · order-confirmation"
+      "checkout · order-confirmation",
+      "src · lib · payments · recovery-auth"
     ]
   },
   {
     "text": "SEEN ABAYAS · Payment status",
+    "groups": [
+      "checkout · order-confirmation"
+    ]
+  },
+  {
+    "text": "Stripe confirmed this checkout is closed. Its reservation has been released. Return to your bag to review your selection.",
     "groups": [
       "checkout · order-confirmation"
     ]
@@ -1112,7 +1217,19 @@
     ]
   },
   {
+    "text": "Stripe is still confirming your payment. Please wait before attempting another payment. Your pieces remain reserved.",
+    "groups": [
+      "checkout · order-confirmation"
+    ]
+  },
+  {
     "text": "Stripe is still confirming your test payment. Please wait before attempting another payment. Your pieces remain reserved.",
+    "groups": [
+      "checkout · order-confirmation"
+    ]
+  },
+  {
+    "text": "Test order summary",
     "groups": [
       "checkout · order-confirmation"
     ]
@@ -1136,6 +1253,18 @@
     ]
   },
   {
+    "text": "Thank you. Your order is confirmed.",
+    "groups": [
+      "checkout · order-confirmation"
+    ]
+  },
+  {
+    "text": "This checkout has ended and its stock reservation has been released. Return to your bag to try again.",
+    "groups": [
+      "checkout · order-confirmation"
+    ]
+  },
+  {
     "text": "This is a test order. Your bag has been kept so you can test another payment method. Physical inventory is not sold by sandbox payments.",
     "groups": [
       "checkout · order-confirmation"
@@ -1143,6 +1272,18 @@
   },
   {
     "text": "This test checkout has ended and its stock reservation has been released. You can return to your bag to try again.",
+    "groups": [
+      "checkout · order-confirmation"
+    ]
+  },
+  {
+    "text": "Total paid",
+    "groups": [
+      "checkout · order-confirmation"
+    ]
+  },
+  {
+    "text": "We are checking whether Stripe opened your checkout. Please check again shortly.",
     "groups": [
       "checkout · order-confirmation"
     ]
@@ -1173,6 +1314,18 @@
   },
   {
     "text": "Your checkout is still open.",
+    "groups": [
+      "checkout · order-confirmation"
+    ]
+  },
+  {
+    "text": "Your order reference and saved details are shown here. Contact customer care if you need help with this order.",
+    "groups": [
+      "checkout · order-confirmation"
+    ]
+  },
+  {
+    "text": "Your payment has been verified and your pieces are now part of your confirmed order. Keep the order reference below for customer care.",
     "groups": [
       "checkout · order-confirmation"
     ]
@@ -1866,6 +2019,12 @@
     ]
   },
   {
+    "text": "After a verified paid purchase, seen.paid-bags.v1 remembers up to 50 opaque order references in local storage so revisiting confirmation does not clear a newer bag again. It stores no contact, address or card details. You can remove it through your browser's site-data settings. A bag that differs from the purchased selection is preserved.",
+    "groups": [
+      "cookie-policy"
+    ]
+  },
+  {
     "text": "Analytics and advertising",
     "groups": [
       "cookie-policy"
@@ -1876,6 +2035,12 @@
     "groups": [
       "cookie-policy",
       "privacy-policy"
+    ]
+  },
+  {
+    "text": "Completed purchases",
+    "groups": [
+      "cookie-policy"
     ]
   },
   {
@@ -2020,7 +2185,7 @@
     ]
   },
   {
-    "text": "When test payment is enabled, reviewing checkout sets the necessary first-party seen_checkout_owner cookie for up to 30 days. It is a random browser ownership token, contains no contact or card details, uses HttpOnly and SameSite=Lax, and is Secure on HTTPS. It authorises private test-order access after returning from Stripe. Blocking or clearing it prevents access to those orders in that browser. Stripe-hosted Checkout uses its own payment and fraud-prevention technologies; no Stripe script is loaded by this storefront. Clearing your bag does not cancel a pending checkout or remove this cookie.",
+    "text": "When payment is enabled, reviewing checkout sets the necessary first-party seen_checkout_owner cookie for up to 30 days. It is a random browser ownership token, contains no contact or card details, uses HttpOnly and SameSite=Lax, and is Secure on HTTPS. It authorises private order access after returning from Stripe. Blocking or clearing it prevents access to those orders in that browser. Stripe-hosted Checkout uses its own payment and fraud-prevention technologies; no Stripe script is loaded by this storefront. Clearing your bag does not cancel a pending checkout or remove this cookie.",
     "groups": [
       "cookie-policy"
     ]
@@ -3868,6 +4033,12 @@
     ]
   },
   {
+    "text": "Checkout expiry needs another attempt.",
+    "groups": [
+      "src · lib · payments · provider"
+    ]
+  },
+  {
     "text": "checkout.session.async_payment_failed",
     "groups": [
       "src · lib · payments · provider"
@@ -3988,13 +4159,7 @@
     ]
   },
   {
-    "text": "Test payments are not configured yet. Your bag is still saved.",
-    "groups": [
-      "src · lib · payments · server"
-    ]
-  },
-  {
-    "text": "Test payments are not enabled yet. Your bag is still saved.",
+    "text": "Payments are not configured yet. Your bag is still saved.",
     "groups": [
       "src · lib · payments · server"
     ]
@@ -4235,12 +4400,6 @@
   },
   {
     "text": "magnetic",
-    "groups": [
-      "ui · store-motion"
-    ]
-  },
-  {
-    "text": "none",
     "groups": [
       "ui · store-motion"
     ]

@@ -10,7 +10,7 @@ export function providerSnapshot(
   eventType = "reconcile",
 ) {
   if (
-    session.livemode ||
+    session.livemode !== !order.is_test ||
     session.mode !== "payment" ||
     session.metadata?.order_id !== order.id ||
     session.client_reference_id !== order.id ||
@@ -103,7 +103,7 @@ export async function applyProviderSession(
 
 /** Exhaust the bounded creation window before treating a missing session as an orphan. */
 export async function recoverCreatingOrder(order: PaymentOrder) {
-  const { stripe } = paymentServices();
+  const { stripe } = paymentServices(order.is_test);
   const deadline = Date.now() + 25_000;
   let after: string | undefined;
   for (let page = 0; page < 20; page++) {
@@ -137,7 +137,7 @@ export async function reconcileOrder(order: PaymentOrder) {
   if (["paid", "expired", "failed", "attention"].includes(order.state))
     return order;
   if (!order.session_id) return recoverCreatingOrder(order);
-  const session = await paymentServices().stripe.checkout.sessions.retrieve(
+  const session = await paymentServices(order.is_test).stripe.checkout.sessions.retrieve(
     order.session_id,
   );
   // Time alone never releases stock. If a provider still reports an overdue
@@ -147,14 +147,14 @@ export async function reconcileOrder(order: PaymentOrder) {
     Date.now() >= Date.parse(order.expires_at)
   ) {
     try {
-      const expired = await paymentServices().stripe.checkout.sessions.expire(
+      const expired = await paymentServices(order.is_test).stripe.checkout.sessions.expire(
         session.id,
       );
       return applyProviderSession(order, expired);
     } catch {
       // Payment may have won the race with expiry. Retrieve again rather than
       // assuming cancellation, so pending/paid stock is never released early.
-      const latest = await paymentServices().stripe.checkout.sessions.retrieve(
+      const latest = await paymentServices(order.is_test).stripe.checkout.sessions.retrieve(
         session.id,
       );
       if (latest.status === "open")
@@ -166,7 +166,7 @@ export async function reconcileOrder(order: PaymentOrder) {
 }
 
 export async function openHostedCheckout(order: PaymentOrder) {
-  const { stripe } = paymentServices();
+  const { stripe } = paymentServices(order.is_test);
   let session: Stripe.Checkout.Session;
   if (order.session_id)
     session = await stripe.checkout.sessions.retrieve(order.session_id);
@@ -264,7 +264,7 @@ export async function cancelHostedCheckout(order: PaymentOrder) {
   let current = await reconcileOrder(order);
   if (current.state === "open" && current.session_id) {
     try {
-      const session = await paymentServices().stripe.checkout.sessions.expire(
+      const session = await paymentServices(current.is_test).stripe.checkout.sessions.expire(
         current.session_id,
       );
       current = await applyProviderSession(current, session);

@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { requestDeadline } from "@/lib/request-deadline";
 import { formatGbp } from "@/lib/money";
 import type { CustomerOrder } from "@/lib/payments/model";
+import { useBag } from "@/components/bag/bag-provider";
 
 const messages = {
   creating: {
@@ -40,9 +41,20 @@ const messages = {
     text: "We received a payment update that needs checking. Please contact customer care with the reference below before trying another payment.",
   },
 };
+const liveMessages = {
+  creating: {title:"Checking your payment.",text:"We are checking whether Stripe opened your checkout. Please check again shortly."},
+  open: {title:"Your checkout is still open.",text:"Payment has not been completed. You can return to Stripe using your browser, or cancel this checkout to release its reservation."},
+  pending: {title:"Awaiting confirmation.",text:"Stripe is still confirming your payment. Please wait before attempting another payment. Your pieces remain reserved."},
+  paid: {title:"Thank you. Your order is confirmed.",text:"Your payment has been verified and your pieces are now part of your confirmed order. Keep the order reference below for customer care."},
+  failed: {title:"Payment was not completed.",text:"This checkout has ended and its stock reservation has been released. Return to your bag to try again."},
+  expired: {title:"Your checkout has ended.",text:"Stripe confirmed this checkout is closed. Its reservation has been released. Return to your bag to review your selection."},
+  attention: messages.attention,
+};
 
 export function OrderConfirmation({ orderId }: { orderId: string }) {
   const [order, setOrder] = useState<CustomerOrder | null>(null);
+  const bag = useBag();
+  const completedBag = useRef(false);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [checking, setChecking] = useState(false);
@@ -125,7 +137,22 @@ export function OrderConfirmation({ orderId }: { orderId: string }) {
     }, 5000);
     return () => window.clearInterval(interval);
   }, [order, load]);
-  const message = order ? messages[order.state] : null;
+  useEffect(() => {
+    if (!order || order.isTest || order.state !== "paid" || !bag.ready || bag.busy || completedBag.current) return;
+    const marker = "seen.paid-bags.v1";
+    let seen: string[] = [];
+    try {
+      const saved = JSON.parse(localStorage.getItem(marker) || "[]");
+      if (Array.isArray(saved)) seen=saved.filter(id=>typeof id==="string"&&/^[a-f0-9-]{36}$/i.test(id)).slice(-50);
+      if (seen.includes(order.id)) { completedBag.current=true; return; }
+    } catch { /* In-memory idempotency still applies. */ }
+    const matches = bag.quote.lines.length === order.items.length && order.items.every(item =>
+      bag.quote.lines.some(line => line.variantId === item.variant_id && line.quantity === item.quantity));
+    if (matches && bag.clearSavedBag() === "busy") return;
+    completedBag.current=true;
+    try { localStorage.setItem(marker,JSON.stringify([...seen,order.id].slice(-50))); } catch { /* No contact, address or payment data is stored. */ }
+  }, [order, bag]);
+  const message = order ? (order.isTest ? messages : liveMessages)[order.state] : null;
   return (
     <div className="container confirmation-page">
       <p className="eyebrow">
@@ -223,14 +250,14 @@ export function OrderConfirmation({ orderId }: { orderId: string }) {
             <p className="confirmation-note">
               <Copy
                 text={
-                  "This is a test order. Your bag has been kept so you can test another payment method. Physical inventory is not sold by sandbox payments."
+                  order.isTest ? "This is a test order. Your bag has been kept so you can test another payment method. Physical inventory is not sold by sandbox payments." : "Your order reference and saved details are shown here. Contact customer care if you need help with this order."
                 }
               />
             </p>
           </section>
           <section
             className="checkout-summary confirmation-summary"
-            aria-label="Test order summary"
+            aria-label={order.isTest ? "Test order summary" : "Order summary"}
           >
             <h2>
               <Copy text={"Your selection"} />
@@ -286,7 +313,7 @@ export function OrderConfirmation({ orderId }: { orderId: string }) {
               </div>
               <div className="checkout-total">
                 <dt>
-                  <Copy text={"Test total"} />
+                  <Copy text={order.isTest ? "Test total" : "Total paid"} />
                   <small>GBP</small>
                 </dt>
                 <dd>{formatGbp(order.totalPence)}</dd>
@@ -317,7 +344,7 @@ export function OrderConfirmation({ orderId }: { orderId: string }) {
               void load(true);
             }}
           >
-            <Copy text={"Cancel this test checkout"} />
+            <Copy text={order.isTest ? "Cancel this test checkout" : "Cancel this checkout"} />
           </button>
         )}
         <Link className="confirmation-bag" href="/bag">

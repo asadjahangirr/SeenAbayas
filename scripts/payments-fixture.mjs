@@ -80,14 +80,14 @@ const server = http.createServer(async (req, res) => {
         id: change.eventId || `evt_${randomUUID().replaceAll("-", "")}`,
         object: "event",
         type,
-        livemode: false,
+        livemode: current.livemode,
         data: { object: current },
       });
       const signature = stripe.webhooks.generateTestHeaderString({
         payload: body,
         secret: change.badSignature
           ? "whsec_wrong"
-          : "whsec_SEEN_LOCAL_FIXTURE_ONLY",
+          : current.livemode ? "whsec_SEEN_LOCAL_LIVE_FIXTURE_ONLY" : "whsec_SEEN_LOCAL_FIXTURE_ONLY",
       });
       const response = await fetch(
         "http://127.0.0.1:3107/api/payments/stripe/webhook",
@@ -104,7 +104,7 @@ const server = http.createServer(async (req, res) => {
       return;
     }
     if (
-      req.headers.authorization !== "Bearer sk_test_SEEN_LOCAL_FIXTURE_ONLY"
+      !["Bearer sk_test_SEEN_LOCAL_FIXTURE_ONLY","Bearer sk_live_SEEN_LOCAL_FIXTURE_ONLY"].includes(req.headers.authorization)
     ) {
       send({ error: { message: "Fixture credentials required" } }, 401);
       return;
@@ -113,6 +113,7 @@ const server = http.createServer(async (req, res) => {
       send({ error: { message: "Isolated provider outage" } }, 503);
       return;
     }
+    const live = req.headers.authorization === "Bearer sk_live_SEEN_LOCAL_FIXTURE_ONLY";
     const key = req.headers["idempotency-key"];
     if (key && idempotency.has(key)) {
       const previous = idempotency.get(key);
@@ -144,11 +145,11 @@ const server = http.createServer(async (req, res) => {
         total +=
           Number(body.get(`line_items[${i}][quantity]`)) *
           Number(body.get(`line_items[${i}][price_data][unit_amount]`));
-      const id = `cs_test_${randomUUID().replaceAll("-", "")}`;
+      const id = `cs_${live ? "live" : "test"}_${randomUUID().replaceAll("-", "")}`;
       result = {
         id,
         object: "checkout.session",
-        livemode: false,
+        livemode: live,
         mode: "payment",
         currency: "gbp",
         amount_total: total,
@@ -180,14 +181,15 @@ const server = http.createServer(async (req, res) => {
     if (url.pathname === "/v1/checkout/sessions" && req.method === "GET")
       result = {
         object: "list",
-        data: [...sessions.values()],
+        data: [...sessions.values()].filter(session=>session.livemode===live),
         has_more: false,
       };
     const match = url.pathname.match(
-      /^\/v1\/checkout\/sessions\/(cs_test_[a-z0-9]+)(\/expire)?$/,
+      /^\/v1\/checkout\/sessions\/(cs_(?:test|live)_[a-z0-9]+)(\/expire)?$/,
     );
     if (match) {
       result = sessions.get(match[1]);
+      if (result?.livemode !== live) result=undefined;
       if (match[2] && result?.status === "open")
         Object.assign(result, { status: "expired", url: null });
     }

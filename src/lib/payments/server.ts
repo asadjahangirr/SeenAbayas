@@ -2,14 +2,14 @@ import "server-only";
 import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
 import { cache } from "react";
-import { readPaymentCredentials, testCheckoutEnabled } from "./config.mjs";
+import { readPaymentCredentials, checkoutPaymentMode } from "./config.mjs";
 import { PaymentError, type PaymentOrder } from "./model";
 
-export function paymentServices() {
-  const config = readPaymentCredentials(process.env);
+export function paymentServices(isTest?: boolean) {
+  const config = readPaymentCredentials(process.env, isTest === undefined ? undefined : isTest ? "test" : "live");
   if (!config)
     throw new PaymentError(
-      "Test payments are not configured yet. Your bag is still saved.",
+      "Payments are not configured yet. Your bag is still saved.",
     );
   const stripe = new Stripe(config.stripeKey, {
     timeout: 8000,
@@ -73,22 +73,22 @@ export async function paymentRpc<T>(
   return data as T;
 }
 
-export const paymentReadiness = cache(async () => {
-  if (!testCheckoutEnabled(process.env)) return false;
+export const readyPaymentMode = cache(async (): Promise<"test" | "live" | null> => {
+  const mode = checkoutPaymentMode(process.env);
+  if (!mode) return null;
   try {
-    const data = await paymentRpc<{ ready: boolean }>("payment_health");
-    return data?.ready === true;
+    const data = await paymentRpc<{ ready: boolean; live_payments_ready?: boolean }>("payment_health");
+    return data?.ready === true && (mode === "test" || data.live_payments_ready === true) ? mode : null;
   } catch {
-    return false;
+    return null;
   }
 });
-export async function requireTestCheckout() {
-  if (!testCheckoutEnabled(process.env))
-    throw new PaymentError(
-      "Test payments are not enabled yet. Your bag is still saved.",
-    );
-  if (!(await paymentReadiness()))
+export const paymentReadiness = cache(async () => Boolean(await readyPaymentMode()));
+export async function requireCheckout() {
+  const mode = await readyPaymentMode();
+  if (!mode)
     throw new PaymentError("The payment database update is not ready yet.");
+  return mode;
 }
 export async function getPaymentOrder(id: string, ownerHash?: string) {
   return paymentRpc<PaymentOrder | null>("payment_get_order", {

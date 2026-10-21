@@ -37,6 +37,7 @@ test.beforeAll(async () => {
     "20261020000100_payments.sql",
     "20261020000200_order_records.sql",
     "20261020000300_stock_management.sql",
+    "20261021000100_live_payments.sql",
   ])
     await db.exec(await readFile(`supabase/migrations/${file}`, "utf8"));
   await db.query("insert into auth.users(id) values($1)", [owner]);
@@ -119,12 +120,12 @@ async function apply(
         order.id,
         event,
         {
-          id: "cs_test_fixture",
+          id: order.is_test ? "cs_test_fixture" : "cs_live_fixture",
           order_id: order.id,
           request_hash: order.request_hash,
           total_pence: order.total_pence,
           currency: "gbp",
-          is_test: true,
+          is_test: order.is_test,
           state,
           payment_intent: "pi_fixture",
           ...changes,
@@ -259,7 +260,7 @@ test("only the server role can access payment RPCs and private order data is nev
   await db.exec("set local role service_role");
   expect(
     (await db.query<any>("select public.payment_health() data")).rows[0].data,
-  ).toMatchObject({ ready: true, test_only: true, order_records_ready: true });
+  ).toMatchObject({ ready: true, test_only: false, order_records_ready: true, live_payments_ready:true });
 });
 
 test("orphan cleanup cannot release an active creation window and only releases once", async () => {
@@ -346,11 +347,9 @@ test("sandbox commits are rejected and a mismatched reservation rolls back every
   expect((await db.query("select * from seen_private.stripe_event_receipts")).rows).toHaveLength(0);
 });
 
-test("prepared physical-stock commit deducts once while the production schema still forbids live orders", async () => {
+test("physical-stock commit deducts once and cannot be reversed into a fresh reservation", async () => {
   const template=await prepare(requestId,ownerHash,2);await apply(template,"expired");
-  // Only this rolled-back isolated database relaxes the test-only constraint to
-  // exercise the internal future-live stock branch. Hosted/live checkout stays blocked.
-  await db.exec("alter table seen_private.checkout_orders drop constraint checkout_orders_is_test_check");
+  // Isolated fixture: exercise the physical branch without any provider charge.
   const live=(await db.query<any>(`insert into seen_private.checkout_orders(request_id,owner_hash,request_hash,order_number,is_test,details,delivery,subtotal_pence,delivery_pence,total_pence,return_origin)
     select gen_random_uuid(),owner_hash,request_hash,'ISOLATED-STOCK-ONLY',false,details,delivery,subtotal_pence,delivery_pence,total_pence,return_origin from seen_private.checkout_orders where id=$1 returning id`,[template.id])).rows[0];
   await db.query(`insert into seen_private.checkout_items select $1,variant_id,product_id,quantity,unit_price_pence,snapshot from seen_private.checkout_items where order_id=$2`,[live.id,template.id]);
@@ -361,6 +360,26 @@ test("prepared physical-stock commit deducts once while the production schema st
   expect(await stock()).toEqual({on_hand:3,reserved:0});
   expect((await db.query("select movement,quantity,on_hand_delta from seen_private.checkout_stock_events where order_id=$1 and movement='committed'",[live.id])).rows).toEqual([{movement:"committed",quantity:2,on_hand_delta:-2}]);
   await denied(()=>db.query("update seen_private.checkout_orders set stock_state='reserved' where id=$1",[live.id]));
+});
+
+test("live orders reserve, settle once, deduct physical units and contribute to verified finance",async()=>{
+  const live=(await db.query<any>("select public.payment_prepare_order_v2($1,$2,$3,$4,$5,'standard',0,'https://www.seenabayas.co.uk','live') data",[requestId,ownerHash,requestHash,details,[{variant_id:variant,quantity:2,unit_price_pence:8000}]])).rows[0].data;
+  expect(live.is_test).toBe(false);expect(live.order_number).toMatch(/^SEEN-[A-F0-9]+$/);expect(live.tax_pence).toBe(0);
+  await denied(()=>apply(live,"paid","evt_wrong_mode",{is_test:true,id:"cs_test_wrong"}));
+  await apply(live,"paid","evt_real_fixture");await apply(live,"paid","evt_real_fixture");
+  expect(await stock()).toEqual({on_hand:3,reserved:0});
+  const stats=(await db.query<any>("select public.admin_snapshot() data")).rows[0].data.statistics;
+  expect(Number(stats.paidPence)).toBe(16000);expect(Number(stats.orderCount)).toBe(1);
+  const record=(await db.query<any>("select payload from seen_private.admin_records where id=$1",[live.id])).rows[0].payload;
+  expect(record).toMatchObject({is_test:false,payment_status:"paid",stock_state:"committed",tax_pence:0});
+});
+
+test("live failure releases without deduction and new mode RPC rejects callers outside the service role",async()=>{
+  const args=[requestId,ownerHash,requestHash,details,[{variant_id:variant,quantity:2,unit_price_pence:8000}]];
+  const sql="select public.payment_prepare_order_v2($1,$2,$3,$4,$5,'standard',0,'https://www.seenabayas.co.uk','live') data";
+  const live=(await db.query<any>(sql,args)).rows[0].data;
+  await apply(live,"expired");expect(await stock()).toEqual({on_hand:5,reserved:0});
+  for(const role of ["anon","authenticated"]){await db.exec(`set local role ${role}`);await denied(()=>db.query(sql,args));await db.exec("reset role");}
 });
 
 test("multiple items settle atomically and stale admin stock cannot overwrite an active reservation", async () => {

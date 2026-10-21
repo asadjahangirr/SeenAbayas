@@ -1,5 +1,7 @@
 ﻿# Stripe test payments - SEEN ABAYAS
 
+**21 October continuation:** the developer requests live payments on https://www.seenabayas.co.uk plus sandbox testing, with zero additional tax. The new implementation/migration supports this while preserving test order verification; activation remains pending operator setup. Follow [DOMAIN_PAYMENT_SETUP.md](DOMAIN_PAYMENT_SETUP.md) for the current complete instructions and retained test/live key names. The test-only restrictions and old Vercel URLs below describe the earlier checkpoint; do not rerun older migrations over the new one.
+
 Updated 20 October 2026. The Stripe-hosted payment flow is implemented for **test mode only**. Live keys and `PAYMENTS_MODE=live` are rejected. Installation, configuration and a verified Stripe transaction are separate checkpoints.
 
 ## Status
