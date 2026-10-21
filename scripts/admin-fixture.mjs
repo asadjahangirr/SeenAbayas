@@ -117,7 +117,9 @@ const rpc = {
   order_email_status: ["target_order"],
 };
 let recoveryIssued = false;
+let loginPassword = "Test-password-only-123";
 async function reset(enroll = false) {
+  loginPassword = "Test-password-only-123";
   user.factors = enroll
     ? []
     : [
@@ -254,7 +256,7 @@ const server = http.createServer(async (req, res) => {
       }
       if (
         body.email !== "owner@example.test" ||
-        body.password !== "Test-password-only-123"
+        body.password !== loginPassword
       ) {
         send(
           { error: "invalid_grant", error_description: "Invalid credentials" },
@@ -279,6 +281,7 @@ const server = http.createServer(async (req, res) => {
         send({ message: "Invalid account update" }, 400);
         return;
       }
+      if (req.method === "PUT" && body.password) loginPassword = body.password;
       send(user);
       return;
     }

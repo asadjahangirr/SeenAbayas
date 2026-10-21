@@ -1013,6 +1013,20 @@ test("shared inbox quotas reject a fourth sender message or seventh network mess
   expect((await db.query<any>("select public.admin_snapshot() data")).rows[0].data.records).toHaveLength(6);
 });
 
+test("contact migration reruns preserve existing messages, retry receipts and inventory", async () => {
+  const message = inboxMessage(), id = crypto.randomUUID();
+  await submitEnquiry(message, undefined, undefined, id);
+  const before = (await db.query("select id,kind,payload,version from seen_private.admin_records order by id")).rows;
+  const receipts = (await db.query("select * from seen_private.contact_receipts order by request_id")).rows;
+  const stock = (await db.query("select * from seen_private.inventory order by variant_id")).rows;
+  const migration = (await readFile("supabase/migrations/20261021000300_contact_inbox.sql", "utf8")).replace(/^begin;$/m, "").replace(/^commit;$/m, "");
+  await db.exec(migration);
+  await db.exec(migration);
+  expect((await db.query("select id,kind,payload,version from seen_private.admin_records order by id")).rows).toEqual(before);
+  expect((await db.query("select * from seen_private.contact_receipts order by request_id")).rows).toEqual(receipts);
+  expect((await db.query("select * from seen_private.inventory order by variant_id")).rows).toEqual(stock);
+});
+
 test("shared inbox global quota is enforced across distinct senders and networks", async () => {
   await asUser(null, "aal1", "service_role");
   for (let i = 0; i < 30; i++) await submitEnquiry(inboxMessage(), i.toString(16).padStart(64, "0"), i.toString(16).padStart(64, "1"));

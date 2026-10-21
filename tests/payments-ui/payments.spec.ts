@@ -357,11 +357,11 @@ test("scheduled recovery releases expired checkouts without a webhook or custome
   const signature=createHmac("sha256","seen-local-fixture-recovery-token-only-123456").update(`seen-stock-recovery:v1:${timestamp}:POST:/api/payments/reconcile`).digest("hex");
   const recovered=await request.post("/api/payments/reconcile",{headers:{"x-seen-recovery-timestamp":timestamp,"x-seen-recovery-signature":signature}});
   expect(recovered.status()).toBe(200);
-  expect(await recovered.json()).toEqual({checked:1,updated:1,retryRequired:0});
+  expect(await recovered.json()).toEqual({checked:1,updated:1,retryRequired:0,emails:{configured:false}});
   expect((await state(request)).stock[0]).toEqual({on_hand:5,reserved:0});
   expect((await state(request)).sessions[0].status).toBe("expired");
   const replay=await request.get("/api/payments/reconcile",{headers:recoveryHeaders});
-  expect(await replay.json()).toEqual({checked:0,updated:0,retryRequired:0});
+  expect(await replay.json()).toEqual({checked:0,updated:0,retryRequired:0,emails:{configured:false}});
 });
 
 test("provider outages retain reservations and return a retryable scheduler failure; later verification recovers safely", async ({page,request}) => {
@@ -371,11 +371,11 @@ test("provider outages retain reservations and return a retryable scheduler fail
   await request.post("http://127.0.0.1:3108/__test/recovery",{data:{unavailable:true}});
   const failed=await request.post("/api/payments/reconcile",{headers:recoveryHeaders});
   expect(failed.status()).toBe(503);
-  expect(await failed.json()).toEqual({checked:1,updated:0,retryRequired:1});
+  expect(await failed.json()).toEqual({checked:1,updated:0,retryRequired:1,emails:{configured:false}});
   expect((await state(request)).stock[0].reserved).toBe(2);
   await request.post("http://127.0.0.1:3108/__test/recovery",{data:{unavailable:false,releaseLease:true}});
   const recovered=await request.get("/api/payments/reconcile",{headers:recoveryHeaders});
-  expect(await recovered.json()).toEqual({checked:1,updated:1,retryRequired:0});
+  expect(await recovered.json()).toEqual({checked:1,updated:1,retryRequired:0,emails:{configured:false}});
   expect((await state(request)).stock[0]).toEqual({on_hand:5,reserved:0});
 });
 
@@ -389,7 +389,7 @@ test("scheduled recovery keeps completed asynchronous payments reserved and rele
   // A separate interrupted-creation fixture has no provider session to recover.
   await request.post("http://127.0.0.1:3108/__test/recovery",{data:{orphan:true,releaseLease:true}});
   const orphan=await request.post("/api/payments/reconcile",{headers:recoveryHeaders});
-  expect(await orphan.json()).toEqual({checked:1,updated:1,retryRequired:0});
+  expect(await orphan.json()).toEqual({checked:1,updated:1,retryRequired:0,emails:{configured:false}});
   expect((await state(request)).stock[0]).toEqual({on_hand:5,reserved:0});
 });
 

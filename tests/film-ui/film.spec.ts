@@ -10,6 +10,23 @@ async function openFilm(page: Page) {
   await page.evaluate(() => document.fonts.ready);
 }
 
+for (const width of [393, 1440]) test(`homepage edit and story become readable while scrolling at ${width}px`, async ({ page }, testInfo) => {
+  await page.setViewportSize({ width, height: 900 });
+  await openFilm(page);
+  for (const selector of [".collection-heading", ".story-heading", ".story-copy"]) {
+    const section = page.locator(selector);
+    await section.evaluate(element => {
+      window.scrollTo({ top: element.getBoundingClientRect().top + scrollY - innerHeight * 0.35, behavior: "instant" });
+    });
+    await expect(section).toHaveCSS("opacity", "1");
+    await expect(section).toHaveCSS("visibility", "visible");
+    expect(await section.innerText()).not.toBe("");
+  }
+  await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
+  await assertTransparent(page);
+  await page.screenshot({ path: testInfo.outputPath(`home-content-${width}.png`), fullPage: true });
+});
+
 async function assertDocked(page: Page) {
   await expect
     .poll(async () =>

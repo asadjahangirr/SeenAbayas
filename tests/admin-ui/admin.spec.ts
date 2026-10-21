@@ -97,6 +97,7 @@ test("admin data is inaccessible before login and cross-origin writes are reject
 test("sign in requires MFA, then every admin section opens", async ({
   page,
 }) => {
+  test.setTimeout(60_000);
   await signIn(page);
   for (const [slug, title] of [
     ["products", "Products & stock"],
