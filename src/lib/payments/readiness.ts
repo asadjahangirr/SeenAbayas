@@ -1,6 +1,13 @@
 import "server-only";
 import { paymentConfigurationReport } from "./diagnostics.mjs";
-import { paymentRpc } from "./server";
+import { paymentRpc, paymentServices } from "./server";
+import { probeStripeReadAccess } from "./permission-probe.mjs";
+
+/** Explicit owner diagnostic only; active environment, GETs only, no provider writes. */
+export async function getStripeReadAccess(mode: "test" | "live") {
+  const { stripe } = paymentServices(mode === "test");
+  return { environment: mode, ...await probeStripeReadAccess(stripe) };
+}
 
 /** Owner-only caller. Reads configuration/health, never Stripe or commerce writes. */
 export async function getPaymentSetupStatus() {

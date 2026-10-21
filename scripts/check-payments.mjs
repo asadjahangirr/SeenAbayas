@@ -2,13 +2,18 @@
 import fs from "node:fs";
 import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
+import { probeStripeReadAccess } from "../src/lib/payments/permission-probe.mjs";
 
 if (fs.existsSync(".env.local")) process.loadEnvFile(".env.local");
 const result = { testKey: /^(sk|rk)_test_/.test(process.env.STRIPE_SECRET_KEY || ""), stripeConnected: false, supabaseConnected: false, paymentMigrationReady: false, webhookConfigured: /^whsec_/.test(process.env.STRIPE_WEBHOOK_SECRET || ""), paymentsMode: process.env.PAYMENTS_MODE || "disabled" };
 result.configuredStripeMode = /^(sk|rk)_live_/.test(process.env.STRIPE_SECRET_KEY || "") ? "live" : result.testKey ? "test" : "unconfigured";
 result.recoverySecretConfigured = (process.env.PAYMENTS_RECONCILE_SECRET || "").length >= 32 && (process.env.PAYMENTS_RECONCILE_SECRET || "").length <= 256;
 if (result.configuredStripeMode !== "unconfigured") {
-  try { const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { timeout: 8000, maxNetworkRetries: 0 }); const balance = await stripe.balance.retrieve(); result.stripeConnected = balance.livemode === (result.configuredStripeMode === "live"); }
+  try {
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { timeout: 8000, maxNetworkRetries: 0 });
+    result.stripeReadAccess = await probeStripeReadAccess(stripe);
+    result.stripeConnected = result.stripeReadAccess.requiredReadAccess === "passed";
+  }
   catch { result.stripeConnected = false; }
 }
 if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SECRET_KEY) {

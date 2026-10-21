@@ -660,10 +660,16 @@ export function AdminWorkspace({
                       never made public automatically.
                     </p>
                     {role === "owner" && (
+                      <>
                       <a className="admin-inline-link" href="/api/admin/payments/readiness" target="_blank" rel="noopener noreferrer">
                         Check payment setup
                         <ArrowUpRight size={16} />
                       </a>
+                      <a className="admin-inline-link" href="/api/admin/payments/readiness?stripe=read" target="_blank" rel="noopener noreferrer">
+                        Check Stripe read access
+                        <ArrowUpRight size={16} />
+                      </a>
+                      </>
                     )}
                   </Panel>
                 </>

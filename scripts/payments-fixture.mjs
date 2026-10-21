@@ -132,6 +132,10 @@ const server = http.createServer(async (req, res) => {
     }
     const body = new URLSearchParams(raw);
     let result;
+    if (url.pathname === "/v1/customers" && req.method === "GET")
+      result = { object: "list", data: [], has_more: false };
+    if (url.pathname === "/v1/account" && req.method === "GET")
+      result = { object: "account", charges_enabled: true, payouts_enabled: true, email: "PRIVATE_FIXTURE_ACCOUNT@example.test" };
     if (url.pathname === "/v1/customers" && req.method === "POST") {
       result = { id: `cus_test_${++customerCount}`, object: "customer" };
     }
@@ -187,7 +191,9 @@ const server = http.createServer(async (req, res) => {
     if (url.pathname === "/v1/checkout/sessions" && req.method === "GET")
       result = {
         object: "list",
-        data: [...sessions.values()].filter(session=>session.livemode===live),
+        data: [...sessions.values()].filter(session => session.livemode === live &&
+          session.created >= Number(url.searchParams.get("created[gte]") || 0) &&
+          session.created <= Number(url.searchParams.get("created[lte]") || Infinity)),
         has_more: false,
       };
     const match = url.pathname.match(

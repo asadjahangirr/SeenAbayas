@@ -1,11 +1,21 @@
 import { AdminError, adminFailure, privateJson, requireAdmin } from "@/lib/admin/auth";
-import { getPaymentSetupStatus } from "@/lib/payments/readiness";
+import { getPaymentSetupStatus, getStripeReadAccess } from "@/lib/payments/readiness";
 
-export async function GET() {
+export const maxDuration = 60;
+
+export async function GET(request: Request) {
   try {
     const { role } = await requireAdmin();
     if (role !== "owner") throw new AdminError("Only the owner can inspect payment setup.", 403);
-    return privateJson(await getPaymentSetupStatus());
+    const report = await getPaymentSetupStatus();
+    if (new URL(request.url).searchParams.get("stripe") === "read" && report.readyMode) {
+      return privateJson({
+        ...report,
+        providerPermissions: "read_checks_completed",
+        providerAccess: await getStripeReadAccess(report.readyMode),
+      });
+    }
+    return privateJson(report);
   } catch (error) {
     return adminFailure(error);
   }
