@@ -1,6 +1,10 @@
-# Automatic stock management — point 4
+# Automatic stock management ? point 4
 
-Implemented locally on 20 October 2026. Hosted installation, recurring-job activation and fresh sandbox acceptance are separate checks and are not yet confirmed.
+**Current checkpoint (21 October 2026):** hosted stock/order migrations were independently verified earlier. The developer has now supplied a successful setup status screenshot (seen-stock-recovery, every-minute schedule, active=true, request_table_ready=true) and a second screenshot showing two consecutive scheduled HTTP 200 responses, timed_out=false and recovery_result={checked:0,updated:0,retryRequired:0}. This establishes successful signed scheduled execution through the deployed application with no eligible work on those runs. It does not establish an actual hosted expiry/release, a fresh post-migration paid-order test or live physical-stock deduction. Keep test mode enabled; that provider/schema still rejects live charging.
+
+The earlier missing-table/no-job problem is resolved in the supplied evidence. The setup originally rolled back on combined Vault-value validation; the corrected field-specific error later identified the URL entry as invalid. After the developer corrected that entry and reran setup, the job/table and successful HTTP outcomes were demonstrated. Exact malformed URL characters were not supplied, so do not invent them. The operator files retain private access, token byte preservation, strict endpoint validation and atomic rollback; only public URL boundary whitespace/trailing slashes are normalised. Do not rerun setup merely because old history records a failure. Use the read-only check file for routine observation.
+
+Next development item in the requested order is point 5, checkout discount redemption. The latest user response confirms recovery results; it does not explicitly authorise implementing every subsequent phase. Fresh point-3/4 purchase/expiry acceptance remains recorded separately. No hosted schema, secrets, schedules, orders, reservations or stock were changed by the agent during this verification.
 
 Checkout reserves the selected sizes in the database before opening Stripe. The bag itself does not reserve stock. Available stock is on-hand minus reserved; desktop and phone share the same inventory. Successful **sandbox** purchases release the reservation without selling physical stock. A guarded physical-stock deduction path is prepared and tested in an isolated database, but real-money checkout remains disabled by the existing test-only database/provider constraints.
 
@@ -32,13 +36,15 @@ Webhooks normally release expired checkouts. The recurring job also recovers mis
 5. In **Supabase Vault**, create two private entries (or update the existing entries with these exact names):
    - `seen_stock_recovery_token`: the same random token as the Vercel variable.
    - `seen_stock_recovery_url`: `https://seenabayas.vercel.app/api/payments/reconcile`.
-6. Run the complete `supabase/setup-stock-recovery.sql` in SQL Editor as the project database owner. It schedules **seen-stock-recovery** every minute. Rerunning replaces the named schedule rather than creating duplicates. It begins real recovery of this project's existing sandbox reservations; apply it after deployment/configuration, rather than as a read-only installation check.
+6. Run the complete corrected `supabase/setup-stock-recovery.sql` in SQL Editor as the project database owner. It schedules **seen-stock-recovery** every minute and returns the schedule/active/table-ready status row described above. Rerunning replaces the named schedule rather than creating duplicates. It begins real recovery of this project's existing sandbox reservations; apply it after deployment/configuration, rather than as a read-only installation check.
 
 The scheduler reads the token inside a private database function and queues only a short-lived, timestamped HMAC proof. The long-lived token is not included in queued HTTP headers. This matters because Supabase documents that pg_net request queues can be readable by database roles even when the original token came from Vault. The setup does not try to change platform-owned queue permissions. External trusted schedulers may alternatively send `Authorization: Bearer <token>` to GET/POST on the same endpoint; choose one scheduler instead of enabling duplicate jobs. Never send Stripe or Supabase privileged credentials as that header.
 
 No CLI or extra hosting account is required for the Supabase Cron option. See the official [Cron setup](https://supabase.com/docs/guides/cron/quickstart), [Vault scheduling pattern](https://supabase.com/docs/guides/functions/schedule-functions) and [pg_net credential visibility explanation](https://supabase.com/docs/guides/troubleshooting/database-roles-can-read-request-headers-queued-by-pg_net-ad6357).
 
 ## 3. Verify the recurring job
+
+Verified operator evidence (21 October): setup status shows the active every-minute job and existing request table; the check screenshot shows two consecutive 200 responses with no timeout and retryRequired=0. checked=0 means no eligible work was processed. Routine observation uses supabase/check-stock-recovery.sql; it invokes no recovery and reads no tokens/customer details. A real hosted expiry/release and fresh paid-order acceptance remain separate checks.
 
 In Supabase Cron, verify **seen-stock-recovery** is active. SQL job history records the enqueue, which alone is not successful HTTP recovery. Run the commented observation query at the bottom of `supabase/setup-stock-recovery.sql` to inspect actual HTTP outcomes for this job:
 
