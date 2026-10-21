@@ -14,7 +14,7 @@ const values = {
   STRIPE_WEBHOOK_SECRET: "whsec_SEEN_LOCAL_FIXTURE_ONLY",
   NEXT_PUBLIC_SUPABASE_URL: "http://127.0.0.1:3106",
 };
-test("payment configuration never accepts live keys or incomplete setup", () => {
+test("sandbox checkout rejects live-only credentials and incomplete setup", () => {
   expect(testCheckoutEnabled(values)).toBe(true);
   for (const override of [
     { STRIPE_SECRET_KEY: "sk_live_rejected" },
@@ -43,6 +43,32 @@ test("live checkout requires explicit mode, zero added tax, HTTPS and retained s
   for(const override of [{PAYMENTS_TAX_MODE:""},{PAYMENTS_MODE:"disabled"},{STRIPE_TEST_SECRET_KEY:""},{STRIPE_TEST_WEBHOOK_SECRET:""},{NEXT_PUBLIC_SITE_URL:"http://localhost:3000"},{STRIPE_WEBHOOK_SECRET:values.STRIPE_WEBHOOK_SECRET}])
     expect(checkoutPaymentMode({...live,...override})).toBeNull();
   expect(checkoutPaymentMode({...live,PAYMENTS_MODE:"test"})).toBe("test");
+});
+
+test("restricted live keys retain separate sandbox credentials without crossing checkout environments", () => {
+  const staged = {
+    ...values,
+    NEXT_PUBLIC_SITE_URL: "https://www.seenabayas.co.uk",
+    PAYMENTS_TAX_MODE: "none",
+    STRIPE_SECRET_KEY: "rk_live_fixture_not_real",
+    STRIPE_WEBHOOK_SECRET: "whsec_live_fixture",
+    STRIPE_TEST_SECRET_KEY: "rk_test_fixture_not_real",
+    STRIPE_TEST_WEBHOOK_SECRET: "whsec_test_fixture",
+  };
+  expect(checkoutPaymentMode(staged)).toBe("test");
+  expect(readPaymentCredentials(staged, "test")).toMatchObject({
+    stripeKey: staged.STRIPE_TEST_SECRET_KEY,
+    webhookSecret: staged.STRIPE_TEST_WEBHOOK_SECRET,
+    mode: "test",
+  });
+  expect(readPaymentCredentials(staged, "live")).toMatchObject({
+    stripeKey: staged.STRIPE_SECRET_KEY,
+    webhookSecret: staged.STRIPE_WEBHOOK_SECRET,
+    mode: "live",
+  });
+  expect(checkoutPaymentMode({ ...staged, PAYMENTS_MODE: "live" })).toBe("live");
+  expect(checkoutPaymentMode({ ...staged, STRIPE_TEST_SECRET_KEY: "" })).toBeNull();
+  expect(checkoutPaymentMode({ ...staged, STRIPE_TEST_WEBHOOK_SECRET: "" })).toBeNull();
 });
 test("the isolated Stripe transport cannot use real credentials or a hosted database", () => {
   const fixture = {

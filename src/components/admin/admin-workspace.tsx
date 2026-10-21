@@ -598,7 +598,7 @@ export function AdminWorkspace({
                           snapshot.statistics?.orderCount ??
                           orders.filter((r) => r.payload.is_test !== true)
                             .length,
-                        note: "Checkout integration pending",
+                        note: "Customer orders, excluding sandbox tests",
                       },
                       {
                         label: "Net payments received",
@@ -654,11 +654,17 @@ export function AdminWorkspace({
                   </div>
                   <Panel title="Before opening the store">
                     <p>
-                      Payments and checkout are not connected yet. Confirm the
+                      Verify payment setup and confirm the
                       real product details, stock, legal address and delivery
                       charges before accepting orders. Draft product records are
                       never made public automatically.
                     </p>
+                    {role === "owner" && (
+                      <a className="admin-inline-link" href="/api/admin/payments/readiness" target="_blank" rel="noopener noreferrer">
+                        Check payment setup
+                        <ArrowUpRight size={16} />
+                      </a>
+                    )}
                   </Panel>
                 </>
               )}

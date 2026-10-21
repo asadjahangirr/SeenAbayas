@@ -36,6 +36,12 @@ const server = http.createServer(async (req, res) => {
       }
       send({ok:true});return;
     }
+    if (url.pathname === "/__test/admin-role" && req.method === "POST") {
+      const { role } = JSON.parse(raw);
+      if (!["owner", "editor"].includes(role)) { send({ error: "Invalid fixture role" }, 400); return; }
+      await serial(() => db.query("update seen_private.admin_members set role=$1 where user_id=$2", [role, "10000000-0000-4000-8000-000000000010"]));
+      send({ ok: true }); return;
+    }
     if (url.pathname === "/__test/state") {
       const stock = await serial(() =>
         db.query(
