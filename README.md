@@ -4,6 +4,8 @@ A Next.js App Router storefront for the SEEN ABAYAS brand. The original client b
 
 **Continuing this project in a new chat/account? Read [docs/PROJECT_HANDOVER.md](docs/PROJECT_HANDOVER.md) first.** It consolidates the current implementation, later decisions, verification limits and remaining phases; some older notes below describe previous checkpoints.
 
+Latest admin update (23 October): fast section navigation, clearer page-based editing, saved phone/desktop draft previews and username/password sign-in with verified email recovery. Apply the new account migration and deploy using [docs/ADMIN_WORKSPACE_SETUP.md](docs/ADMIN_WORKSPACE_SETUP.md). The client account is created privately by an existing owner after deployment; no password is embedded in the repository. Earlier checkpoint/setup paragraphs below are historical.
+
 Automatic paid-order email implementation is ready for setup: separate customer confirmations and owner notifications to info@seenabayas.co.uk, private queue/retries, and admin status. Follow [docs/ORDER_EMAIL_SETUP.md](docs/ORDER_EMAIL_SETUP.md) for Resend sending-domain DNS, private environment settings, the new migration and verification. No client mailbox password is needed. Sending is not active until configured/deployed; no real email has been verified by the agent.
 
 Current working decisions, including the requested temporary sizes/stock and implemented admin dashboard, are recorded in [docs/DEVELOPMENT_NOTES.md](docs/DEVELOPMENT_NOTES.md).

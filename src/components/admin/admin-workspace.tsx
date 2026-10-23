@@ -3,10 +3,14 @@ import {
   useState,
   useEffect,
   useRef,
+  useMemo,
   type ReactNode,
   type FormEvent,
+  type MouseEvent,
 } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { adminNavigation, sectionDescriptions, sectionDestinations, customerCopy } from "@/lib/admin/presentation";
 import {
   ArrowUpRight,
   Menu,
@@ -46,6 +50,8 @@ import developmentCatalog from "@/data/development-catalog.json";
 import copyRegistry from "@/data/cms-copy.generated.json";
 import { formatGbp } from "@/lib/money";
 import { ChangeEmail } from "./change-email";
+import { AccountTeam } from "./account-team";
+import { ConnectionChecks } from "./connection-checks";
 import { ShippingSettingsEditor } from "./shipping-settings";
 import { settingsSchema } from "@/lib/policies";
 import { productSchema } from "@/lib/admin/model";
@@ -122,7 +128,7 @@ function Status({ children }: { children: ReactNode }) {
 }
 
 export function AdminWorkspace({
-  section,
+  section: initialSection,
   initial,
   email,
   role,
@@ -132,20 +138,32 @@ export function AdminWorkspace({
   email: string;
   role: "owner" | "editor";
 }) {
+  const pathname = usePathname();
+  const candidate = pathname.split("/")[2] || "dashboard";
+  const section: AdminSection = (adminSections as readonly string[]).includes(candidate) ? candidate as AdminSection : initialSection;
+  const editVersion = useRef(0);
+  const siteDirty = useRef(false);
+  const refreshVersion = useRef(0);
+  const libraryLoaded = useRef(false);
+  const libraryPending = useRef<Promise<void> | null>(null);
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewWidth, setPreviewWidth] = useState<"desktop" | "phone">("desktop");
   const [mobile, setMobile] = useState(false);
   const [createProductRequest, setCreateProductRequest] = useState(0);
   const sidebarRef = useRef<HTMLElement>(null);
   const menuRef = useRef<HTMLButtonElement>(null);
   const [snapshot, setSnapshot] = useState(initial);
-  const parsed = siteDocumentSchema.safeParse(initial.site.draft);
+  const parsed = useMemo(() => siteDocumentSchema.safeParse(initial.site.draft), [initial.site.draft]);
   const [document, setDocument] = useState<SiteDocument>(
     parsed.success ? parsed.data : defaultDocument,
   );
-  const policySettings = settingsSchema.safeParse(document.policies);
+  const policySettings = useMemo(() => settingsSchema.safeParse(document.policies), [document.policies]);
   const currentPolicies = policySettings.success
     ? policySettings.data
     : settingsSchema.parse(defaultDocument.policies);
   const [dirty, setDirty] = useState(false);
+  const [productDirty, setProductDirty] = useState(false);
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -215,14 +233,17 @@ export function AdminWorkspace({
     "settings",
   ];
   const editSite = (next: SiteDocument) => {
+    siteDirty.current = true;
+    editVersion.current++;
     setDocument(next);
     setDirty(true);
   };
   const refresh = async () => {
+    const version = ++refreshVersion.current;
     const r = await fetch("/api/admin", { cache: "no-store" });
     if (!r.ok) throw new Error("Could not reload the workspace.");
     const s = await r.json();
-    setSnapshot(s);
+    if (version === refreshVersion.current) setSnapshot(previous => ({ ...s, connection: s.connection || previous.connection, site: !siteDirty.current && s.site.version >= previous.site.version ? s.site : previous.site }));
     return s as AdminSnapshot;
   };
   useEffect(() => {
@@ -239,7 +260,7 @@ export function AdminWorkspace({
       if (!response.ok || cancelled) return;
       const next = (await response.json()) as AdminSnapshot;
       if (cancelled) return;
-      setSnapshot(next);
+      setSnapshot(previous => ({ ...next, connection: next.connection || previous.connection, site: next.site.version >= previous.site.version ? next.site : previous.site }));
       const draft = siteDocumentSchema.safeParse(next.site.draft);
       setDocument(draft.success ? draft.data : defaultDocument);
     };
@@ -270,28 +291,34 @@ export function AdminWorkspace({
     }
   };
   const loadLibrary = async () => {
-    const r = await fetch("/api/admin/media", { cache: "no-store" });
-    const d = await r.json();
-    if (!r.ok) throw new Error(d.error);
-    setLibrary(d);
+    if (libraryPending.current) return libraryPending.current;
+    const task = (async () => {
+      const r = await fetch("/api/admin/media", { cache: "no-store" });
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.error);
+      setLibrary(d); libraryLoaded.current = true;
+    })();
+    libraryPending.current = task;
+    try { await task; } finally { libraryPending.current = null; }
   };
   useEffect(() => {
-    if (["media", "hero", "products"].includes(section))
+    if (["media", "hero", "products"].includes(section) && !libraryLoaded.current)
       void loadLibrary().catch((e) => setError(e.message));
   }, [section]);
   useEffect(() => {
     const warn = (e: BeforeUnloadEvent) => {
-      if (dirty) {
+      if (dirty || productDirty) {
         e.preventDefault();
         e.returnValue = "";
       }
     };
     window.addEventListener("beforeunload", warn);
     return () => window.removeEventListener("beforeunload", warn);
-  }, [dirty]);
+  }, [dirty, productDirty]);
   const saveSite = (publish: boolean) =>
     run(
       async () => {
+        const editedAt = editVersion.current;
         const saved = await adminRequest({
           action: "site",
           input: { document, version: snapshot.site.version, publish },
@@ -305,13 +332,13 @@ export function AdminWorkspace({
             published: publish ? document : s.site.published,
           },
         }));
-        setDirty(false);
-        await refresh();
+        if (editVersion.current === editedAt) { siteDirty.current = false; setDirty(false); }
+        void refresh().catch(() => {});
       },
       publish
         ? snapshot.connection?.content === "supabase"
           ? "Published. Your changes are live. Open store tabs update automatically."
-          : "Saved, but website content is still in file mode. Set CMS_SOURCE=supabase and restart to show these changes."
+          : "Saved, but your website is not connected to these updates yet. Ask your website manager to finish connecting it."
         : "Draft saved. The live website stays unchanged until you publish.",
     );
   const records = (kind: RecordKind) =>
@@ -366,23 +393,42 @@ export function AdminWorkspace({
   const restricted =
     role !== "owner" &&
     ["orders", "inbox", "finance", "coupons", "settings"].includes(section);
-  const filteredCopy = (
-    copyRegistry as { text: string; groups: string[] }[]
-  ).filter(
-    (c) =>
-      (group === "all" || c.groups.includes(group)) &&
-      (!query ||
-        `${c.text} ${document.text[c.text] || ""}`
-          .toLowerCase()
-          .includes(query.toLowerCase())),
-  );
-  const groups = [
-    ...new Set(
-      (copyRegistry as { text: string; groups: string[] }[]).flatMap(
-        (c) => c.groups,
-      ),
-    ),
-  ].sort();
+  const editableCopy = useMemo(() => customerCopy(copyRegistry), []);
+  const filteredCopy = useMemo(() => editableCopy.filter(c =>
+    (group === "all" || c.places.some(place => place.name === group)) &&
+    (c.text.toLowerCase().includes(query.toLowerCase()) || (document.text[c.text] || "").toLowerCase().includes(query.toLowerCase()))
+  ), [editableCopy, group, query, document.text]);
+  const groups = useMemo(() => [...new Set(editableCopy.flatMap(c => c.places.map(p => p.name)))].sort(), [editableCopy]);
+  const destination = group !== "all" && section === "content"
+    ? editableCopy.flatMap(c => c.places).find(p => p.name === group)
+    : sectionDestinations[section];
+  const destinationPath = destination?.path || "/";
+  const [previewVersion, setPreviewVersion] = useState(0);
+  const previousPath = useRef(pathname);
+  useEffect(() => { previousPath.current = pathname; }, [pathname]);
+  useEffect(() => {
+    const back = () => {
+      if (busy || ((dirty || productDirty) && !confirm("Leave this page and discard unsaved changes?"))) {
+        window.history.pushState(null, "", previousPath.current); return;
+      }
+      if (dirty) { const saved = siteDocumentSchema.safeParse(snapshot.site.draft); setDocument(saved.success ? saved.data : defaultDocument); siteDirty.current = false; setDirty(false); }
+      setProductDirty(false);
+    };
+    window.addEventListener("popstate", back);
+    return () => window.removeEventListener("popstate", back);
+  }, [dirty, productDirty, busy, snapshot.site.draft]);
+  useEffect(() => { setQuery(""); setGroup("all"); setLimit(30); setNotice(""); setError(""); setPreviewOpen(false); }, [section]);
+  const navigate = (event: MouseEvent<HTMLAnchorElement>, target: AdminSection) => {
+    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    event.preventDefault();
+    if (busy) return;
+    if ((dirty || productDirty) && !confirm("Leave this page and discard unsaved changes?")) return;
+    if (dirty) { const saved = siteDocumentSchema.safeParse(snapshot.site.draft); setDocument(saved.success ? saved.data : defaultDocument); siteDirty.current = false; setDirty(false); }
+    setOpen(false);
+    setProductDirty(false);
+    window.history.pushState(null, "", target === "dashboard" ? "/admin" : `/admin/${target}`);
+    requestAnimationFrame(() => { headingRef.current?.focus({ preventScroll: true }); window.scrollTo({ top: 0, behavior: "instant" }); });
+  };
   return (
     <AdminMediaProvider files={library} reload={loadLibrary}>
       <div className="admin-workspace" data-admin>
@@ -401,7 +447,7 @@ export function AdminWorkspace({
           inert={mobile && !open}
         >
           <a href="/admin" className="admin-wordmark">
-            SEEN<span>ATELIER ADMINISTRATION</span>
+            SEEN<span>STORE MANAGEMENT</span>
           </a>
           <button
             className="admin-nav-close"
@@ -411,39 +457,14 @@ export function AdminWorkspace({
             <X size={20} />
           </button>
           <nav aria-label="Administration">
-            {adminSections.map((s, i) => (
-              <Link
-                key={s}
-                prefetch={false}
-                href={s === "dashboard" ? "/admin" : `/admin/${s}`}
-                aria-current={section === s ? "page" : undefined}
-                onClick={(e) => {
-                  if (dirty) {
-                    if (
-                      !confirm("Leave this page and discard unsaved changes?")
-                    ) {
-                      e.preventDefault();
-                      return;
-                    }
-                    const saved = siteDocumentSchema.safeParse(
-                      snapshot.site.draft,
-                    );
-                    setDocument(saved.success ? saved.data : defaultDocument);
-                    setDirty(false);
-                  }
-                  setOpen(false);
-                }}
-              >
-                <span className="admin-nav-number">
-                  {String(i + 1).padStart(2, "0")}
-                </span>
-                {sectionNames[s]}
-                {s === "inbox" &&
-                  records("message").some((r) => !r.payload.read) && (
-                    <span className="admin-unread" />
-                  )}
-              </Link>
-            ))}
+            {adminNavigation.map(category => <div className="admin-nav-group" key={category.label}>
+              <p className="admin-nav-label">{category.label}</p>
+              {category.sections.map(s => <Link prefetch={false} key={s}  href={s === "dashboard" ? "/admin" : `/admin/${s}`}
+                aria-current={section === s ? "page" : undefined} onClick={event => navigate(event, s)}>
+                <span className="admin-nav-dot" aria-hidden="true" />{sectionNames[s]}
+                {s === "inbox" && records("message").some(r => !r.payload.read) && <span className="admin-unread" />}
+              </Link>)}
+            </div>)}
           </nav>
           <a
             className="admin-view-store"
@@ -456,7 +477,7 @@ export function AdminWorkspace({
           </a>
           <div className="admin-profile">
             <span>{email}</span>
-            <small>{role} · MFA protected</small>
+            <small>{role === "owner" ? "Store owner" : "Website editor"}</small>
             <button
               onClick={() =>
                 void run(async () => {
@@ -481,6 +502,11 @@ export function AdminWorkspace({
               <Menu size={22} />
             </button>
             <span>SEEN / WORKSPACE</span>
+            <button disabled={busy || dirty || productDirty} onClick={() => void run(async () => {
+              const next = await refresh(); const saved = siteDocumentSchema.safeParse(next.site.draft);
+              setDocument(saved.success ? saved.data : defaultDocument);
+              if (libraryLoaded.current) await loadLibrary();
+            }, "Workspace refreshed.")}>Refresh workspace</button>
             <a href="/admin/preview" target="_blank" rel="noreferrer">
               <Eye size={15} />
               Preview draft
@@ -489,11 +515,9 @@ export function AdminWorkspace({
           <div className="admin-page-heading">
             <div>
               <p className="admin-eyebrow">Your store, considered.</p>
-              <h1>{sectionNames[section]}</h1>
+              <h1 ref={headingRef} tabIndex={-1}>{sectionNames[section]}</h1>
               <p>
-                {contentSections.includes(section)
-                  ? "Edit below, then Save & update store. Use Save draft if you want to review changes privately first."
-                  : "A considered view of your business, all in one place."}
+                {sectionDescriptions[section]}
               </p>
             </div>
             {section === "products" && (
@@ -539,17 +563,17 @@ export function AdminWorkspace({
               <strong>
                 {snapshot.connection.catalog === "supabase" &&
                 snapshot.connection.content === "supabase"
-                  ? "Connected to your Supabase store"
-                  : "Store is using sample or file content"}
+                  ? "Your live website is connected"
+                  : "Website connection needs attention"}
               </strong>
               <p>
                 {snapshot.connection.catalog !== "supabase" ||
                 snapshot.connection.content !== "supabase"
-                  ? "Admin changes are saved in Supabase. To display them, set CATALOG_SOURCE=supabase and CMS_SOURCE=supabase, then restart the website."
+                  ? "Your changes are saved here, but the website is not connected to them yet. Ask your website manager to finish the connection."
                   : snapshot.connection.sync === "migration-required"
-                    ? "Published products and content are connected. Run 20261019000300_storefront_sync.sql in Supabase SQL Editor to show all saved categories and enable the efficient live update check."
+                    ? "Products and content are connected. Your website manager needs to finish the live-update setup so all categories appear."
                     : snapshot.connection.sync === "offline"
-                      ? "Live update checks could not reach Supabase. Check the connection and migrations, then reload."
+                      ? "We could not check the live website connection. Try refreshing the workspace."
                       : "Products and categories update when saved. Website text, images and settings update with Save & update store. Open store tabs refresh automatically."}
               </p>
             </div>
@@ -568,6 +592,17 @@ export function AdminWorkspace({
             )}
             {busy && <p>Saving securely…</p>}
           </div>
+          {destination && <section className="admin-effect-bar" aria-label="Where your changes appear">
+            <div><span>Changes appear on</span><strong>{destination.name}</strong><p>{section === "products" || section === "categories" ? "Saved visible products and categories update your shop. Hidden products stay private." : "Save & update store publishes your changes. Save draft keeps them private."}</p></div>
+            <div className="admin-effect-actions"><a href={destinationPath} target="_blank" rel="noreferrer">View live page <ArrowUpRight size={14} /></a>
+              <button onClick={() => setPreviewOpen(!previewOpen)} aria-expanded={previewOpen}><Eye size={15} />{previewOpen ? "Close preview" : "Preview saved draft"}</button></div>
+          </section>}
+          {previewOpen && destination && <section className="admin-preview-panel">
+            <div className="admin-toolbar"><strong>Saved draft preview</strong><span>Save draft first to see your latest edits here.</span>
+              <button onClick={() => setPreviewWidth("phone")} aria-pressed={previewWidth === "phone"}>Phone</button><button onClick={() => setPreviewWidth("desktop")} aria-pressed={previewWidth === "desktop"}>Desktop</button><button onClick={() => setPreviewVersion(v => v + 1)}>Refresh preview</button>
+              <a href={`/admin/preview${destinationPath === "/" ? "" : destinationPath}`} target="_blank" rel="noreferrer">Open preview <ArrowUpRight size={13} /></a></div>
+            <iframe title="Saved website draft" key={`${destinationPath}-${previewVersion}`} src={`/admin/preview${destinationPath === "/" ? "" : destinationPath}`} data-size={previewWidth} />
+          </section>}
           <AdminPageHelp section={section} />
           {restricted ? (
             <Panel title="Owner access required">
@@ -623,6 +658,7 @@ export function AdminWorkspace({
                         <a
                           className="admin-list-row"
                           href="/admin/products"
+                          onClick={event => navigate(event, "products")}
                           key={p.id}
                         >
                           <span>
@@ -632,9 +668,10 @@ export function AdminWorkspace({
                           <Status>{p.status}</Status>
                         </a>
                       ))}
-                      <Link
+                      <Link prefetch={false}
                         className="admin-inline-link"
                         href="/admin/products"
+                        onClick={event => navigate(event, "products")}
                       >
                         Manage products
                         <ArrowUpRight size={16} />
@@ -651,47 +688,32 @@ export function AdminWorkspace({
                       <p className="admin-caption">
                         {snapshot.site.published_at
                           ? `Last published ${new Date(snapshot.site.published_at).toLocaleString("en-GB")}`
-                          : "The original SEEN design is active. No CMS revision has been published yet."}
+                          : "Your original website design is active. Publish your first update when ready."}
                       </p>
-                      <Link className="admin-inline-link" href="/admin/content">
+                      <Link prefetch={false} className="admin-inline-link" href="/admin/content" onClick={event => navigate(event, "content")}>
                         Edit website copy
                         <ArrowUpRight size={16} />
                       </Link>
                     </Panel>
                   </div>
-                  <Panel title="Before opening the store">
-                    <p>
-                      Verify payment setup and confirm the
-                      real product details, stock, legal address and delivery
-                      charges before accepting orders. Draft product records are
-                      never made public automatically.
-                    </p>
-                    {role === "owner" && (
-                      <>
-                      <a className="admin-inline-link" href="/api/admin/payments/readiness" target="_blank" rel="noopener noreferrer">
-                        Check payment setup
-                        <ArrowUpRight size={16} />
-                      </a>
-                      <a className="admin-inline-link" href="/api/admin/payments/readiness?stripe=read" target="_blank" rel="noopener noreferrer">
-                        Check Stripe read access
-                        <ArrowUpRight size={16} />
-                      </a>
-                      <a className="admin-inline-link" href="/api/admin/order-emails" target="_blank" rel="noopener noreferrer">
-                        Check order email setup
-                        <ArrowUpRight size={16} />
-                      </a>
-                      <a className="admin-inline-link" href="/api/admin/shipping/readiness?royalMail=read" target="_blank" rel="noopener noreferrer">
-                        Check Royal Mail read access
-                        <ArrowUpRight size={16} />
-                      </a>
-                      </>
-                    )}
+                  <Panel title="What would you like to do?" description="Choose a task to go straight to its controls.">
+                    <div className="admin-quick-tasks">{([
+                      ["products", "Add or change a product", "Photos, prices, sizes and stock"],
+                      ["content", "Change website wording", "Pick a page and edit what customers read"],
+                      ["hero", "Change the homepage video", "Upload or choose a film"],
+                      ["settings", "Change delivery or the banner", "Fees, free delivery and your top announcement"],
+                      ["orders", "Prepare customer orders", "Purchased items, addresses and tracking"],
+                      ["security", "Manage your account", "Password, email and administrator access"],
+                    ] as const).map(([target, title, note]) => <Link prefetch={false} key={target}  href={`/admin/${target}`} onClick={event => navigate(event, target)}><strong>{title}<ArrowUpRight size={15} /></strong><span>{note}</span></Link>)}</div>
                   </Panel>
+                  {role === "owner" && <ConnectionChecks />}
+
                 </>
               )}
               {section === "products" && (
                 <ProductManager
                   createRequest={createProductRequest}
+                  onDirtyChange={setProductDirty}
                   canDelete={role === "owner"}
                   products={snapshot.products}
                   categories={records("category")}
@@ -1038,9 +1060,9 @@ export function AdminWorkspace({
                         setLimit(50);
                       }}
                     >
-                      <option value="all">All pages & components</option>
+                      <option value="all">All website pages</option>
                       {groups.map((g) => (
-                        <option key={g}>{g}</option>
+                        <option key={g} value={g}>{g}</option>
                       ))}
                     </select>
                     <span>{filteredCopy.length} entries</span>
@@ -1049,7 +1071,8 @@ export function AdminWorkspace({
                     {filteredCopy.slice(0, limit).map((c) => (
                       <div className="admin-copy-field" key={c.text}>
                         <div>
-                          <small>{c.groups.join(" · ")}</small>
+                          <small>Appears on: {c.places.map(p => p.name).join(" · ")}</small>
+                          <a className="admin-copy-location" href={c.places[0].path} target="_blank" rel="noreferrer">View this page <ArrowUpRight size={12} /></a>
                           <p>{c.text}</p>
                         </div>
                         <label>
@@ -1133,7 +1156,7 @@ export function AdminWorkspace({
                   </Panel>
                   <Panel
                     title="The motion collection"
-                    description="GSAP effects are additional to the existing logo docking, product zoom and banner animation. Touch and reduced-motion preferences remain respected."
+                    description="Choose how sections appear as customers scroll and how buttons respond. These settings respect reduced-motion preferences."
                   >
                     <div className="admin-fields">
                       <Field label="Scroll reveals">
@@ -1430,13 +1453,13 @@ export function AdminWorkspace({
                   />
                   <Panel title="Integrations">
                     <p>
-                      Supabase handles accounts, content, stock and media.
-                      Contact enquiries go to the private Admin Inbox. Resend
+                      Your store keeps accounts, website changes, stock and uploaded files together.
+                      Contact enquiries go to the private Admin Inbox. Your email service
                       sends purchase emails when enabled. Provider secrets are managed in hosting
                       environment variables and never exposed in this editor.
                     </p>
                     <p>
-                      Stripe handles payment collection. The standard delivery fee
+                      Your payment provider collects customer payments. The standard delivery fee
                       above does not buy a Royal Mail label. Royal Mail automation
                       and customer coupon redemption remain separate integrations.
                     </p>
@@ -1503,6 +1526,7 @@ export function AdminWorkspace({
               )}
               {section === "security" && (
                 <>
+                  <AccountTeam owner={role === "owner"} />
                   <SecuritySettings
                     email={email}
                     role={role}
@@ -1580,6 +1604,7 @@ function AssetSelect({
 
 function ProductManager({
   createRequest,
+  onDirtyChange,
   canDelete,
   products,
   categories,
@@ -1589,6 +1614,7 @@ function ProductManager({
   refresh,
 }: {
   createRequest: number;
+  onDirtyChange: (dirty: boolean) => void;
   canDelete: boolean;
   products: AdminProduct[];
   categories: AdminRecord[];
@@ -1603,6 +1629,14 @@ function ProductManager({
   const [selected, setSelected] = useState<string[]>([]);
   const [editing, setEditing] = useState<AdminProduct | undefined>();
   const [form, setForm] = useState<ReturnType<typeof newProduct> | null>(null);
+  const originalForm = useRef<string | null>(null);
+  useEffect(() => {
+    if (!form) { originalForm.current = null; onDirtyChange(false); return; }
+    const value = JSON.stringify(form);
+    if (originalForm.current === null) originalForm.current = value;
+    onDirtyChange(originalForm.current !== value);
+  }, [form, onDirtyChange]);
+  useEffect(() => () => onDirtyChange(false), [onDirtyChange]);
   const [search, setSearch] = useState("");
   const [stock, setStock] = useState(5);
   const [validation, setValidation] = useState("");
@@ -1637,6 +1671,8 @@ function ProductManager({
     };
   }
   const open = (product?: AdminProduct) => {
+    if (form && originalForm.current !== JSON.stringify(form) && !confirm("Discard the unsaved product changes?")) return;
+    originalForm.current = null;
     setEditing(product);
     setValidation("");
     if (!product) {
@@ -1833,7 +1869,7 @@ function ProductManager({
               Clear selection
             </button>
           )}
-          <Link href="/collection" target="_blank" rel="noopener noreferrer">
+          <Link prefetch={false} href="/collection" target="_blank" rel="noopener noreferrer">
             View collection <ArrowUpRight size={14} aria-hidden="true" />
           </Link>
         </div>
@@ -1956,7 +1992,7 @@ function ProductManager({
                 </button>
                 {p.status === "published" ? (
                   <>
-                    <Link
+                    <Link prefetch={false}
                       href={`/collection/${p.design_reference}`}
                       target="_blank"
                       rel="noopener noreferrer"
@@ -3176,11 +3212,11 @@ function SecuritySettings({
   const [current, setCurrent] = useState("");
   const [password, setPassword] = useState("");
   const [confirmation, setConfirmation] = useState("");
-  const [code, setCode] = useState("");
+
   return (
     <Panel
-      title="Account & security"
-      description="Your account uses Supabase Auth and a verified authenticator. Membership is managed by the project owner."
+      title="Change your password"
+      description="Manage your sign-in details. Only approved administrators can access this workspace."
     >
       <p>
         {email} · {role}
@@ -3192,15 +3228,11 @@ function SecuritySettings({
           void execute(async () => {
             if (password !== confirmation)
               throw new Error("The new passwords do not match.");
-            const r = await fetch("/api/admin/auth", { cache: "no-store" });
-            const d = await r.json();
             await adminRequest(
               {
                 action: "password",
                 current,
                 password,
-                code,
-                factorId: d.factors[0]?.id,
               },
               "/api/admin/auth",
             );
@@ -3239,25 +3271,12 @@ function SecuritySettings({
             required
           />
         </Field>
-        <Field label="Authenticator code">
-          <input
-            inputMode="numeric"
-            autoComplete="one-time-code"
-            pattern="[0-9]{6}"
-            value={code}
-            onChange={(e) => setCode(e.target.value)}
-            required
-          />
-        </Field>
+
         <button className="admin-primary" disabled={busy}>
           Change password & sign out all sessions
         </button>
       </form>
-      <p className="admin-caption">
-        If you lose your authenticator, contact your Supabase project owner for
-        identity-verified recovery. Password recovery is available from the
-        sign-in page. There is no public admin registration or default password.
-      </p>
+      <p className="admin-caption">Forgot your password? Use the reset link on the sign-in page. Add and verify your recovery email before you need it.</p>
     </Panel>
   );
 }

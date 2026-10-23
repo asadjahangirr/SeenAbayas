@@ -29,7 +29,6 @@ test("owner sees queued notifications on a phone without causing any email send"
   const admin = { Origin: "http://127.0.0.1:3107" };
   expect((await page.request.post("/api/admin/auth", { headers: admin, data: { action: "login", email: "owner@example.test", password: "Test-password-only-123" } })).status()).toBe(200);
   const profile = await (await page.request.get("/api/admin/auth")).json();
-  expect((await page.request.post("/api/admin/auth", { headers: admin, data: { action: "verify", factorId: profile.factors[0].id, code: "123456" } })).status()).toBe(200);
   const catalogue = await (await request.post("http://127.0.0.1:3106/rest/v1/rpc/get_storefront_catalog_v2", { data: {} })).json();
   const variant = catalogue[0].variants[0].id;
   const service = { apikey: "sb_secret_SEEN_LOCAL_FIXTURE_ONLY", Authorization: "Bearer sb_secret_SEEN_LOCAL_FIXTURE_ONLY" };

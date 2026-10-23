@@ -40,7 +40,7 @@ export default async function Administration({
       key={selected}
       section={selected as AdminSection}
       initial={{ ...result.data as AdminSnapshot, connection }}
-      email={access.user.email || "Administrator"}
+      email={access.user.email?.endsWith("@admin.invalid") ? String(access.user.user_metadata?.display_name || "Store administrator") : access.user.email || "Administrator"}
       role={access.role}
     />
   );

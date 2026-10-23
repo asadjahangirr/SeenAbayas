@@ -16,19 +16,19 @@ import {
 import { getStoreConnection } from "@/lib/storefront/server";
 import { defaultShippingSettings, shippingSettingsSchema } from "@/lib/shipping/settings";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const { client } = await requireAdmin();
     const [result, connection] = await Promise.all([
       client.rpc("admin_snapshot"),
-      getStoreConnection(),
+      new URL(request.url).searchParams.get("connection") === "check" ? getStoreConnection() : Promise.resolve(undefined),
     ]);
     if (result.error)
       throw new AdminError(
         "Could not load administration data. Check the migrations.",
         503,
       );
-    return privateJson({ ...result.data, connection });
+    return privateJson({ ...result.data, ...(connection ? { connection } : {}) });
   } catch (e) {
     return adminFailure(e);
   }

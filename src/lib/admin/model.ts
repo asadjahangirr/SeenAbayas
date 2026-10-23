@@ -35,7 +35,7 @@ export const sectionNames: Record<AdminSection, string> = {
   appearance: "Appearance & motion",
   settings: "Store settings",
   history: "History & activity",
-  security: "Account & security",
+  security: "Account & access",
 };
 const money = z.number().int().min(0).max(99_999_999);
 const short = z.string().trim().max(150);

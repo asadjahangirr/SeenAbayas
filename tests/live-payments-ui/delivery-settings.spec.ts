@@ -18,8 +18,7 @@ for (const width of [393, 1440]) test(`owner delivery fee and banner reach check
   await page.getByLabel("Email address").fill("owner@example.test");
   await page.getByLabel("Password", { exact: true }).fill("Test-password-only-123");
   await page.getByRole("button", { name: "Continue securely" }).click();
-  await page.getByLabel("Authenticator code").fill("123456");
-  await page.getByRole("button", { name: "Open workspace" }).click();
+
   await expect(page.getByRole("heading", { name: "Overview", exact: true })).toBeVisible();
   await page.goto("/admin/settings");
   await expect(page.getByLabel("Standard delivery charge (£)", { exact: true })).toHaveCount(1);

@@ -8,8 +8,7 @@ async function signIn(page: Page) {
     .getByLabel("Password", { exact: true })
     .fill("Test-password-only-123");
   await page.getByRole("button", { name: "Continue securely" }).click();
-  await page.getByLabel("Authenticator code").fill("123456");
-  await page.getByRole("button", { name: "Open workspace" }).click();
+
   await expect(
     page.getByRole("heading", { name: "Overview", exact: true }),
   ).toBeVisible();
@@ -17,68 +16,19 @@ async function signIn(page: Page) {
 test.beforeEach(async ({ request }) => {
   await request.get("http://127.0.0.1:3106/__test/reset");
 });
-test("API requires MFA, uses HttpOnly cookies and clears access on sign-out", async ({
-  request,
-  browser,
-}) => {
-  const options = { headers: { Origin: "http://127.0.0.1:3107" } };
-  expect(
-    (
-      await request.post("/api/admin/auth", {
-        ...options,
-        data: {
-          action: "login",
-          email: "owner@example.test",
-          password: "Test-password-only-123",
-        },
-      })
-    ).status(),
-  ).toBe(200);
-  expect((await request.get("/api/admin")).status()).toBe(403);
-  const state = await request.storageState();
-  expect(
-    state.cookies
-      .filter((c) => c.name.includes("auth-token"))
-      .every((c) => c.httpOnly && c.sameSite === "Lax"),
-  ).toBe(true);
-  const profile = await (await request.get("/api/admin/auth")).json();
-  expect(
-    (
-      await request.post("/api/admin/auth", {
-        ...options,
-        data: {
-          action: "verify",
-          factorId: profile.factors[0].id,
-          code: "000000",
-        },
-      })
-    ).status(),
-  ).toBe(401);
-  expect(
-    (
-      await request.post("/api/admin/auth", {
-        ...options,
-        data: {
-          action: "verify",
-          factorId: profile.factors[0].id,
-          code: "123456",
-        },
-      })
-    ).status(),
-  ).toBe(200);
-  expect((await request.get("/api/admin")).status()).toBe(200);
-  expect((await request.get("/admin")).status()).toBe(200);
-  const anonymous = await browser.newContext();
-  expect(
-    (await anonymous.request.get("/admin", { maxRedirects: 0 })).status(),
-  ).toBe(307);
-  await anonymous.close();
-  await request.post("/api/admin/auth", {
-    ...options,
-    data: { action: "logout" },
-  });
+test("password sign-in uses HttpOnly cookies, protects recovery and clears access on sign-out", async ({request,browser}) => {
+  const options={headers:{Origin:"http://127.0.0.1:3107"}};
   expect((await request.get("/api/admin")).status()).toBe(401);
+  expect((await request.post("/api/admin/auth",{...options,data:{action:"login",email:"owner@example.test",password:"Test-password-only-123"}})).status()).toBe(200);
+  expect((await request.get("/api/admin")).status()).toBe(200);
+  const state=await request.storageState();const cookies=state.cookies.filter(c=>c.name.includes("auth-token"));expect(cookies.length).toBeGreaterThan(0);expect(cookies.every(c=>c.httpOnly&&c.sameSite==="Lax")).toBe(true);
+  expect(await(await request.get("/api/admin/auth")).json()).toMatchObject({passwordOnly:true,mfa:false,factors:[]});
+  expect((await request.post("/api/admin/auth",{...options,data:{action:"recover-password",password:"New-password-only-123"}})).status()).toBe(403);
+  expect((await request.get("/admin")).status()).toBe(200);
+  const anonymous=await browser.newContext();expect((await anonymous.request.get("/admin",{maxRedirects:0})).status()).toBe(307);await anonymous.close();
+  await request.post("/api/admin/auth",{...options,data:{action:"logout"}});expect((await request.get("/api/admin")).status()).toBe(401);
 });
+
 test("admin data is inaccessible before login and cross-origin writes are rejected", async ({
   page,
   request,
@@ -94,7 +44,7 @@ test("admin data is inaccessible before login and cross-origin writes are reject
   });
   expect(rejected.status()).toBe(403);
 });
-test("sign in requires MFA, then every admin section opens", async ({
+test("password sign-in opens every approved admin section", async ({
   page,
 }) => {
   test.setTimeout(60_000);
@@ -112,7 +62,7 @@ test("sign in requires MFA, then every admin section opens", async ({
     ["appearance", "Appearance & motion"],
     ["settings", "Store settings"],
     ["history", "History & activity"],
-    ["security", "Account & security"],
+    ["security", "Account & access"],
   ]) {
     await page.goto(`/admin/${slug}`);
     await expect(
@@ -264,26 +214,8 @@ for (const width of [320, 390, 768, 1024, 1440])
     expect(result.violations).toEqual([]);
   });
 
-test("first owner enrols an authenticator before opening the workspace", async ({
-  page,
-  request,
-}) => {
-  await request.get("http://127.0.0.1:3106/__test/reset?enroll=1");
-  await page.goto("/admin/login");
-  await page.getByLabel("Email address").fill("owner@example.test");
-  await page
-    .getByLabel("Password", { exact: true })
-    .fill("Test-password-only-123");
-  await page.getByRole("button", { name: "Continue securely" }).click();
-  await page.getByRole("button", { name: "Set up authenticator" }).click();
-  await expect(
-    page.getByAltText("Scan this QR code in your authenticator"),
-  ).toBeVisible();
-  await page.getByLabel("Authenticator code").fill("123456");
-  await page.getByRole("button", { name: "Open workspace" }).click();
-  await expect(
-    page.getByRole("heading", { level: 1, name: "Overview" }),
-  ).toBeVisible();
+test("an approved owner opens the workspace without an authenticator",async({page,request})=>{
+  await request.get("http://127.0.0.1:3106/__test/reset?enroll=1");await signIn(page);await expect(page.getByLabel("Authenticator code")).toHaveCount(0);
 });
 
 test("uploaded media stays private until the hero is published", async ({
@@ -386,48 +318,22 @@ test("private preview follows customer routes and includes unpublished products"
   ).toBeVisible();
 });
 
-test("password recovery exchanges a PKCE code and still requires the authenticator", async ({
-  page,
-}) => {
-  await page.goto("/admin/recover");
-  await page.getByLabel("Email address").fill("owner@example.test");
-  await page.getByRole("button", { name: "Request recovery link" }).click();
-  await expect(
-    page
-      .getByRole("status")
-      .filter({ hasText: "If this address is registered" }),
-  ).toBeVisible();
-  await page.goto("/admin/auth/callback?code=test-recovery-code");
-  await expect(page).toHaveURL(/\/admin\/recover\?stage=password/);
-  await page
-    .getByLabel("New password", { exact: true })
-    .fill("New-test-password-for-seen-123");
-  await page
-    .getByLabel("Confirm new password", { exact: true })
-    .fill("New-test-password-for-seen-123");
-  await page.getByLabel("Authenticator code").fill("123456");
-  await page.getByRole("button", { name: "Reset password securely" }).click();
-  await expect(page).toHaveURL(/\/admin\/login$/);
+test("password recovery sends a one-use email link and resets without an authenticator", async ({page,request}) => {
+  await page.goto("/admin/recover");await page.getByLabel("Email address").fill("owner@example.test");await page.getByRole("button",{name:"Request recovery link"}).click();
+  await expect(page.locator(".admin-success[role=status]")).toContainText("verified email");
+  const messages=await(await request.get("http://127.0.0.1:3106/__test/account-emails")).json();expect(messages).toHaveLength(1);
+  const link=messages[0].text.match(/http:\/\/127\.0\.0\.1:3107\/admin\/recover\?token_hash=[^\s]+/)[0];
+  await page.goto(link);await page.getByRole("button",{name:"Open password reset",exact:true}).click();await expect(page.getByLabel("New password",{exact:true})).toBeVisible();
+  await page.getByLabel("New password",{exact:true}).fill("Changed-password-1234");await page.getByLabel("Confirm new password",{exact:true}).fill("Changed-password-1234");await page.getByRole("button",{name:"Reset password securely"}).click();await expect(page).toHaveURL(/\/admin\/login/);
+  expect((await page.request.post("/api/admin/auth",{headers:{Origin:"http://127.0.0.1:3107"},data:{action:"login",email:"owner@example.test",password:"Changed-password-1234"}})).status()).toBe(200);
 });
 
-test("login email changes require the current password and a fresh authenticator code", async ({
-  page,
-}) => {
-  await signIn(page);
-  await page.goto("/admin/security");
-  const panel = page.locator("section").filter({
-    has: page.getByRole("heading", {
-      name: "Change login email",
-      exact: true,
-    }),
-  });
-  await panel.getByLabel("New login email").fill("new-owner@example.test");
-  await panel.getByLabel("Current password").fill("Test-password-only-123");
-  await panel.getByLabel("Authenticator code").fill("123456");
-  await panel.getByRole("button", { name: "Request email change" }).click();
-  await expect(panel.getByRole("status")).toContainText(
-    "Confirmation requested.",
-  );
+test("adding a recovery email requires the current password and confirms address ownership",async({page,request})=>{
+  await signIn(page);await page.goto("/admin/security");
+  const panel=page.locator("section").filter({has:page.getByRole("heading",{name:"Add or change your recovery email",exact:true})});
+  await panel.getByLabel("New login email").fill("new-owner@example.test");await panel.getByLabel("Current password",{exact:true}).fill("Test-password-only-123");await panel.getByRole("button",{name:"Send verification email"}).click();await expect(panel.getByRole("status")).toContainText("Check your new inbox");
+  const messages=await(await request.get("http://127.0.0.1:3106/__test/account-emails")).json();const link=messages[0].text.match(/http:\/\/127\.0\.0\.1:3107\/admin\/email-confirmation\?token=[a-f0-9]+/)[0];
+  await page.goto(link);await page.getByRole("button",{name:"Confirm my email"}).click();await expect(page.getByRole("heading",{name:"Your email is verified."})).toBeVisible();
 });
 
 test("published delivery settings and conditional copy survive bag removals", async ({

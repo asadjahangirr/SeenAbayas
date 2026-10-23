@@ -1,6 +1,6 @@
 // Test-only provider simulator. Never imported by the application or deployed.
 import http from "node:http";
-import { createHmac } from "node:crypto";
+import { createHmac, randomUUID } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { PGlite } from "@electric-sql/pglite";
 const db = new PGlite();
@@ -10,7 +10,7 @@ const factor = "10000000-0000-4000-8000-000000000020";
 const challenge = "10000000-0000-4000-8000-000000000021";
 const url = "http://127.0.0.1:3106";
 await db.exec(
-  `create role anon nologin;create role authenticated nologin;create role service_role nologin;create schema auth;create table auth.users(id uuid primary key);create function auth.uid() returns uuid language sql stable as $$ select (nullif(current_setting('request.jwt.claims',true),'')::jsonb->>'sub')::uuid $$;create function auth.jwt() returns jsonb language sql stable as $$ select coalesce(nullif(current_setting('request.jwt.claims',true),'')::jsonb,'{}') $$;create schema storage;create table storage.buckets(id text primary key,name text,public boolean,file_size_limit bigint,allowed_mime_types text[]);create table storage.objects(id uuid primary key default gen_random_uuid(),bucket_id text,name text,metadata jsonb);alter table storage.objects enable row level security;grant usage on schema storage to anon,authenticated;grant select,insert,delete on storage.objects to anon,authenticated;`,
+  `create role anon nologin;create role authenticated nologin;create role service_role nologin;create schema auth;create table auth.users(id uuid primary key,email text unique,email_confirmed_at timestamptz);create function auth.uid() returns uuid language sql stable as $$ select (nullif(current_setting('request.jwt.claims',true),'')::jsonb->>'sub')::uuid $$;create function auth.jwt() returns jsonb language sql stable as $$ select coalesce(nullif(current_setting('request.jwt.claims',true),'')::jsonb,'{}') $$;create schema storage;create table storage.buckets(id text primary key,name text,public boolean,file_size_limit bigint,allowed_mime_types text[]);create table storage.objects(id uuid primary key default gen_random_uuid(),bucket_id text,name text,metadata jsonb);alter table storage.objects enable row level security;grant usage on schema storage to anon,authenticated;grant select,insert,delete on storage.objects to anon,authenticated;`,
 );
 for (const file of [
   "20261018000100_catalog.sql",
@@ -27,9 +27,11 @@ for (const file of [
   "20261021000200_order_emails.sql",
   "20261021000300_contact_inbox.sql",
   "20261022000100_shipping_quotes.sql",
+  "20261023000100_shipping_read_compatibility.sql",
+  "20261023000200_admin_workspace.sql",
 ])
   await db.exec(await readFile(`supabase/migrations/${file}`, "utf8"));
-await db.query("insert into auth.users(id) values($1)", [owner]);
+await db.query("insert into auth.users(id,email,email_confirmed_at) values($1,'owner@example.test',now())", [owner]);
 await db.query(
   "insert into seen_private.admin_members(user_id,role) values($1,'owner')",
   [owner],
@@ -54,24 +56,22 @@ const user = {
     },
   ],
 };
-function session(aal = "aal1") {
-  const now = Math.floor(Date.now() / 1000);
-  const part = (x) => Buffer.from(JSON.stringify(x)).toString("base64url");
-  const unsigned = `${part({ alg: "HS256", typ: "JWT" })}.${part({ iss: `${url}/auth/v1`, sub: owner, aud: "authenticated", role: "authenticated", aal, iat: now, exp: now + 3600, session_id: challenge })}`;
-  return {
-    access_token: `${unsigned}.${createHmac("sha256", "TEST-ONLY-NOT-A-PRODUCTION-SECRET").update(unsigned).digest("base64url")}`,
-    token_type: "bearer",
-    expires_in: 3600,
-    expires_at: now + 3600,
-    refresh_token: `test-refresh-${aal}`,
-    user,
-  };
+const accountUsers = new Map([[owner, { user, password:"Test-password-only-123" }]]);
+const refreshSessions = new Map();
+const recoveryLinks = new Map();
+const accountEmails = [];
+function session(aal = "aal1", userId = owner, sessionId = randomUUID()) {
+  const now = Math.floor(Date.now() / 1000), current = accountUsers.get(userId).user;
+  const part = value => Buffer.from(JSON.stringify(value)).toString("base64url");
+  const unsigned = `${part({alg:"HS256",typ:"JWT"})}.${part({iss:`${url}/auth/v1`,sub:userId,aud:"authenticated",role:"authenticated",aal,iat:now,exp:now+3600,session_id:sessionId})}`;
+  const refresh = `test-refresh-${randomUUID()}`;
+  refreshSessions.set(refresh,{aal,userId,sessionId});
+  return {access_token:`${unsigned}.${createHmac("sha256","TEST-ONLY-NOT-A-PRODUCTION-SECRET").update(unsigned).digest("base64url")}`,token_type:"bearer",expires_in:3600,expires_at:now+3600,refresh_token:refresh,user:current};
 }
 const knownTokens = new Map();
-function mint(aal) {
-  const s = session(aal);
-  knownTokens.set(s.access_token, aal);
-  return s;
+function mint(aal, userId = owner, sessionId) {
+  const value = session(aal,userId,sessionId);
+  knownTokens.set(value.access_token,{aal,userId});return value;
 }
 let queue = Promise.resolve();
 function serial(fn) {
@@ -82,6 +82,9 @@ function serial(fn) {
 const rpc = {
   submit_contact_enquiry: ["request_id", "message", "network_hash", "sender_hash"],
   admin_access: [],
+  admin_account_lookup:["identifier"],admin_account_attempt:["identity_hash","network_hash","action"],
+  admin_account_team:[],admin_account_register:["operator_id","user_id","username","display_name","member_role"],
+  admin_account_email_request:["user_id","email","token_hash"],admin_account_claim_email:["token_hash"],
   admin_snapshot: [],
   admin_shipping_health: [],
   get_site_document: [],
@@ -126,6 +129,9 @@ let recoveryIssued = false;
 let loginPassword = "Test-password-only-123";
 async function reset(enroll = false) {
   loginPassword = "Test-password-only-123";
+  for(const key of accountUsers.keys())if(key!==owner)accountUsers.delete(key);
+  accountUsers.set(owner,{user,password:loginPassword});user.email="owner@example.test";
+  accountEmails.length=0;recoveryLinks.clear();refreshSessions.clear();
   user.factors = enroll
     ? []
     : [
@@ -143,7 +149,7 @@ async function reset(enroll = false) {
   uploads.clear();
   uploadNames.clear();
   await db.exec(
-    "reset role;delete from seen_private.shipping_quote_attempts;delete from seen_private.contact_receipts;delete from seen_private.order_emails;delete from seen_private.checkout_stock_events;delete from seen_private.stripe_event_receipts;delete from seen_private.checkout_items;delete from seen_private.checkout_orders;delete from seen_private.admin_records;delete from seen_private.admin_audit;delete from seen_private.site_history;update seen_private.site_documents set version=0,draft='{}',published=null,published_at=null;delete from seen_private.inventory;delete from public.product_variants;delete from public.products;delete from storage.objects;",
+    "reset role;delete from seen_private.admin_email_requests;delete from seen_private.admin_auth_attempts;delete from seen_private.admin_profiles;delete from seen_private.admin_members where user_id<>'10000000-0000-4000-8000-000000000010';delete from auth.users where id<>'10000000-0000-4000-8000-000000000010';update auth.users set email='owner@example.test',email_confirmed_at=now();update seen_private.admin_members set role='owner',active=true;delete from seen_private.shipping_quote_attempts;delete from seen_private.contact_receipts;delete from seen_private.order_emails;delete from seen_private.checkout_stock_events;delete from seen_private.stripe_event_receipts;delete from seen_private.checkout_items;delete from seen_private.checkout_orders;delete from seen_private.admin_records;delete from seen_private.admin_audit;delete from seen_private.site_history;update seen_private.site_documents set version=0,draft='{}',published=null,published_at=null;delete from seen_private.inventory;delete from public.product_variants;delete from public.products;delete from storage.objects;",
   );
   await db.query("select set_config('request.jwt.claims',$1,false)", [
     JSON.stringify({ sub: owner, aal: "aal2" }),
@@ -227,7 +233,11 @@ const server = http.createServer(async (req, res) => {
     if (req.headers["content-type"]?.includes("application/json"))
       body = JSON.parse(raw.toString() || "{}");
     const bearer = req.headers.authorization?.replace(/^Bearer /, "");
-    const aal = knownTokens.get(bearer);
+    const identity = knownTokens.get(bearer);
+    const aal = identity?.aal;
+    const currentUserId = identity?.userId;
+    const currentUser = currentUserId ? accountUsers.get(currentUserId)?.user : null;
+    const serviceKey = bearer === "sb_secret_SEEN_LOCAL_FIXTURE_ONLY";
     if (pathname === "/__test/reset") {
       await serial(() =>
         reset(new URL(req.url, url).searchParams.has("enroll")),
@@ -240,61 +250,56 @@ const server = http.createServer(async (req, res) => {
       send({});
       return;
     }
+    if (pathname === "/__test/account-emails") {send(accountEmails);return;}
+    if (pathname === "/__test/account-email" && req.method === "POST") {
+      if(req.headers.authorization!=="Bearer re_SEEN_ACCOUNT_FIXTURE_ONLY"){send({},401);return;}
+      accountEmails.push(body);send({id:randomUUID()});return;
+    }
+    if(pathname.startsWith("/auth/v1/admin/")){
+      if(!serviceKey){send({},403);return;}
+      if(pathname==="/auth/v1/admin/generate_link"){
+        const found=[...accountUsers].find(([,value])=>value.user.email===body.email);
+        if(!found){send({},404);return;}
+        const token=randomUUID().replaceAll("-","")+randomUUID().replaceAll("-","");recoveryLinks.set(token,found[0]);
+        send({...found[1].user,hashed_token:token,email_otp:"123456",verification_type:"recovery",action_link:"http://127.0.0.1:3107/admin/recover",redirect_to:"http://127.0.0.1:3107/admin/recover"});return;
+      }
+      if(pathname==="/auth/v1/admin/users"&&req.method==="POST"){
+        const id=randomUUID(),value={...user,id,email:body.email,user_metadata:body.user_metadata||{},factors:[]};
+        accountUsers.set(id,{user:value,password:body.password});
+        await serial(()=>db.query("insert into auth.users(id,email,email_confirmed_at) values($1,$2,now())",[id,body.email]));send(value);return;
+      }
+      const match=pathname.match(/^\/auth\/v1\/admin\/users\/([^/]+)(?:\/factors(?:\/([^/]+))?)?$/);
+      if(match){const value=accountUsers.get(match[1]);if(!value){send({},404);return;}
+        if(pathname.includes("/factors")){if(req.method==="DELETE")value.user.factors=value.user.factors.filter(item=>item.id!==match[2]);send(req.method==="GET"?value.user.factors:{});return;}
+        if(req.method==="DELETE"){accountUsers.delete(match[1]);await serial(()=>db.query("delete from auth.users where id=$1",[match[1]]));send({});return;}
+        if(req.method==="PUT"&&body.email){value.user.email=body.email;await serial(()=>db.query("update auth.users set email=$1,email_confirmed_at=now() where id=$2",[body.email,match[1]]));}
+        send(value.user);return;
+      }
+      send({},404);return;
+    }
+    if(pathname==="/auth/v1/verify"){
+      const id=recoveryLinks.get(body.token_hash);
+      if(!id||body.type!=="recovery"){send({message:"Invalid recovery"},400);return;}
+      recoveryLinks.delete(body.token_hash);send(mint("aal1",id));return;
+    }
     if (pathname === "/auth/v1/token") {
-      if (body.auth_code) {
-        if (
-          body.auth_code !== "test-recovery-code" ||
-          !body.code_verifier ||
-          !recoveryIssued
-        ) {
-          send({ message: "Invalid recovery code" }, 400);
-          return;
-        }
-        recoveryIssued = false;
-        send(mint("aal1"));
-        return;
-      }
-      if (body.grant_type === "refresh_token" || body.refresh_token) {
-        send(
-          mint(String(body.refresh_token).endsWith("aal2") ? "aal2" : "aal1"),
-        );
-        return;
-      }
-      if (
-        body.email !== "owner@example.test" ||
-        body.password !== loginPassword
-      ) {
-        send(
-          { error: "invalid_grant", error_description: "Invalid credentials" },
-          400,
-        );
-        return;
-      }
-      send(mint("aal1"));
-      return;
+      if(body.refresh_token){const value=refreshSessions.get(body.refresh_token);if(!value){send({message:"Invalid refresh token"},401);return;}send(mint(value.aal,value.userId,value.sessionId));return;}
+      const found=[...accountUsers].find(([,value])=>value.user.email===body.email&&value.password===body.password);
+      if(!found){send({error:"invalid_grant",error_description:"Invalid credentials"},400);return;}
+      send(mint("aal1",found[0]));return;
     }
     if (pathname === "/auth/v1/user") {
-      if (!aal) {
-        send({ message: "Invalid token" }, 401);
-        return;
+      if(!currentUser){send({message:"Invalid token"},401);return;}
+      if(req.method==="PUT"){
+        if(currentUser.factors.some(item=>item.status==="verified")&&aal!=="aal2"){send({message:"MFA still enrolled"},403);return;}
+        if(body.password){if(body.password.length<14){send({},400);return;}accountUsers.get(currentUserId).password=body.password;}
       }
-      if (
-        req.method === "PUT" &&
-        (aal !== "aal2" ||
-          (!body.email && !body.password) ||
-          (body.password && body.password.length < 14))
-      ) {
-        send({ message: "Invalid account update" }, 400);
-        return;
-      }
-      if (req.method === "PUT" && body.password) loginPassword = body.password;
-      send(user);
-      return;
+      send(currentUser);return;
     }
     if (pathname === "/auth/v1/logout") {
-      knownTokens.delete(bearer);
-      send({});
-      return;
+      for(const [key,value]of knownTokens)if(value.userId===currentUserId)knownTokens.delete(key);
+      for(const [key,value]of refreshSessions)if(value.userId===currentUserId)refreshSessions.delete(key);
+      send({});return;
     }
     if (pathname === "/auth/v1/factors" && req.method === "POST") {
       if (!aal) {
@@ -354,10 +359,10 @@ const server = http.createServer(async (req, res) => {
         await db.exec("begin");
         try {
           await db.query("select set_config('request.jwt.claims',$1,true)", [
-            JSON.stringify(aal ? { sub: owner, aal } : {}),
+            JSON.stringify(aal ? { sub: currentUserId, aal } : {}),
           ]);
           const service =
-            (name.startsWith("payment_") || name.startsWith("order_email_") || name.startsWith("shipping_") || name === "get_shipping_settings" || name === "submit_contact_enquiry") &&
+            (name.startsWith("payment_") || name.startsWith("order_email_") || name.startsWith("shipping_") || name === "get_shipping_settings" || name === "submit_contact_enquiry" || (name.startsWith("admin_account_") && name !== "admin_account_team")) &&
             bearer === "sb_secret_SEEN_LOCAL_FIXTURE_ONLY";
           await db.exec(
             `set local role ${service ? "service_role" : aal ? "authenticated" : "anon"}`,
@@ -383,7 +388,7 @@ const server = http.createServer(async (req, res) => {
       return;
     }
     if (pathname === "/storage/v1/object/list/seen-media") {
-      if (aal !== "aal2") {
+      if (!aal) {
         send({}, 403);
         return;
       }
@@ -400,7 +405,7 @@ const server = http.createServer(async (req, res) => {
     }
     if (pathname.startsWith("/storage/v1/object/upload/sign/seen-media/")) {
       if (req.method === "POST") {
-        if (aal !== "aal2") {
+        if (!aal) {
           send({}, 403);
           return;
         }
@@ -439,7 +444,7 @@ const server = http.createServer(async (req, res) => {
         const pub = await serial(() =>
           db.query("select public.is_published_seen_media($1) ok", [name]),
         );
-        if (aal !== "aal2" && !pub.rows[0].ok) {
+        if (!aal && !pub.rows[0].ok) {
           send({}, 403);
           return;
         }

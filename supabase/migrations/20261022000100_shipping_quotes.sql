@@ -4,7 +4,11 @@
 begin;
 
 create or replace function public.get_site_document() returns jsonb language sql stable security definer set search_path='' as $$
-  select case when published is null then null else jsonb_set(published,'{shipping}',
+  -- Older storefronts reject unknown top-level fields. Fixed mode must keep
+  -- their original contract; current code defaults an absent shipping field.
+  select case when published is null then null
+    when coalesce(published#>>'{shipping,mode}','fixed')='fixed' then published-'shipping'
+    else jsonb_set(published,'{shipping}',
     jsonb_build_object('mode',coalesce(published#>>'{shipping,mode}','fixed')),true) end
   from seen_private.site_documents where id;
 $$;

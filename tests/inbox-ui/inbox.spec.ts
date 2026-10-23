@@ -8,8 +8,7 @@ async function signIn(page: Page) {
   await page.getByLabel("Email address").fill("owner@example.test");
   await page.getByLabel("Password", { exact: true }).fill("Test-password-only-123");
   await page.getByRole("button", { name: "Continue securely" }).click();
-  await page.getByLabel("Authenticator code").fill("123456");
-  await page.getByRole("button", { name: "Open workspace" }).click();
+
   await expect(page.getByRole("heading", { name: "Overview", exact: true })).toBeVisible();
 }
 test.beforeEach(async ({ request }) => { await request.get("http://127.0.0.1:3106/__test/reset"); });

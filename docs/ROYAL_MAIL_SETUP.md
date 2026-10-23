@@ -4,6 +4,14 @@ Updated 22 October 2026.
 
 **Implemented:** editable parcel/garment measurements, an owner/MFA-protected connection diagnostic, and server-calculated Click & Drop pay-as-you-go checkout quotes. Fixed delivery is the default. **Not activated or verified with the real carrier:** the saved key returned HTTP 401; account type, measurements, service codes and price/VAT interpretation remain unconfirmed. Automatic shipment creation, label retrieval and tracking synchronisation are separate unfinished fulfilment work.
 
+## Urgent read-compatibility correction - 23 October 2026
+
+If the deployed homepage/collection show server error `4202134668` after installing the shipping migration, run the complete **`supabase/migrations/20261023000100_shipping_read_compatibility.sql`** in the existing Supabase SQL Editor. Expected: **Success. No rows returned.** Refresh the store afterwards. This database read-only function correction takes effect without a website redeployment; the agent has not applied it to the hosted database.
+
+The original shipping migration always added a top-level `shipping` key, even for older documents/fixed mode. The previous deployed site's strict content schema rejects that unknown key. On 23 October the public homepage and collection returned HTTP 500 with digest 4202134668, while admin login and public revision sync returned 200. The hosted public document passed the current schema and failed the prior schema solely on the unexpected shipping key; removing it restored validation. The prior public read therefore was not safe to install ahead of the new app deployment.
+
+The correction omits `shipping` from fixed-mode public reads, allowing current code to use its existing fixed default and older code to keep its original contract. Calculated mode continues to expose only the required mode; private measurements/origin remain hidden. The original shipping migration has the same correction for fresh installs/reruns. Saved settings, orders, payments, reservations, stock and grants are unchanged. Do not reset inventory, rerun the initial catalogue migration, remove security checks or rotate working credentials for this error. Deploy the latest application code afterwards to obtain the new admin panel, keeping fixed mode until actual carrier access and inputs are ready.
+
 ## 1. Install the database update before publishing parcel settings
 
 Open the existing SEEN Supabase project > SQL Editor. Run the complete:

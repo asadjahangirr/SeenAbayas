@@ -5,8 +5,7 @@ async function signIn(page: Page, password = "Test-password-only-123") {
   await page.getByLabel("Email address").fill("owner@example.test");
   await page.getByLabel("Password", { exact: true }).fill(password);
   await page.getByRole("button", { name: "Continue securely" }).click();
-  await page.getByLabel("Authenticator code").fill("123456");
-  await page.getByRole("button", { name: "Open workspace" }).click();
+
   await expect(page.getByRole("heading", { name: "Overview", exact: true })).toBeVisible();
 }
 test.beforeEach(async ({ request }) => { await request.get("http://127.0.0.1:3106/__test/reset"); });
@@ -127,7 +126,6 @@ test("password change rejects wrong credentials and mismatched confirmation befo
   await form.getByLabel("Current password", { exact: true }).fill("wrong-fixture-password");
   await form.getByLabel("New password (at least 14 characters)").fill(nextPassword);
   await form.getByLabel("Confirm new password").fill("different-fixture-password");
-  await form.getByLabel("Authenticator code").fill("123456");
   await form.getByRole("button", { name: "Change password & sign out all sessions", exact: true }).click();
   await expect(page.getByText("The new passwords do not match.", { exact: true })).toBeVisible();
   await form.getByLabel("Confirm new password").fill(nextPassword);

@@ -1,301 +1,5 @@
 [
   {
-    "text": "cross-site",
-    "groups": [
-      "api · bag · route",
-      "api · checkout · review · route",
-      "src · lib · payments · http"
-    ]
-  },
-  {
-    "text": "Invalid bag request.",
-    "groups": [
-      "api · bag · route"
-    ]
-  },
-  {
-    "text": "lines",
-    "groups": [
-      "api · bag · route"
-    ]
-  },
-  {
-    "text": "object",
-    "groups": [
-      "api · bag · route"
-    ]
-  },
-  {
-    "text": "Please refresh the page and try again.",
-    "groups": [
-      "api · bag · route"
-    ]
-  },
-  {
-    "text": "preview",
-    "groups": [
-      "api · bag · route",
-      "api · checkout · review · route",
-      "checkout · checkout-page",
-      "src · lib · checkout · information"
-    ]
-  },
-  {
-    "text": "This collection is not available to add to your bag yet. Please contact customer care.",
-    "groups": [
-      "api · bag · route"
-    ]
-  },
-  {
-    "text": "We couldn't check your bag. Please try again in a moment.",
-    "groups": [
-      "api · bag · route"
-    ]
-  },
-  {
-    "text": "We couldn't confirm cancellation yet. Please try again.",
-    "groups": [
-      "api · checkout · cancel · route"
-    ]
-  },
-  {
-    "text": "application/json",
-    "groups": [
-      "api · checkout · review · route",
-      "src · lib · payments · http"
-    ]
-  },
-  {
-    "text": "Checkout details are too long.",
-    "groups": [
-      "api · checkout · review · route"
-    ]
-  },
-  {
-    "text": "details",
-    "groups": [
-      "api · checkout · review · route"
-    ]
-  },
-  {
-    "text": "express",
-    "groups": [
-      "api · checkout · review · route"
-    ]
-  },
-  {
-    "text": "Express delivery is no longer available. Please choose standard delivery.",
-    "groups": [
-      "api · checkout · review · route"
-    ]
-  },
-  {
-    "text": "Invalid checkout request.",
-    "groups": [
-      "api · checkout · review · route"
-    ]
-  },
-  {
-    "text": "live",
-    "groups": [
-      "api · checkout · review · route",
-      "api · checkout · session · route",
-      "checkout · checkout-page",
-      "src · lib · checkout · public-copy",
-      "src · lib · payments · readiness",
-      "src · lib · payments · server"
-    ]
-  },
-  {
-    "text": "none",
-    "groups": [
-      "api · checkout · review · route",
-      "api · checkout · session · route",
-      "ui · store-motion"
-    ]
-  },
-  {
-    "text": "Please check your details and bag before continuing.",
-    "groups": [
-      "api · checkout · review · route"
-    ]
-  },
-  {
-    "text": "Refresh the page before reviewing your details.",
-    "groups": [
-      "api · checkout · review · route"
-    ]
-  },
-  {
-    "text": "royal_mail_olp",
-    "groups": [
-      "api · checkout · review · route",
-      "api · checkout · session · route",
-      "checkout · checkout-page",
-      "shipping-delivery",
-      "src · lib · checkout · model"
-    ]
-  },
-  {
-    "text": "Stock has changed. Review the unavailable items in your bag before continuing.",
-    "groups": [
-      "api · checkout · review · route"
-    ]
-  },
-  {
-    "text": "string",
-    "groups": [
-      "api · checkout · review · route",
-      "checkout · order-confirmation",
-      "content · contact-form",
-      "order-confirmation",
-      "src · lib · payments · provider"
-    ]
-  },
-  {
-    "text": "unconfirmed",
-    "groups": [
-      "api · checkout · review · route",
-      "api · checkout · session · route"
-    ]
-  },
-  {
-    "text": "We couldn't review your selection. Your details are still here; please try again.",
-    "groups": [
-      "api · checkout · review · route"
-    ]
-  },
-  {
-    "text": "Your selection is below the store's minimum order value.",
-    "groups": [
-      "api · checkout · review · route",
-      "src · lib · checkout · model"
-    ]
-  },
-  {
-    "text": "payment_prepare_order",
-    "groups": [
-      "api · checkout · session · route"
-    ]
-  },
-  {
-    "text": "payment_prepare_order_v2",
-    "groups": [
-      "api · checkout · session · route"
-    ]
-  },
-  {
-    "text": "payment_prepare_order_v3",
-    "groups": [
-      "api · checkout · session · route"
-    ]
-  },
-  {
-    "text": "We couldn't open payment. Your bag is saved; retry to recover the same checkout.",
-    "groups": [
-      "api · checkout · session · route"
-    ]
-  },
-  {
-    "text": "paid",
-    "groups": [
-      "api · checkout · status · route",
-      "api · payments · stripe · webhook · route",
-      "checkout · order-confirmation",
-      "src · lib · payments · provider"
-    ]
-  },
-  {
-    "text": "This checkout is unavailable in this browser.",
-    "groups": [
-      "api · checkout · status · route"
-    ]
-  },
-  {
-    "text": "This checkout is unavailable in this browser. Return to your bag or contact customer care.",
-    "groups": [
-      "api · checkout · status · route"
-    ]
-  },
-  {
-    "text": "We couldn't check this payment. Please try again shortly.",
-    "groups": [
-      "api · checkout · status · route"
-    ]
-  },
-  {
-    "text": "email",
-    "groups": [
-      "api · contact · route",
-      "contact",
-      "cookie-policy"
-    ]
-  },
-  {
-    "text": "inbox",
-    "groups": [
-      "api · contact · route"
-    ]
-  },
-  {
-    "text": "info@seenabayas.co.uk",
-    "groups": [
-      "api · contact · route",
-      "content · contact-form",
-      "store"
-    ]
-  },
-  {
-    "text": "fulfilled",
-    "groups": [
-      "api · payments · reconcile · route",
-      "src · lib · payments · reconcile"
-    ]
-  },
-  {
-    "text": "Reconciliation will need another attempt.",
-    "groups": [
-      "api · payments · reconcile · route"
-    ]
-  },
-  {
-    "text": "rejected",
-    "groups": [
-      "api · payments · reconcile · route",
-      "src · lib · payments · reconcile"
-    ]
-  },
-  {
-    "text": "Unauthorised.",
-    "groups": [
-      "api · payments · reconcile · route"
-    ]
-  },
-  {
-    "text": "Invalid payment signature.",
-    "groups": [
-      "api · payments · stripe · webhook · route"
-    ]
-  },
-  {
-    "text": "Missing payment signature.",
-    "groups": [
-      "api · payments · stripe · webhook · route"
-    ]
-  },
-  {
-    "text": "Payment verification will be retried.",
-    "groups": [
-      "api · payments · stripe · webhook · route"
-    ]
-  },
-  {
-    "text": "Store sync is temporarily unavailable.",
-    "groups": [
-      "api · storefront · sync · route"
-    ]
-  },
-  {
     "text": "Your shopping bag",
     "groups": [
       "bag",
@@ -836,6 +540,15 @@
     ]
   },
   {
+    "text": "live",
+    "groups": [
+      "checkout · checkout-page",
+      "src · lib · checkout · public-copy",
+      "src · lib · payments · readiness",
+      "src · lib · payments · server"
+    ]
+  },
+  {
     "text": "No additional tax is charged. Delivery is included in the total shown when its rate is available.",
     "groups": [
       "checkout · checkout-page"
@@ -907,6 +620,13 @@
     "text": "Preparing your selection…",
     "groups": [
       "checkout · checkout-page"
+    ]
+  },
+  {
+    "text": "preview",
+    "groups": [
+      "checkout · checkout-page",
+      "src · lib · checkout · information"
     ]
   },
   {
@@ -995,6 +715,14 @@
     "text": "Royal Mail",
     "groups": [
       "checkout · checkout-page"
+    ]
+  },
+  {
+    "text": "royal_mail_olp",
+    "groups": [
+      "checkout · checkout-page",
+      "shipping-delivery",
+      "src · lib · checkout · model"
     ]
   },
   {
@@ -1218,6 +946,13 @@
     ]
   },
   {
+    "text": "paid",
+    "groups": [
+      "checkout · order-confirmation",
+      "src · lib · payments · provider"
+    ]
+  },
+  {
     "text": "Payment has not been completed. You can return to Stripe using your browser, or cancel this checkout to release its reservation.",
     "groups": [
       "checkout · order-confirmation"
@@ -1258,6 +993,15 @@
     "text": "SEEN ABAYAS · Payment status",
     "groups": [
       "checkout · order-confirmation"
+    ]
+  },
+  {
+    "text": "string",
+    "groups": [
+      "checkout · order-confirmation",
+      "content · contact-form",
+      "order-confirmation",
+      "src · lib · payments · provider"
     ]
   },
   {
@@ -1687,6 +1431,13 @@
     ]
   },
   {
+    "text": "email",
+    "groups": [
+      "contact",
+      "cookie-policy"
+    ]
+  },
+  {
     "text": "Explore the size guide",
     "groups": [
       "contact"
@@ -1800,6 +1551,13 @@
     "text": "getting in touch.",
     "groups": [
       "content · contact-form"
+    ]
+  },
+  {
+    "text": "info@seenabayas.co.uk",
+    "groups": [
+      "content · contact-form",
+      "store"
     ]
   },
   {
@@ -4058,6 +3816,12 @@
     ]
   },
   {
+    "text": "Your selection is below the store's minimum order value.",
+    "groups": [
+      "src · lib · checkout · model"
+    ]
+  },
+  {
     "text": ", select an available size and add it to your bag. At checkout, enter your contact and UK delivery details, review the final total and continue to secure payment with Stripe. Continuing reserves the selected pieces temporarily. Your order is confirmed after payment is verified. If a delivery charge is unavailable, that selection cannot proceed to payment.",
     "groups": [
       "src · lib · checkout · public-copy"
@@ -4139,6 +3903,18 @@
     "text": "The website supports browsing, a shopping bag and a checkout review preview. Real-money payments and commercial order placement are not available in this checkout mode. Sandbox checkout may be enabled for testing: it saves private test orders and temporarily reserves stock, without a purchase contract or dispatch. Adding a piece or reviewing your details does not reserve stock, take payment or create a purchase contract.",
     "groups": [
       "src · lib · checkout · public-copy"
+    ]
+  },
+  {
+    "text": "application/json",
+    "groups": [
+      "src · lib · payments · http"
+    ]
+  },
+  {
+    "text": "cross-site",
+    "groups": [
+      "src · lib · payments · http"
     ]
   },
   {
@@ -4302,6 +4078,18 @@
     "text": "The payment database health check did not report ready.",
     "groups": [
       "src · lib · payments · readiness"
+    ]
+  },
+  {
+    "text": "fulfilled",
+    "groups": [
+      "src · lib · payments · reconcile"
+    ]
+  },
+  {
+    "text": "rejected",
+    "groups": [
+      "src · lib · payments · reconcile"
     ]
   },
   {
@@ -4582,6 +4370,12 @@
   },
   {
     "text": "magnetic",
+    "groups": [
+      "ui · store-motion"
+    ]
+  },
+  {
+    "text": "none",
     "groups": [
       "ui · store-motion"
     ]

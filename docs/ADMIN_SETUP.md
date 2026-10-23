@@ -1,5 +1,7 @@
 # SEEN administration
 
+**23 October update:** the requested password-only sign-in, client usernames, email verification/recovery and fast workspace are implemented. Follow [ADMIN_WORKSPACE_SETUP.md](ADMIN_WORKSPACE_SETUP.md) for the new migration/deployment and creating the seenabaya client account. Mandatory authenticator instructions below describe the previous policy and are superseded after the new migration. Existing owner/editor roles remain. No default password or production client account was created by the agent.
+
 The admin lives at `/admin`. It uses Supabase Auth, invite-only database membership and mandatory TOTP authentication. There is no default admin account or public registration. Existing storefront content remains active while `CMS_SOURCE=files`.
 
 ## Enable your workspace

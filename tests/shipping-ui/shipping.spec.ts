@@ -12,8 +12,7 @@ async function setup(page:Page) {
   await page.getByLabel("Email address").fill("owner@example.test");
   await page.getByLabel("Password",{exact:true}).fill("Test-password-only-123");
   await page.getByRole("button",{name:"Continue securely"}).click();
-  await page.getByLabel("Authenticator code").fill("123456");
-  await page.getByRole("button",{name:"Open workspace"}).click();
+
   await expect(page.getByRole("heading",{name:"Overview",exact:true})).toBeVisible();
   await page.goto("/admin/settings");
   await page.getByRole("combobox",{name:"Royal Mail account type",exact:true}).selectOption("olp");

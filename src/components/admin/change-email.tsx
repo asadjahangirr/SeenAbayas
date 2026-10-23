@@ -1,99 +1,18 @@
 "use client";
 import { useState, type FormEvent } from "react";
+import { adminRequest } from "@/lib/admin/client";
 export function ChangeEmail() {
-  const [email, setEmail] = useState("");
-  const [current, setCurrent] = useState("");
-  const [code, setCode] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState("");
-  const [done, setDone] = useState(false);
-  async function submit(e: FormEvent) {
-    e.preventDefault();
-    setBusy(true);
-    setError("");
-    try {
-      const status = await fetch("/api/admin/auth", { cache: "no-store" });
-      const data = await status.json();
-      if (!status.ok) throw new Error(data.error);
-      const r = await fetch("/api/admin/auth", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "email",
-          email,
-          current,
-          code,
-          factorId: data.factors[0]?.id,
-        }),
-      });
-      const result = await r.json();
-      if (!r.ok) throw new Error(result.error);
-      setDone(true);
-      setCurrent("");
-      setCode("");
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Please try again.");
-    } finally {
-      setBusy(false);
-    }
-  }
-  return (
-    <section className="admin-panel">
-      <div className="admin-panel__heading">
-        <h2>Change login email</h2>
-        <p>
-          Your account permissions stay attached to your user ID. Confirm the
-          change using the email links sent by Supabase.
-        </p>
-      </div>
-      <form className="admin-form-stack" onSubmit={submit}>
-        <label className="admin-field">
-          New login email
-          <input
-            type="email"
-            autoComplete="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-        </label>
-        <label className="admin-field">
-          Current password
-          <input
-            type="password"
-            autoComplete="current-password"
-            required
-            value={current}
-            onChange={(e) => setCurrent(e.target.value)}
-          />
-        </label>
-        <label className="admin-field">
-          Authenticator code
-          <input
-            inputMode="numeric"
-            pattern="[0-9]{6}"
-            maxLength={6}
-            autoComplete="one-time-code"
-            required
-            value={code}
-            onChange={(e) => setCode(e.target.value)}
-          />
-        </label>
-        {error && (
-          <p role="alert" className="admin-error">
-            {error}
-          </p>
-        )}
-        {done && (
-          <p role="status" className="admin-success">
-            Confirmation requested. Follow the links sent to your email
-            addresses to complete the change.
-          </p>
-        )}
-        <button className="admin-primary" disabled={busy}>
-          {busy ? "Please wait…" : "Request email change"}
-        </button>
-      </form>
-    </section>
-  );
+  const [email,setEmail]=useState(""),[current,setCurrent]=useState("");
+  const [busy,setBusy]=useState(false),[error,setError]=useState(""),[done,setDone]=useState(false);
+  async function submit(event:FormEvent){event.preventDefault();setBusy(true);setError("");setDone(false);try{
+    await adminRequest({action:"email",email,current},"/api/admin/auth");setCurrent("");setDone(true);
+  }catch(error){setError(error instanceof Error?error.message:"Please try again.");}finally{setBusy(false);}}
+  return <section className="admin-panel"><div className="admin-panel__heading"><h2>Add or change your recovery email</h2><p>We will send a verification link to this address. After confirming it, you can use it to sign in or reset a forgotten password. Your username stays the same.</p></div>
+    <form className="admin-form-stack" onSubmit={submit}>
+      <label className="admin-field">New login email<input type="email" autoComplete="email" required maxLength={254} value={email} onChange={event=>setEmail(event.target.value)}/></label>
+      <label className="admin-field">Current password<input type="password" autoComplete="current-password" required maxLength={128} value={current} onChange={event=>setCurrent(event.target.value)}/></label>
+      {error&&<p role="alert" className="admin-error">{error}</p>}{done&&<p role="status" className="admin-success">Verification requested. Check your new inbox and confirm the address. Your existing sign-in details work until you confirm it.</p>}
+      <button className="admin-primary" disabled={busy}>{busy?"Sending verification...":"Send verification email"}</button>
+    </form>
+  </section>;
 }

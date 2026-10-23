@@ -87,6 +87,15 @@ export function StorefrontSync({ revision }: { revision: string }) {
     const wake = () => {
       void check();
     };
+    // A saved change in another tab of this browser is already committed.
+    // Refresh immediately rather than adding another revision-check round trip.
+    const publishedHere = () => {
+      if (disposed || document.hidden || !navigator.onLine) return;
+      if (refreshingAt.current && Date.now() - refreshingAt.current < 500) return;
+      refreshingAt.current = Date.now();
+      startTransition(() => router.refresh());
+      window.dispatchEvent(new Event(STORE_UPDATED_EVENT));
+    };
     const visibility = () => {
       if (document.hidden) {
         clearTimeout(timer);
@@ -94,12 +103,12 @@ export function StorefrontSync({ revision }: { revision: string }) {
       } else wake();
     };
     const storage = (e: StorageEvent) => {
-      if (e.key === STORE_STORAGE_KEY) wake();
+      if (e.key === STORE_STORAGE_KEY) publishedHere();
     };
     let channel: BroadcastChannel | undefined;
     try {
       channel = new BroadcastChannel(STORE_CHANNEL);
-      channel.onmessage = wake;
+      channel.onmessage = publishedHere;
     } catch {
       /* Optional acceleration. */
     }

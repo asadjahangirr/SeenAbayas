@@ -64,13 +64,14 @@ export async function requireAdmin(requireMfa = true) {
     );
   if (!access.data?.allowed)
     throw new AdminError("This account has no administration access.", 403);
-  if (requireMfa && !access.data.mfa)
+  if (requireMfa && !access.data.password_only_ready && !access.data.mfa)
     throw new AdminError("Verify your authenticator code.", 403);
   return {
     client,
     user: data.user,
     role: access.data.role as "owner" | "editor",
     mfa: Boolean(access.data.mfa),
+    passwordOnly: access.data.password_only_ready === true,
   };
 }
 

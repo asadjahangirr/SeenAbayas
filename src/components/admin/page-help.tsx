@@ -28,7 +28,7 @@ const help: Record<AdminSection, string[]> = {
   inbox: [
     "Open a message to read it, mark it read or archive it.",
     "Reply by email opens your email app. It does not send an email automatically.",
-    "New website messages need the contact email and optional inbox integration to be configured.",
+    "Messages submitted through Contact Us arrive here. Reply by email opens your email app.",
   ],
   finance: [
     "Add an expense with an amount in pounds, a date and a note.",
@@ -38,7 +38,7 @@ const help: Record<AdminSection, string[]> = {
   coupons: [
     "Add a code, choose percentage or a fixed amount in pounds, and enter its discount.",
     "Set an optional expiry and usage limit. Save the coupon or turn Active off to disable it.",
-    "Customer redemption starts when checkout is connected. A saved coupon does not enable payment.",
+    "Customer use of discount codes is not available yet. Saving a code prepares it for that later feature.",
   ],
   hero: [
     "Browse videos to upload an MP4 from your computer or reuse a library file. Add or reorder clips to play them in sequence.",
@@ -63,7 +63,7 @@ const help: Record<AdminSection, string[]> = {
   settings: [
     "Shipping & order settings controls the standard delivery charge, free delivery threshold and minimum order. Exactly the threshold qualifies; express upgrades are separate.",
     "Amounts are in pounds. A blank standard fee blocks payment below the free threshold; 0 means no charge. Edit Banner message or use the automatic delivery message with {threshold} to keep its amount in sync.",
-    "Save & update store applies the settings. API keys and payment provider accounts are configured separately.",
+    "Save & update store applies the settings. Your website manager connects payment and delivery services separately.",
   ],
   history: [
     "A published content update creates a saved revision.",
@@ -71,9 +71,9 @@ const help: Record<AdminSection, string[]> = {
     "Activity lists catalog, content and record changes. It does not contain passwords or API keys.",
   ],
   security: [
-    "Use your current password and a fresh authenticator code to change account details.",
-    "Confirm email changes using the messages sent by Supabase.",
-    "Password changes sign out sessions. Contact your project owner if you lose your authenticator.",
+    "Use your current password to change your password or request a new recovery email.",
+    "Open the verification message in your new inbox and confirm the address.",
+    "Password changes sign out your other sessions. Store owners can add another administrator below; each person can add their own email after signing in.",
   ],
 };
 export function AdminPageHelp({ section }: { section: AdminSection }) {

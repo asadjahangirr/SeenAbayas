@@ -8,6 +8,7 @@ export async function proxy(request: NextRequest) {
   // The allowlist must survive client navigation from another page to Contact.
   // Only the Turnstile frame origin is allowed, and only when its widget is configured.
   const contactVerification = process.env.CONTACT_DELIVERY === "email" && Boolean(process.env.CONTACT_TURNSTILE_SITE_KEY);
+  const isDraftPreview = request.nextUrl.pathname === "/admin/preview" || request.nextUrl.pathname.startsWith("/admin/preview/");
   const isAdmin = request.nextUrl.pathname === "/admin" || request.nextUrl.pathname.startsWith("/admin/") || request.nextUrl.pathname.startsWith("/api/admin");
   const supabase = readCatalogConfig(process.env).supabase;
   let uploadOrigin = "";
@@ -25,8 +26,8 @@ export async function proxy(request: NextRequest) {
     "object-src 'none'",
     "base-uri 'none'",
     "form-action 'self'",
-    contactVerification ? "frame-src https://challenges.cloudflare.com" : "frame-src 'none'",
-    "frame-ancestors 'none'",
+    isAdmin ? "frame-src 'self'" : contactVerification ? "frame-src https://challenges.cloudflare.com" : "frame-src 'none'",
+    isDraftPreview ? "frame-ancestors 'self'" : "frame-ancestors 'none'",
   ].join("; ");
 
   const requestHeaders = new Headers(request.headers);

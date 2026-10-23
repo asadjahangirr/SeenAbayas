@@ -3,7 +3,7 @@ import { PGlite } from "@electric-sql/pglite";
 import { readFile } from "node:fs/promises";
 import { processOrderEmails, type EmailRpc } from "../../src/lib/order-emails/worker";
 import { emailPurchaseSchema, type EmailClaim, type OrderEmailConfig } from "../../src/lib/order-emails/model";
-import { defaultDocument } from "../../src/lib/cms/model";
+import { defaultDocument, siteDocumentSchema } from "../../src/lib/cms/model";
 import { defaultShippingSettings } from "../../src/lib/shipping/settings";
 
 let db: PGlite;
@@ -44,6 +44,7 @@ test.beforeAll(async () => {
     "20261021000100_live_payments.sql",
     "20261021000200_order_emails.sql",
     "20261022000100_shipping_quotes.sql",
+    "20261023000100_shipping_read_compatibility.sql",
   ])
     await db.exec(await readFile(`supabase/migrations/${file}`, "utf8"));
   await db.query("insert into auth.users(id) values($1)", [owner]);
@@ -153,6 +154,47 @@ async function denied(fn: () => Promise<unknown>) {
   await expect(fn()).rejects.toThrow();
   await db.exec("rollback to savepoint rejection;release savepoint rejection");
 }
+
+test("fixed-mode read hotfix restores the legacy storefront contract without changing orders, stock, settings or read permissions", async () => {
+  const order = await prepare();
+  const document = structuredClone(defaultDocument);
+  document.shipping.dispatchPostcode = "SW1A 1AA";
+  document.shipping.variantWeights = { [variant]: 400 };
+  await db.query("update seen_private.site_documents set published=$1,draft=$1 where id", [document]);
+  // Reproduce the installed migration's original projection against a legacy
+  // strict storefront schema before applying the standalone operator hotfix.
+  await db.exec(`create or replace function public.get_site_document() returns jsonb language sql stable security definer set search_path='' as $$
+    select case when published is null then null else jsonb_set(published,'{shipping}',jsonb_build_object('mode',coalesce(published#>>'{shipping,mode}','fixed')),true) end
+    from seen_private.site_documents where id; $$;`);
+  const oldStorefront = siteDocumentSchema.omit({ shipping: true });
+  const read = async () => (await db.query<any>("select public.get_site_document() data")).rows[0].data;
+  expect(oldStorefront.safeParse(await read()).success).toBe(false);
+  const before = (await db.query<any>("select public.payment_get_order($1,$2) data", [order.id,ownerHash])).rows[0].data;
+  const script = (await readFile("supabase/migrations/20261023000100_shipping_read_compatibility.sql","utf8")).replace(/^begin;\s*$/m,"").replace(/^commit;\s*$/m,"");
+  for (let i=0;i<2;i++) {
+    await db.exec(script);
+    const data = await read();
+    expect(oldStorefront.safeParse(data).success).toBe(true);
+    expect(siteDocumentSchema.parse(data).shipping.mode).toBe("fixed");
+    expect(data).not.toHaveProperty("shipping");
+    expect(JSON.stringify(data)).not.toContain("SW1A 1AA");
+    expect((await db.query<any>("select public.get_shipping_settings() data")).rows[0].data).toEqual(document.shipping);
+    expect((await db.query<any>("select public.payment_get_order($1,$2) data",[order.id,ownerHash])).rows[0].data).toEqual(before);
+    expect(await stock()).toEqual({on_hand:5,reserved:1});
+  }
+  expect((await db.query<any>("select published,draft from seen_private.site_documents where id")).rows[0]).toEqual({published:document,draft:document});
+  await db.exec("set local role anon");
+  expect(oldStorefront.safeParse(await read()).success).toBe(true);
+  await denied(() => db.query("select public.get_shipping_settings()"));
+  await db.exec("reset role");
+});
+
+test("public shipping reads preserve unpublished and pre-shipping documents", async () => {
+  expect((await db.query<any>("select public.get_site_document() data")).rows[0].data).toBeNull();
+  const { shipping: _shipping, ...legacy } = structuredClone(defaultDocument);
+  await db.query("update seen_private.site_documents set published=$1 where id", [legacy]);
+  expect((await db.query<any>("select public.get_site_document() data")).rows[0].data).toEqual(legacy);
+});
 
 async function shippingDocument(threshold = 10000) {
   const document = structuredClone(defaultDocument);

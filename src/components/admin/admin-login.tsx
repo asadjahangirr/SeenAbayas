@@ -26,7 +26,7 @@ export function AdminLogin() {
     const r = await fetch("/api/admin/auth", { cache: "no-store" });
     if (!r.ok) return;
     const d = await r.json();
-    if (d.mfa) {
+    if (d.passwordOnly || d.mfa) {
       window.location.assign("/admin");
       return;
     }
@@ -90,9 +90,9 @@ export function AdminLogin() {
           {stage === "login" ? (
             <>
               <label>
-                Email address
+                Email address or username
                 <input
-                  type="email"
+                  type="text"
                   autoComplete="username"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -177,8 +177,8 @@ export function AdminLogin() {
         )}
         <a href="/admin/recover">Forgot your password?</a>
         <p className="admin-caption">
-          Access requires approval from the project owner. Password recovery
-          uses your email and authenticator.
+          Approved administrators only. Add a verified email in Account settings
+          to receive password-reset links.
         </p>
       </div>
       <a href="/">Return to the store</a>

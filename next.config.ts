@@ -20,6 +20,12 @@ const nextConfig: NextConfig = {
             : []),
         ],
       },
+      {
+        source: "/admin/preview/:path*",
+        headers: [{ key: "X-Frame-Options", value: "SAMEORIGIN" }],
+      },
+      { source: "/admin/recover", headers: [{key:"Referrer-Policy",value:"no-referrer"}] },
+      { source: "/admin/email-confirmation", headers: [{key:"Referrer-Policy",value:"no-referrer"}] },
     ];
   },
 };

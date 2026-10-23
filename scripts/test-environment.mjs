@@ -9,7 +9,7 @@ export function isolatedEnvironment(port, overrides = {}) {
     PAYMENTS_RECONCILE_SECRET: "", RESEND_API_KEY: "", CONTACT_FROM_EMAIL: "",
     CONTACT_DELIVERY: "inbox", CONTACT_TURNSTILE_SITE_KEY: "", CONTACT_TURNSTILE_SECRET_KEY: "", CONTACT_INBOX_ENABLED: "false",
     ORDER_EMAILS_ENABLED: "false", ORDER_FROM_EMAIL: "", ORDER_EMAIL_TEST_RECIPIENT: "",
-    ROYAL_MAIL_API_KEY: "",
+    ROYAL_MAIL_API_KEY: "", ADMIN_EMAIL_FIXTURE_ORIGIN: "",
     ROYAL_MAIL_AUTH_MODE: "bearer",
     ...overrides,
   };

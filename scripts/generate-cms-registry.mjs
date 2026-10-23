@@ -20,7 +20,7 @@ for (const file of [
   ...walk("src/config"),
   ...walk("src/lib/checkout"),
   ...walk("src/lib/payments"),
-].filter((f) => /\.tsx?$/.test(f) && !/[\\/](admin|cms)[\\/]/.test(f))) {
+].filter((f) => /\.tsx?$/.test(f) && !/[\\/](admin|cms|api)[\\/]/.test(f))) {
   const source = fs.readFileSync(file, "utf8");
   const tree = ts.createSourceFile(
     file,
