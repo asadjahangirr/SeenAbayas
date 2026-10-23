@@ -272,6 +272,43 @@
     ]
   },
   {
+    "text": "AbortError",
+    "groups": [
+      "bag · discount-code",
+      "home · film-hero"
+    ]
+  },
+  {
+    "text": "Apply",
+    "groups": [
+      "bag · discount-code"
+    ]
+  },
+  {
+    "text": "Checking…",
+    "groups": [
+      "bag · discount-code"
+    ]
+  },
+  {
+    "text": "Enter",
+    "groups": [
+      "bag · discount-code"
+    ]
+  },
+  {
+    "text": "Free standard delivery applied.",
+    "groups": [
+      "bag · discount-code"
+    ]
+  },
+  {
+    "text": "We couldn't check that code. Please try again.",
+    "groups": [
+      "bag · discount-code"
+    ]
+  },
+  {
     "text": "Checkout",
     "groups": [
       "checkout"
@@ -1986,7 +2023,7 @@
     ]
   },
   {
-    "text": "The storefront uses first-party local storage to remember product variant references and quantities in your bag. It does not save payment card details, your name, email or delivery address in those entries.",
+    "text": "The storefront uses first-party local storage to remember product variant references, quantities and your chosen discount code. Discount codes use a separate entry ending in .coupon; their eligibility and value are checked on the server. It does not save payment card details, your name, email or delivery address in those entries.",
     "groups": [
       "cookie-policy"
     ]
@@ -2403,12 +2440,6 @@
     ]
   },
   {
-    "text": "AbortError",
-    "groups": [
-      "home · film-hero"
-    ]
-  },
-  {
     "text": "Be Seen.",
     "groups": [
       "home · film-hero",
@@ -2805,7 +2836,7 @@
     ]
   },
   {
-    "text": "The bag saves product variant references and quantities in your browser. Those selections are sent to our server to check prices and availability. Bag storage does not contain your contact details, address or payment card information, and adding a piece does not place an order.",
+    "text": "The bag saves product variant references, quantities and your chosen discount code in your browser. Those selections are sent to our server to check prices and availability. Bag storage does not contain your contact details, address or payment card information, and adding a piece does not place an order.",
     "groups": [
       "privacy-policy"
     ]

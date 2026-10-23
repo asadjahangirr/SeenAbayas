@@ -7,8 +7,8 @@ import { ShippingError, type ShippingSettings } from "./settings";
 import type { CarrierDelivery } from "./rates";
 
 const digest = (value: unknown) => createHash("sha256").update(JSON.stringify(value)).digest("hex");
-export function shippingInputHash(document: SiteDocument, settings: ShippingSettings, bag: BagQuote, details: CheckoutDetails, method: string, ownerHash: string) {
-  return digest({ ownerHash, method, details, commerce: document.commerce, delivery: document.policies,
+export function shippingInputHash(document: SiteDocument, settings: ShippingSettings, bag: BagQuote, details: CheckoutDetails, method: string, ownerHash: string, coupon?: import("@/lib/coupons/model").CheckoutCoupon) {
+  return digest({ ownerHash, method, details, ...(coupon ? {coupon} : {}), commerce: document.commerce, delivery: document.policies,
     settings, lines: [...bag.lines].map(line => ({ id: line.variantId, quantity: line.quantity, price: line.piece?.pricePence })).sort((a,b) => a.id.localeCompare(b.id)) });
 }
 const schema = z.object({ inputHash: z.string().regex(/^[a-f0-9]{64}$/), delivery: z.object({

@@ -7,7 +7,7 @@ export async function POST(request: Request) {
   try {
     checkOrigin(request);
     const access = await requireAdmin();
-    if (access.role !== "owner")
+    if (!access.mainAdmin && !access.permissions.includes("orders"))
       return NextResponse.json(
         { error: "Owner access is required." },
         { status: 403 },

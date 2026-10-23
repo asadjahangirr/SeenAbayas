@@ -24,8 +24,13 @@ import {
 import { BagDrawer } from "./bag-drawer";
 import { STORE_UPDATED_EVENT } from "@/lib/storefront/notify";
 import { requestDeadline } from "@/lib/request-deadline";
+import { couponCodeSchema, type CheckoutCoupon } from "@/lib/coupons/model";
 
 type BagContextValue = {
+  couponCode: string;
+  coupon: CheckoutCoupon | null;
+  setCouponCode: (code:string) => void;
+  setCoupon: (coupon:CheckoutCoupon | null) => void;
   quote: BagQuote;
   count: number;
   busy: boolean;
@@ -79,6 +84,20 @@ export function BagProvider({
     ? `${BAG_STORAGE_KEY}.development`
     : BAG_STORAGE_KEY;
   const [quote, setQuote] = useState<BagQuote>(emptyBag);
+  const [couponCode, updateCouponCode] = useState("");
+  const [coupon, setCoupon] = useState<CheckoutCoupon | null>(null);
+  const couponKey=`${storageKey}.coupon`;
+  const setCouponCode=useCallback((code:string)=>{
+    const parsed=couponCodeSchema.safeParse(code);
+    const next=parsed.success ? parsed.data : "";
+    updateCouponCode(next);setCoupon(null);
+    try{if(next)localStorage.setItem(couponKey,next);else localStorage.removeItem(couponKey);}catch{/* Shopping works without storage. */}
+  },[couponKey]);
+  useEffect(()=>{
+    const read=()=>{try{const parsed=couponCodeSchema.safeParse(localStorage.getItem(couponKey)||"");updateCouponCode(parsed.success?parsed.data:"");setCoupon(null);}catch{/* Keep in-memory code. */}};
+    read();const changed=(event:StorageEvent)=>{if(event.key===couponKey)read();};
+    window.addEventListener("storage",changed);return()=>window.removeEventListener("storage",changed);
+  },[couponKey]);
   const [requests, setRequests] = useState<BagRequestLine[]>([]);
   const requestsRef = useRef<BagRequestLine[]>([]);
   const quoteRef = useRef<BagQuote>(emptyBag);
@@ -271,10 +290,13 @@ export function BagProvider({
   function clearSavedBag(): "cleared" | "blocked" | "busy" {
     if (pending.current) return "busy";
     commit([], emptyBag, false);
+    setCouponCode("");
     setError("");
     try {
       localStorage.removeItem(BAG_STORAGE_KEY);
       localStorage.removeItem(`${BAG_STORAGE_KEY}.development`);
+      localStorage.removeItem(`${BAG_STORAGE_KEY}.coupon`);
+      localStorage.removeItem(`${BAG_STORAGE_KEY}.development.coupon`);
       setNotice("Your saved bag has been cleared.");
       return "cleared";
     } catch {
@@ -286,6 +308,7 @@ export function BagProvider({
   return (
     <BagContext.Provider
       value={{
+        couponCode,coupon,setCouponCode,setCoupon,
         quote,
         count: requests.reduce((sum, line) => sum + line.quantity, 0),
         busy,

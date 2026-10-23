@@ -15,6 +15,7 @@ import { paymentRpc, requireCheckout } from "@/lib/payments/server";
 import { openHostedCheckout } from "@/lib/payments/provider";
 import { applyCarrierQuote } from "@/lib/shipping/checkout";
 import { ShippingError } from "@/lib/shipping/settings";
+import { checkCoupon, applyCoupon } from "@/lib/coupons/server";
 
 export const maxDuration = 60;
 export async function POST(request: NextRequest) {
@@ -68,6 +69,7 @@ export async function POST(request: NextRequest) {
         method: data.shippingMethod,
         review: data.reviewFingerprint,
         mode,
+        ...(data.couponCode ? {couponCode:data.couponCode} : {}),
       }),
     );
     let order = await paymentRpc<PaymentOrder | null>("payment_get_request", {
@@ -98,6 +100,7 @@ export async function POST(request: NextRequest) {
           409,
         );
       }
+      applyCoupon(review,await checkCoupon(data.couponCode,quote.subtotalPence,mode));
       let carrier: Awaited<ReturnType<typeof applyCarrierQuote>> | undefined;
       if (document.shipping.mode === "royal_mail_olp") {
         if (!data.shippingQuote) throw new ShippingError("Please review your delivery charge again.", 409);
@@ -113,7 +116,7 @@ export async function POST(request: NextRequest) {
           "Delivery charges must be confirmed before this selection can proceed to payment.",
           409,
         );
-      order = await paymentRpc<PaymentOrder>(carrier ? "payment_prepare_order_v3" : mode === "live" ? "payment_prepare_order_v2" : "payment_prepare_order", {
+      order = await paymentRpc<PaymentOrder>(review.coupon ? "payment_prepare_order_v4" : carrier ? "payment_prepare_order_v3" : mode === "live" ? "payment_prepare_order_v2" : "payment_prepare_order", {
         request_id: data.requestId,
         owner_hash: ownerHash,
         request_hash: requestHash,
@@ -128,6 +131,9 @@ export async function POST(request: NextRequest) {
         return_origin: siteOrigin,
         ...(mode === "live" || carrier ? {payment_mode: mode} : {}),
         ...(carrier ? { quoted_delivery: carrier.delivery, expected_shipping: carrier.settings, expected_commerce: document.commerce } : {}),
+        ...(review.coupon ? {coupon_code:review.coupon.code,expected_coupon:review.coupon,
+          quoted_delivery:carrier?.delivery || null,expected_shipping:carrier?.settings || null,
+          expected_commerce:document.commerce,payment_mode:mode} : {}),
       });
     }
     if (["expired", "failed"].includes(order.state))

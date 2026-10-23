@@ -6,6 +6,7 @@ import {
 } from "@/lib/bag/model";
 import type { SiteDocument } from "@/lib/cms/model";
 import { settingsSchema } from "@/lib/policies";
+import { couponCodeSchema, type CheckoutCoupon } from "@/lib/coupons/model";
 
 const requiredText = (label: string, max: number) =>
   z
@@ -72,6 +73,7 @@ export const checkoutReviewRequestSchema = z
   .object({
     details: checkoutDetailsSchema,
     shippingMethod: z.enum(["standard", "express"]),
+    couponCode: couponCodeSchema.optional(),
     lines: z.unknown().transform((value, ctx) => {
       const lines = parseBagLines(value);
       if (!lines?.length) {
@@ -103,6 +105,8 @@ export type CheckoutReview = {
   paymentAvailable: boolean;
   reviewFingerprint?: string;
   shippingQuote?: string;
+  coupon?: CheckoutCoupon;
+  discountPence?: number;
 };
 
 export function checkoutDeliveryOptions(

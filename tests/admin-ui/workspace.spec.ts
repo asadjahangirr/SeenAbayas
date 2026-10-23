@@ -33,8 +33,8 @@ test("page-based text editing hides internal tokens, preserves drafts and opens 
   const live=await page.request.get("/");expect(await live.text()).toContain("Made to");
 });
 test("owner creates username-only client, client verifies email and resets their own password without MFA",async({page,browser,request})=>{
-  test.setTimeout(120000);await login(page);await page.goto("/admin/security");await page.getByText("Add an administrator",{exact:true}).click();
-  await page.getByLabel("Username",{exact:true}).fill("seenabaya");await page.getByLabel("Temporary password (at least 14 characters)").fill("Client-temporary-1234");await page.getByLabel("Your current password",{exact:true}).fill("Test-password-only-123");
+  test.setTimeout(120000);await login(page);await page.goto("/admin/security");
+  await page.getByLabel("Username",{exact:true}).fill("seenabaya");await page.getByLabel("Administrator name",{exact:true}).fill("Client administrator");await page.getByLabel("Temporary password (at least 14 characters)").fill("Client-temporary-1234");await page.getByLabel("Your current password",{exact:true}).fill("Test-password-only-123");
   await page.getByRole("button",{name:"Create administrator",exact:true}).click();await expect(page.getByText("Administrator seenabaya created.",{exact:false})).toBeVisible();
   const client=await browser.newContext();try{
     const shop=await client.newPage();await login(shop,"seenabaya","Client-temporary-1234");await shop.goto("/admin/security");await expect(shop.getByText("Recovery email: Not added yet",{exact:true})).toBeVisible();
@@ -46,5 +46,25 @@ test("owner creates username-only client, client verifies email and resets their
     messages=await(await request.get("http://127.0.0.1:3106/__test/account-emails")).json();const recovery=messages[1].text.match(/http:\/\/127\.0\.0\.1:3107\/admin\/recover\?token_hash=[^\s]+/)[0];
     await shop.goto(recovery);await shop.getByRole("button",{name:"Open password reset",exact:true}).click();await shop.getByLabel("New password",{exact:true}).fill("Client-updated-4567");await shop.getByLabel("Confirm new password",{exact:true}).fill("Client-updated-4567");await shop.getByRole("button",{name:"Reset password securely"}).click();await expect(shop).toHaveURL(/\/admin\/login/);
     await login(shop,"seenabaya","Client-updated-4567");expect((await page.request.get("/api/admin")).status()).toBe(200);
+  }finally{await client.close();}
+});
+
+test("main admin creates a banner-only administrator, whose dashboard and API enforce the assignment",async({page,browser})=>{
+  test.setTimeout(120000);await login(page);await page.goto('/admin/security');
+  await page.getByLabel('Username',{exact:true}).fill('bannerhelper');await page.getByLabel('Administrator name',{exact:true}).fill('Banner helper');
+  await page.getByLabel('Change the announcement banner',{exact:true}).check();await page.getByLabel('Publish assigned website changes to the live store',{exact:true}).check();
+  await page.getByLabel('Temporary password (at least 14 characters)').fill('Banner-temporary-1234');await page.getByLabel('Your current password',{exact:true}).fill('Test-password-only-123');
+  await page.getByRole('button',{name:'Create administrator',exact:true}).click();await expect(page.getByText('Administrator bannerhelper created.',{exact:false})).toBeVisible();
+  const client=await browser.newContext();try{
+    const staff=await client.newPage();await login(staff,'bannerhelper','Banner-temporary-1234');
+    const nav=staff.getByRole('navigation',{name:'Administration'});await expect(nav.getByRole('link',{name:'Store settings',exact:true})).toBeVisible();await expect(nav.getByRole('link',{name:'Orders',exact:true})).toHaveCount(0);await expect(nav.getByRole('link',{name:'Products & stock',exact:true})).toHaveCount(0);
+    await nav.getByRole('link',{name:'Store settings',exact:true}).click();await expect(staff.getByRole('heading',{name:'Delivery announcement',exact:true})).toBeVisible();await expect(staff.getByRole('heading',{name:'Shipping & order settings',exact:true})).toHaveCount(0);await expect(staff.getByRole('heading',{name:'Royal Mail & parcel setup',exact:true})).toHaveCount(0);
+    await staff.getByLabel('Banner message',{exact:true}).fill('A banner published by our assistant');await staff.getByRole('button',{name:'Save & update store',exact:true}).click();await expect(staff.getByText('Published. Your changes are live.',{exact:false})).toBeVisible();
+    const publicPage=await staff.request.get('/');expect(await publicPage.text()).toContain('A banner published by our assistant');
+    await staff.goto('/admin/orders');await expect(staff.getByRole('heading',{name:'Access not assigned',exact:true})).toBeVisible();
+    const escalate=await staff.evaluate(async()=>{const r=await fetch('/api/admin/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'create-admin',input:{}})});return r.status});expect(escalate).toBe(403);
+    await page.getByRole('button',{name:'Edit access',exact:true}).click();await page.getByLabel('Change the announcement banner',{exact:true}).uncheck();await page.getByLabel('Your current password',{exact:true}).fill('Test-password-only-123');await page.getByRole('button',{name:'Save administrator access',exact:true}).click();await expect(page.getByText('Access updated.',{exact:false})).toBeVisible();
+    await staff.goto('/admin/settings');await expect(staff.getByRole('heading',{name:'Access not assigned',exact:true})).toBeVisible();
+    await staff.goto('/admin/security');await expect(staff.getByRole('heading',{name:'Administrators and access',exact:true})).toHaveCount(0);await expect(staff.getByRole('heading',{name:'Change your password',exact:true})).toBeVisible();
   }finally{await client.close();}
 });

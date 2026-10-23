@@ -25,10 +25,12 @@ export function useMediaPicker() {
 }
 export function AdminMediaProvider({
   files,
+  canManage = true,
   reload,
   children,
 }: {
   files: LibraryFile[];
+  canManage?: boolean;
   reload: () => Promise<unknown>;
   children: ReactNode;
 }) {
@@ -136,13 +138,13 @@ export function AdminMediaProvider({
               Upload from your computer, then use the same file in any
               compatible website slot. JPG, PNG, WebP or MP4 · 25 MB per file.
             </p>
-            <label className="admin-upload-button">
+            <label className="admin-upload-button" hidden={!canManage}>
               <Upload size={17} />
               <span>{busy ? status : "Upload from computer"}</span>
               <input
                 type="file"
                 multiple
-                disabled={busy}
+                disabled={busy || !canManage}
                 aria-label="Upload from computer"
                 accept={
                   selection.kind === "image"

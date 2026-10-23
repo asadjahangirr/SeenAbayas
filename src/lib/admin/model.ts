@@ -111,9 +111,9 @@ export const couponSchema = z
     code: z
       .string()
       .trim()
-      .regex(/^[A-Z0-9_-]{3,40}$/),
-    type: z.enum(["percent", "fixed"]),
-    value: z.number().int().min(1).max(99_999_999),
+      .toUpperCase().regex(/^[A-Z0-9_-]{3,40}$/),
+    type: z.enum(["percent", "fixed", "free_delivery"]),
+    value: z.number().int().min(0).max(99_999_999),
     min_subtotal_pence: money,
     active: z.boolean(),
     expires_at: z.iso.datetime().nullable(),
@@ -121,6 +121,7 @@ export const couponSchema = z
   })
   .strict()
   .superRefine((v, c) => {
+    if(v.type!=="free_delivery" && v.value<1)c.addIssue({code:"custom",message:"Enter a positive discount."});
     if (v.type === "percent" && v.value > 100)
       c.addIssue({ code: "custom", message: "Percentage cannot exceed 100." });
   });
@@ -261,6 +262,7 @@ export type AdminRecord = {
   updated_at: string;
 };
 export type AdminSnapshot = {
+  access?: { main_admin: boolean; permissions: string[]; permissions_ready: boolean };
   connection?: StoreConnection;
   statistics?: {
     recordCount: number;

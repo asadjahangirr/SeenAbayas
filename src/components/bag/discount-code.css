@@ -1,0 +1,10 @@
+.discount-code{margin-block:1.5rem;padding-block:1.25rem;border-block:1px solid var(--border,#dedbd6);font-size:.8rem}
+.discount-code>label{display:block;margin-bottom:.6rem;font-weight:500}
+.discount-code__entry{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.5rem}
+.discount-code__entry input{min-width:0;width:100%;border:1px solid #bdb9b2;background:transparent;color:inherit;min-height:44px;padding:.65rem .8rem;border-radius:0}
+.discount-code__entry button{min-height:44px;border:1px solid currentColor;background:var(--ink,#171717);color:var(--paper,#fff);padding:.65rem 1rem;font:inherit;cursor:pointer;transition:opacity .2s}
+.discount-code button:disabled{opacity:.5;cursor:wait}.discount-code input:focus-visible,.discount-code button:focus-visible{outline:2px solid currentColor;outline-offset:3px}
+.discount-code__error{color:#992c24}.discount-code__success{color:#276139}.discount-code__hint{opacity:.7}
+.discount-code p{margin:.65rem 0 0;line-height:1.6;overflow-wrap:anywhere}
+.discount-code__remove{margin-top:.4rem;min-height:44px;border:0;background:transparent;color:inherit;text-decoration:underline;text-underline-offset:3px;font:inherit;cursor:pointer}
+@media(prefers-reduced-motion:reduce){.discount-code__entry button{transition:none}}

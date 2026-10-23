@@ -5,6 +5,7 @@ import { processOrderEmails, type EmailRpc } from "../../src/lib/order-emails/wo
 import { emailPurchaseSchema, type EmailClaim, type OrderEmailConfig } from "../../src/lib/order-emails/model";
 import { defaultDocument, siteDocumentSchema } from "../../src/lib/cms/model";
 import { defaultShippingSettings, parcelsForBag } from "../../src/lib/shipping/settings";
+import { discountedPrices } from "../../src/lib/coupons/model";
 import type { BagQuote } from "../../src/lib/bag/model";
 
 let db: PGlite;
@@ -47,6 +48,7 @@ test.beforeAll(async () => {
     "20261022000100_shipping_quotes.sql",
     "20261023000100_shipping_read_compatibility.sql",
   "20261023000300_multi_parcel_shipping.sql",
+  "20261023000400_checkout_coupons.sql",
   ])
     await db.exec(await readFile(`supabase/migrations/${file}`, "utf8"));
   await db.query("insert into auth.users(id) values($1)", [owner]);
@@ -808,4 +810,103 @@ test("GBP 80 operator correction preserves private drafts, measurements, product
   await db.exec(script);expect((await read()).version).toBe(after.version);
   await db.exec(await readFile("supabase/migrations/20261023000300_multi_parcel_shipping.sql","utf8").then(s=>s.replace(/^begin;$/m,"").replace(/^commit;$/m,"")));
   expect((await read()).published).toEqual(after.published);
+});
+
+
+async function couponQuote(code="freedel",subtotal=8000,mode="live") {
+  return (await db.query<any>("select public.checkout_coupon_quote($1,$2,$3) data",[code,subtotal,mode])).rows[0].data;
+}
+async function saveCoupon(type="percent",value=10,patch:Record<string,unknown>={}) {
+  return (await db.query<any>("insert into seen_private.admin_records(kind,payload) values('coupon',$1) returning id",[
+    {code:"SAVE10",type,value,min_subtotal_pence:0,active:true,expires_at:null,usage_limit:null,...patch}
+  ])).rows[0].id;
+}
+async function prepareCoupon(document:typeof defaultDocument,code="freedel",patch:Record<string,unknown>={},id=requestId,mode="live",quantity=1) {
+  const coupon=await couponQuote(code,8000*quantity,mode);
+  const carrier=document.shipping.mode==="royal_mail_olp";
+  const free=document.commerce.freeDeliveryEnabled&&8000*quantity>=document.commerce.freeDeliveryThresholdPence || coupon.freeDelivery;
+  const fee=free?0:425;
+  const delivery=carrier?{id:"standard",label:"Tracked 48",carrier:"Royal Mail",source:"royal_mail_olp",serviceCode:"TEST48",carrierCostPence:425,chargePence:fee,weightInGrams:100*1+400*quantity,packageFormat:"SmallParcel",expiresAt:Date.now()+300000}:null;
+  return (await db.query<any>("select public.payment_prepare_order_v4($1,$2,$3,$4,$5,'standard',$6,'http://localhost:3000',$7,$8,$9,$10,$11,$12) data",[
+    id,ownerHash,requestHash,details,[{variant_id:variant,quantity,unit_price_pence:8000}],fee,mode,delivery,carrier?document.shipping:null,document.commerce,code,{...coupon,...patch}
+  ])).rows[0].data;
+}
+async function fixedCouponDocument() {
+  const document=structuredClone(defaultDocument);document.commerce.freeDeliveryThresholdPence=10000;
+  document.policies={...(document.policies as any),delivery:{...(document.policies as any).delivery,standardChargePence:425}};
+  await db.query("update seen_private.site_documents set draft=$1,published=$1 where id",[document]);return document;
+}
+test("FREEDEL is case insensitive, editable, seeded once and private to trusted coupon checks",async()=>{
+  expect(await couponQuote(" freedel ")).toMatchObject({code:"FREEDEL",type:"free_delivery",discountPence:0,freeDelivery:true});
+  await db.exec("set local role anon");await denied(()=>couponQuote());await denied(()=>db.query("select * from seen_private.checkout_coupon_uses"));await db.exec("reset role");
+  await db.exec("update seen_private.admin_records set payload=payload||'{\"active\":false}'::jsonb where kind='coupon' and payload->>'code'='FREEDEL'");
+  await denied(()=>couponQuote());
+  const migration=(await readFile("supabase/migrations/20261023000400_checkout_coupons.sql","utf8")).replace(/^begin;$/m,"").replace(/^commit;$/m,"");
+  await db.exec(migration);await denied(()=>couponQuote());
+});
+test("free-delivery code applies below threshold with fixed fees and records the applied code",async()=>{
+  const order=await prepareCoupon(await fixedCouponDocument());
+  expect(order).toMatchObject({subtotal_pence:8000,discount_pence:0,delivery_pence:0,total_pence:8000,coupon:{code:"FREEDEL"}});
+  expect(await stock()).toEqual({on_hand:5,reserved:1});
+});
+test("percentage and fixed discount snapshots drive exact totals, verified payment and matching emails",async()=>{
+  await saveCoupon();const document=await shippingDocument(8000);
+  const order=await prepareCoupon(document,"SAVE10");expect(order).toMatchObject({subtotal_pence:8000,discount_pence:800,total_pence:7200,delivery_pence:0});
+  await apply(order,"paid","evt_coupon_paid");
+  const payload=(await db.query<any>("select payload from seen_private.admin_records where id=$1",[order.id])).rows[0].payload;
+  expect(payload).toMatchObject({discount_pence:800,coupon:{code:"SAVE10"},total_pence:7200,payment_status:"paid"});
+  const purchase=(await db.query<any>("select snapshot from seen_private.order_emails where order_id=$1 limit 1",[order.id])).rows[0].snapshot;
+  expect(emailPurchaseSchema.parse(purchase)).toMatchObject({discount_pence:800,total_pence:7200});
+  expect(purchase.items[0].unit_price_pence).toBe(8000);
+  await saveCoupon("fixed",125,{code:"LESS125"});expect(await couponQuote("LESS125")).toMatchObject({discountPence:125});
+});
+test("inactive expired minimum-spend and exhausted codes cannot open checkout or reserve inventory",async()=>{
+  for(const patch of [{active:false},{expires_at:"2020-01-01T00:00:00Z"},{min_subtotal_pence:9000}]){
+    const id=await saveCoupon("percent",10,patch);await denied(()=>couponQuote("SAVE10"));await db.query("delete from seen_private.admin_records where id=$1",[id]);
+  }
+  await saveCoupon("percent",100);await denied(()=>couponQuote("SAVE10"));await denied(()=>couponQuote("UNKNOWN"));
+  expect(await stock()).toEqual({on_hand:5,reserved:0});
+});
+test("coupon usage is reserved atomically, retries reuse one claim, failed checkouts release it and test usage is separate",async()=>{
+  await saveCoupon("percent",10,{usage_limit:1});const document=await fixedCouponDocument();
+  const first=await prepareCoupon(document,"SAVE10");
+  const reserveAgain=async(id:string)=>(await db.query<any>("select public.payment_prepare_order_v4($1,$2,$3,$4,$5,'standard',425,'http://localhost:3000','live',null,null,$6,'SAVE10',$7) data",[
+    id,ownerHash,requestHash,details,[{variant_id:variant,quantity:1,unit_price_pence:8000}],document.commerce,first.coupon
+  ])).rows[0].data;
+  expect((await reserveAgain(requestId)).id).toBe(first.id);
+  await denied(()=>reserveAgain("50000000-0000-4000-8000-000000000009"));
+  const again=(await db.query<any>("select public.payment_get_request($1,$2,$3) data",[requestId,ownerHash,requestHash])).rows[0].data;expect(again.id).toBe(first.id);
+  await denied(()=>prepareCoupon(document,"SAVE10",{},"50000000-0000-4000-8000-000000000002"));
+  await apply(first,"expired","evt_coupon_expired");
+  const second=await prepareCoupon(document,"SAVE10",{},"50000000-0000-4000-8000-000000000003");await apply(second,"paid","evt_coupon_second",{id:"cs_live_coupon_second",payment_intent:"pi_coupon_second"});
+  await denied(()=>couponQuote("SAVE10"));expect(await couponQuote("SAVE10",8000,"test")).toMatchObject({discountPence:800});
+  expect((await db.query<any>("select state from seen_private.checkout_coupon_uses order by created_at")).rows.map(r=>r.state)).toEqual(["released","used"]);
+});
+test("a forged discount or changed coupon version never reserves stock",async()=>{
+  const document=await fixedCouponDocument();await saveCoupon();
+  for(const patch of [{discountPence:7999},{freeDelivery:true},{version:100}])await denied(()=>prepareCoupon(document,"SAVE10",patch));
+  expect(await stock()).toEqual({on_hand:5,reserved:0});
+});
+test("discounted Stripe prices preserve quantities and sum exactly to original merchandise less discount",()=>{
+  const items=[{quantity:3,unit_price_pence:101},{quantity:2,unit_price_pence:299}];
+  for(const discount of [0,1,10,111,899]){
+    const lines=discountedPrices(items,discount);expect(lines.reduce((s,l)=>s+l.quantity*l.unitAmount,0)).toBe(901-discount);
+    expect(lines.reduce((s,l)=>s+l.quantity,0)).toBe(5);
+  }
+});
+test("coupon attempts have a durable shared quota independent of an invalid-code rollback",async()=>{
+  for(let n=0;n<20;n++)await db.query("select public.checkout_coupon_attempt($1)",[ownerHash]);
+  await denied(()=>db.query("select public.checkout_coupon_attempt($1)",[ownerHash]));
+  await denied(()=>couponQuote("UNKNOWN"));
+  expect((await db.query<any>("select count(*)::int n from seen_private.checkout_coupon_attempts")).rows[0].n).toBe(20);
+});
+
+
+test("the protected admin writer creates and edits free-delivery campaigns while retaining stale-write checks",async()=>{
+  const data={code:"NEWFREE",type:"free_delivery",value:0,min_subtotal_pence:0,active:true,expires_at:null,usage_limit:null};
+  const id=(await db.query<any>("select public.admin_save_record('coupon',null,$1,0) id",[data])).rows[0].id;
+  expect(await couponQuote("newfree")).toMatchObject({id,freeDelivery:true,discountPence:0});
+  await db.query("select public.admin_save_record('coupon',$1,$2,1)",[id,{...data,active:false}]);
+  await denied(()=>couponQuote("newfree"));
+  await denied(()=>db.query("select public.admin_save_record('coupon',$1,$2,1)",[id,data]));
 });

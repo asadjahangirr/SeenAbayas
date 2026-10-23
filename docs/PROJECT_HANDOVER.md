@@ -1,5 +1,21 @@
 # SEEN ABAYAS - Project handover and continuation guide
 
+## Administrator permissions - 23 October 2026
+
+The designated main account (asadjahangirr9@gmail.com) can now create username-based sub-admins, tick assigned sections/settings, change existing permissions and disable access. Its verified existing Auth user ID is pinned privately; it cannot restrict itself. Apply `supabase/migrations/20261023000500_admin_permissions.sql` after checkout coupons, confirm `main_admin_ready=true`, then deploy. Read [ADMIN_PERMISSIONS_SETUP.md](ADMIN_PERMISSIONS_SETUP.md). No new environment variables are required. Existing staff retain their former section access until changed, but only the main account manages people.
+
+Sidebar, shortcuts, publish controls, media controls and settings groups follow permissions; protected RPC wrappers enforce assignments on direct requests and check both draft and publication. Underlying implementations are private/revoked; customer/finance records and private product costs are filtered. Publication cannot include unassigned pending settings. Staff can always manage their own password/recovery email. Product editing includes stock/prices/visibility; deletion is separate. Media upload/delete is separate from browsing existing assets in assigned editors. Full CMS documents remain editing inputs; permissions govern management actions, not per-field confidential-document access. Hosted accounts, stock, orders and payment settings were not changed.
+
+
+Validation: production build (including TypeScript) and all 18 focused database/account checks passed. Three browser scenarios passed: all 13 desktop sidebar section switches, username-account email verification/password recovery, and a banner-only administrator publishing successfully before losing access after revocation. Sidebar median was 268 ms with zero server-page requests in that local emulated run; it is not a production speed guarantee. Browser assertions completed; the Windows fixture-server teardown hung and was interrupted after completion. No hosted writes, real payment or real email was used.
+
+## Checkout coupons - 23 October 2026
+
+One shared bag/checkout field now supports free standard delivery, percentages and fixed amounts. Apply `supabase/migrations/20261023000400_checkout_coupons.sql` after the multi-parcel migration, then deploy. It seeds the requested editable FREEDEL code without replacing existing campaign edits. Read [COUPON_SETUP.md](COUPON_SETUP.md) for activation, pre-discount GBP 80 eligibility, atomic usage/reservations, separate sandbox counts, immutable order discounts, Stripe line allocation and updated receipt/confirmation/admin totals. Earlier statements saying coupon redemption is unfinished are historical. No hosted migration, coupon, payment or stock change was performed by the agent.
+
+Validation: production build and all 179 database/model checks passed. Eight distinct shipping/coupon browser checks passed across the full and focused runs, including a phone FREEDEL paid-order flow, desktop percentage-discount payment/confirmation, invalid-code/removal feedback and protected admin creation of a free-delivery campaign. Browser assertions completed; the Windows fixture-server teardown was interrupted after completion because the runner did not exit. All payment/carrier/database records were disposable fixtures; no real charge, hosted stock change or email was made.
+
+
 ## Latest delivery correction - 23 October 2026
 
 Multi-item delivery now plans and quotes additional parcels instead of rejecting orders above one parcel capacity. Run `supabase/migrations/20261023000300_multi_parcel_shipping.sql` before deploying. The separate requested business correction is `supabase/enable-free-delivery-80.sql` (enables free standard delivery at GBP 80+, preserves unrelated drafts and all existing orders/stock). Read [MULTI_ITEM_DELIVERY_FIX.md](MULTI_ITEM_DELIVERY_FIX.md). A read-only hosted diagnosis found capacity 1, nine size weights and free delivery disabled with threshold GBP 2; no hosted writes were performed. Earlier one-parcel-only statements below are historical.

@@ -23,7 +23,7 @@ export async function applyCarrierQuote(review: CheckoutReview, document: SiteDo
     if (!health.multi_parcel_ready) throw new ShippingError("Multi-item delivery is being updated. Please try again shortly.");
   }
   const secret = process.env.SUPABASE_SECRET_KEY || "";
-  const inputHash = shippingInputHash(document, settings, review.bag, review.details, review.delivery.id, ownerHash);
+  const inputHash = shippingInputHash(document, settings, review.bag, review.details, review.delivery.id, ownerHash, review.coupon);
   let delivery;
   if (token) delivery = verifyShippingQuote(token, inputHash, secret);
   else {
@@ -47,7 +47,7 @@ export async function applyCarrierQuote(review: CheckoutReview, document: SiteDo
   }
   // The signed quote is the price agreed for five minutes; session creation does not refetch/alter it.
   review.delivery = { ...delivery, deliveryAim: review.delivery.deliveryAim };
-  review.estimatedTotalPence = review.bag.subtotalPence + delivery.chargePence;
+  review.estimatedTotalPence = review.bag.subtotalPence - (review.discountPence || 0) + delivery.chargePence;
   review.shippingQuote = token;
   return { settings, delivery };
 }

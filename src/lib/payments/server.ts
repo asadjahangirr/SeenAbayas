@@ -67,6 +67,7 @@ export async function paymentRpc<T>(
         "Delivery settings changed",
         "Delivery measurements",
         "Delivery service changed",
+        "Discount code",
         "Checkout request does not match",
       ];
       if (allowed.some((prefix) => error.message.startsWith(prefix)))

@@ -12,6 +12,7 @@ import { MAX_LINE_QUANTITY } from "@/lib/bag/model";
 import { formatGbp } from "@/lib/money";
 import { useBag } from "./bag-provider";
 import { BagIcon } from "./bag-trigger";
+import { DiscountCode } from "./discount-code";
 
 export function BagFeedback() {
   const { error, retry, busy } = useBag();
@@ -40,22 +41,25 @@ export function BagLines({ close }: { close?: () => void }) {
 }
 
 export function BagDelivery() {
-  const { quote } = useBag();
+  const { quote, coupon } = useBag();
   const document = useSiteDocument();
   const deliveryThreshold = deliveryThresholdFor(document);
   const threshold = document.commerce.freeDeliveryThresholdPence;
+  if(coupon?.freeDelivery)return <div className="bag-delivery"><p><Copy text="Your code includes complimentary standard UK delivery."/></p></div>;
   if (!document.commerce.freeDeliveryEnabled) return null;
   const remaining = Math.max(0, threshold - quote.subtotalPence);
   return <div className="bag-delivery"><p>{quote.freeDelivery ? <Copy text={"Your selection qualifies for complimentary standard UK delivery."} /> : <><Copy text={"Add "} /><Copy text={formatGbp(remaining)} /><Copy text={" for complimentary standard UK delivery."} /></>}</p><progress aria-label="Progress towards complimentary UK delivery" max={Math.max(1, threshold)} value={Math.min(quote.subtotalPence, Math.max(1, threshold))} /><span><Copy text={"Complimentary on orders of "} /><Copy text={deliveryThreshold} /><Copy text={" or more."} /></span></div>;
 }
 
 export function BagSummary({ drawer = false, close }: { drawer?: boolean; close?: () => void }) {
-  const { quote, busy } = useBag();
+  const { quote, busy, coupon } = useBag();
   const hasIssues = quote.lines.some((line) => line.issue);
   return <div className="bag-summary" aria-busy={busy}>
     {!drawer && <h2><Copy text={"Your selection"} /></h2>}
+    {!drawer && <DiscountCode disabled={busy}/>}
     <BagDelivery />
     <div className="bag-subtotal"><span><Copy text={hasIssues ? "Available items subtotal" : "Subtotal"} /></span><strong key={quote.subtotalPence}><Copy text={formatGbp(quote.subtotalPence)} /></strong></div>
+    {!!coupon?.discountPence&&<><div className="bag-subtotal"><span>Discount ({coupon.code})</span><strong>-{formatGbp(coupon.discountPence)}</strong></div><div className="bag-subtotal"><span><Copy text="After discount"/></span><strong>{formatGbp(quote.subtotalPence-coupon.discountPence)}</strong></div></>}
     <p className="bag-summary__note"><Copy text={"Items in your bag are not reserved."} /></p>
     <ButtonLink href={drawer ? "/bag" : "/checkout"} onClick={close}><Copy text={drawer ? "View shopping bag" : "Continue to checkout"} /><ArrowUpRight size={17} strokeWidth={1.3} aria-hidden="true" /></ButtonLink>
     <Link className="bag-continue" href="/collection" onClick={close}><Copy text={"Continue exploring"} /></Link>

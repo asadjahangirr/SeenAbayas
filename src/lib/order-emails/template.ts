@@ -17,7 +17,7 @@ export function renderOrderEmail(order: EmailPurchase, kind: EmailKind, config: 
     "Your payment has been verified and your SEEN ABAYAS order is confirmed. Here is a copy of your order details.";
   const address = [name, d.addressLine1, d.addressLine2, d.city, d.postcode, "United Kingdom"].filter(Boolean);
   const delivery = `${order.delivery.carrier} · ${order.delivery.label}`;
-  const totals = [["Subtotal", gbp(order.subtotal_pence)], ["Delivery", order.delivery_pence ? gbp(order.delivery_pence) : "Complimentary"],
+  const totals = [["Subtotal", gbp(order.subtotal_pence)], ...(order.discount_pence ? [[`Discount (${order.coupon?.code||"code"})`, `-${gbp(order.discount_pence)}`]] : order.coupon?.code ? [["Delivery code",order.coupon.code]] : []), ["Delivery", order.delivery_pence ? gbp(order.delivery_pence) : "Complimentary"],
     ["Added tax", gbp(order.tax_pence)], ["Total paid", gbp(order.total_pence)]];
   const testNote = order.is_test ? "SANDBOX TEST — No real payment was taken. Do not dispatch this order. Both test messages are redirected to the configured test inbox." : "";
   const link = `${config.origin}${owner ? "/admin/orders" : "/returns-exchanges"}`;

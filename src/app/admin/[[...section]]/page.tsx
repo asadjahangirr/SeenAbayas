@@ -42,6 +42,7 @@ export default async function Administration({
       initial={{ ...result.data as AdminSnapshot, connection }}
       email={access.user.email?.endsWith("@admin.invalid") ? String(access.user.user_metadata?.display_name || "Store administrator") : access.user.email || "Administrator"}
       role={access.role}
+      access={access.permissionsReady ? { mainAdmin: access.mainAdmin, permissions: access.permissions } : undefined}
     />
   );
 }

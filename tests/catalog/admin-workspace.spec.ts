@@ -21,6 +21,7 @@ test.beforeAll(async()=>{
   for(const file of (await readdir("supabase/migrations")).filter(f=>f.endsWith(".sql")).sort())await db.exec(await readFile(`supabase/migrations/${file}`,"utf8"));
   for(const [id,email]of[[owner,"owner@example.test"],[editor,"editor@example.test"],[outsider,"outside@example.test"],[newUser,"new@admin.invalid"]])await db.query("insert into auth.users values($1,$2,now())",[id,email]);
   await db.query("insert into seen_private.admin_members(user_id,role) values($1,'owner'),($2,'editor')",[owner,editor]);
+  await db.query("insert into seen_private.admin_primary_account(user_id) values($1)",[owner]);
 });
 test.afterAll(async()=>{await db?.close();});test.beforeEach(async()=>{await db.exec("begin");await claims(owner);});test.afterEach(async()=>{await db.exec("rollback");});
 
@@ -39,13 +40,13 @@ test("anonymous and ordinary authenticated users cannot call provisioning, token
     await denied(()=>db.query("select * from seen_private.admin_profiles"));await db.exec("reset role");}
 });
 test("owner-approved username registration resolves privately and cannot create duplicate, invalid or editor-approved accounts",async()=>{
-  await denied(()=>db.query("select public.admin_account_register($1,$2,'seenabaya','SEEN','owner')",[editor,newUser]));
-  await denied(()=>db.query("select public.admin_account_register($1,$2,'bad @ name','SEEN','owner')",[owner,newUser]));
-  await db.query("select public.admin_account_register($1,$2,'seenabaya','SEEN','owner')",[owner,newUser]);
+  await denied(()=>db.query("select public.admin_account_register_permissions($1,$2,'seenabaya','SEEN',array['products'])",[editor,newUser]));
+  await denied(()=>db.query("select public.admin_account_register_permissions($1,$2,'bad @ name','SEEN',array['products'])",[owner,newUser]));
+  await db.query("select public.admin_account_register_permissions($1,$2,'seenabaya','SEEN',array['products'])",[owner,newUser]);
   const identity=(await db.query<any>("select public.admin_account_lookup('SEENABAYA') value")).rows[0].value;
   expect(identity).toEqual({userId:newUser,email:"new@admin.invalid",username:"seenabaya"});
   expect((await db.query<any>("select public.admin_account_team() value")).rows[0].value.find((v:any)=>v.id===newUser)).toMatchObject({username:"seenabaya",email:null,emailVerified:false,role:"owner"});
-  await denied(()=>db.query("select public.admin_account_register($1,$2,'seenabaya','SEEN','owner')",[owner,newUser]));
+  await denied(()=>db.query("select public.admin_account_register_permissions($1,$2,'seenabaya','SEEN',array['products'])",[owner,newUser]));
 });
 test("email verification is bound to an approved account, expires and can be claimed only once",async()=>{
   const token="a".repeat(64);
@@ -92,4 +93,97 @@ test("password reset proof is session-bound, expires and rejects normal sessions
 test("website text uses customer page names and excludes internal endpoints, tokens and diagnostics",()=>{
   const copy=customerCopy([{text:"Made to",groups:["home · film-hero"]},{text:"Something",groups:["api · checkout · route"]},{text:"STRIPE_SECRET_KEY",groups:["src · lib · payments · model"]},{text:"cross-site",groups:["src · lib · payments · http"]}]);
   expect(copy).toHaveLength(1);expect(copy[0].places).toEqual([{name:"Homepage",path:"/"}]);
+});
+
+test("main administrator alone assigns access, with version checks and protected main account",async()=>{
+  await db.query("select public.admin_account_register_permissions($1,$2,'assistant','Assistant',array['settings.announcement'])",[owner,newUser]);
+  await claims(newUser);
+  expect((await db.query<any>("select public.admin_access() value")).rows[0].value).toMatchObject({main_admin:false,permissions:['settings.announcement']});
+  await denied(()=>db.query("select public.admin_account_team()"));
+  await denied(()=>db.query("select public.admin_account_set_permissions($1,array['finance'],true,1)",[newUser]));
+  await claims(owner);
+  await denied(()=>db.query("select public.admin_account_set_permissions($1,array[]::text[],false,0)",[owner]));
+  await denied(()=>db.query("select public.admin_account_set_permissions($1,array['invented'],true,1)",[newUser]));
+  await db.query("select public.admin_account_set_permissions($1,array['content'],true,1)",[newUser]);
+  await denied(()=>db.query("select public.admin_account_set_permissions($1,array['finance'],true,1)",[newUser]));
+  await db.query("select public.admin_account_set_permissions($1,array['content'],false,2)",[newUser]);
+  await claims(newUser);await denied(()=>db.query("select public.admin_snapshot()"));
+});
+
+test("assigned announcement works while other settings, publication and direct legacy RPCs are denied",async()=>{
+  await db.query("select public.admin_save_site($1,0,true)",[defaultDocument]);
+  await db.query("select public.admin_account_register_permissions($1,$2,'bannereditor','Banner editor',array['settings.announcement'])",[owner,newUser]);
+  await claims(newUser);await db.exec('set local role authenticated');
+  const edited=structuredClone(defaultDocument);edited.announcement.text='An approved announcement';
+  await db.query("select public.admin_save_site($1,1,false)",[edited]);
+  const tampered=structuredClone(edited);tampered.commerce.freeDeliveryThresholdPence=1;
+  await denied(()=>db.query("select public.admin_save_site($1,2,false)",[tampered]));
+  await denied(()=>db.query("select public.admin_save_site($1,2,true)",[edited]));
+  await denied(()=>db.query("select seen_private.permission_base_admin_save_site($1,2,true)",[tampered]));
+  await denied(()=>db.query("select public.admin_save_record('coupon',null,$1,0)",[{code:'BAD',type:'percent',value:10}]));
+  await denied(()=>db.query("select public.admin_bulk_products(array[gen_random_uuid()],'archive',null)"));
+  await db.exec('reset role');await claims(owner);
+  await db.query("select public.admin_account_set_permissions($1,array['settings.announcement','publish'],true,1)",[newUser]);
+  await claims(newUser);await db.query("select public.admin_save_site($1,2,true)",[edited]);
+});
+
+test("publishing cannot include another administrator's unassigned pending settings",async()=>{
+  await db.query("select public.admin_save_site($1,0,true)",[defaultDocument]);
+  const draft=structuredClone(defaultDocument);draft.commerce.minimumOrderPence=100;
+  await db.query("select public.admin_save_site($1,1,false)",[draft]);
+  await db.query("select public.admin_account_register_permissions($1,$2,'bannerpublisher','Banner publisher',array['settings.announcement','publish'])",[owner,newUser]);
+  await claims(newUser);draft.announcement.text='Our latest news';
+  await denied(()=>db.query("select public.admin_save_site($1,2,true)",[draft]));
+  await db.query("select public.admin_save_site($1,2,false)",[draft]);
+});
+
+test("snapshots exclude customer, finance and activity data outside the assigned sections",async()=>{
+  await db.exec("insert into seen_private.admin_records(kind,payload) values('message','{\"name\":\"Private customer\"}'),('expense','{\"amount_pence\":100}'),('category','{\"name\":\"Collection\"}')");
+  await db.query("select public.admin_account_register_permissions($1,$2,'inboxhelper','Inbox helper',array['inbox'])",[owner,newUser]);
+  await claims(newUser);const result=(await db.query<any>("select public.admin_snapshot() value")).rows[0].value;
+  expect(result.records.map((r:any)=>r.kind)).toEqual(['message']);expect(result.products).toEqual([]);expect(result.statistics).toBeNull();expect(result.audit).toEqual([]);expect(result.history).toEqual([]);
+});
+
+test("revoked permissions apply to an existing session and main identity survives an email change",async()=>{
+  await db.query("select public.admin_account_register_permissions($1,$2,'discounthelper','Discount helper',array['coupons'])",[owner,newUser]);
+  const coupon={code:'HELPER',type:'free_delivery',value:0,active:true};
+  await claims(newUser);await db.query("select public.admin_save_record('coupon',null,$1,0)",[coupon]);
+  await claims(owner);await db.query("select public.admin_account_set_permissions($1,array[]::text[],true,1)",[newUser]);
+  await claims(newUser);await denied(()=>db.query("select public.admin_save_record('coupon',null,$1,0)",[{...coupon,code:'BLOCKED'}]));
+  await claims(owner);await db.query("update auth.users set email='new-main@example.test' where id=$1",[owner]);
+  expect((await db.query<any>("select public.admin_access() value")).rows[0].value.main_admin).toBe(true);
+});
+
+test("direct private storage uploads require explicit media permission",async()=>{
+  await db.query("select public.admin_account_register_permissions($1,$2,'producthelper','Product helper',array['products'])",[owner,newUser]);
+  await claims(newUser);await db.exec('set local role authenticated');
+  await denied(()=>db.query("insert into storage.objects(bucket_id,name) values('seen-media','11111111-1111-4111-8111-111111111111.jpg')"));
+  await db.exec('reset role');await claims(owner);await db.query("select public.admin_account_set_permissions($1,array['products','media'],true,1)",[newUser]);
+  await claims(newUser);await db.exec('set local role authenticated');
+  await db.query("insert into storage.objects(bucket_id,name) values('seen-media','11111111-1111-4111-8111-111111111111.jpg')");
+  await db.exec('reset role');
+});
+
+test("permissions migration reruns without resetting assignments or commerce",async()=>{
+  await db.query("select public.admin_account_register_permissions($1,$2,'retainedhelper','Retained helper',array['inbox'])",[owner,newUser]);
+  const script=(await readFile('supabase/migrations/20261023000500_admin_permissions.sql','utf8')).replace(/^begin;\s*$/m,'').replace(/^commit;\s*$/m,'');await db.exec(script);
+  await claims(newUser);expect((await db.query<any>("select public.admin_access() value")).rows[0].value.permissions).toEqual(['inbox']);await denied(()=>db.query("select public.admin_account_team()"));
+});
+
+test("limited publishing works before the first owner save, using the same document defaults",async()=>{
+  await db.query("select public.admin_account_register_permissions($1,$2,'firstbanner','First banner',array['settings.announcement','publish'])",[owner,newUser]);
+  await claims(newUser);const document=structuredClone(defaultDocument);document.announcement.text='First banner update';
+  await db.query("select public.admin_save_site($1,0,true)",[document]);
+  expect((await db.query<any>("select published from seen_private.site_documents where id")).rows[0].published.announcement.text).toBe('First banner update');
+});
+
+test("product editors can save stock and see category choices without managing categories or deleting products",async()=>{
+  await db.exec("insert into seen_private.admin_records(kind,payload) values('category','{\"name\":\"Abayas\",\"slug\":\"abayas\"}')");
+  await db.query("select public.admin_account_register_permissions($1,$2,'pieceshelper','Pieces helper',array['products'])",[owner,newUser]);
+  await claims(newUser);const p={design_reference:'design-99',name:'Test only',description:'An isolated fixture product',price_pence:4000,cost_pence:2000,status:'draft',details_confirmed:false,sort_order:99,photos:[],category:'abayas',tone:'Olive',variants:[{size_label:'54',sku:'TEST-99',active:true,on_hand:3}]};
+  const id=(await db.query<any>("select public.admin_save_product($1,null) id",[p])).rows[0].id;
+  const snapshot=(await db.query<any>("select public.admin_snapshot() value")).rows[0].value;
+  expect(snapshot.products.find((product:any)=>product.id===id).variants[0].on_hand).toBe(3);expect(snapshot.records.some((r:any)=>r.kind==='category')).toBe(true);
+  await denied(()=>db.query("select public.admin_save_record('category',null,$1,0)",[{name:'Disallowed',slug:'disallowed'}]));
+  await denied(()=>db.query("select public.admin_delete_product($1,now())",[id]));
 });

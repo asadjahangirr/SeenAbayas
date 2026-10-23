@@ -139,3 +139,56 @@ for(const mixed of [false,true])test(mixed?"mixed products get GBP 90 checkout w
     expect(state.stock[0].reserved).toBe(mixed?1:2);
   }finally{await context.close();}
 });
+
+
+for(const code of ["freedel","SAVE10"])test('bag and checkout apply '+code+' with a verified paid order',async({page,browser,request})=>{
+  test.setTimeout(90000);await page.setViewportSize({width:code==="freedel"?393:1440,height:900});await setup(page);await publish(page);
+  if(code==="SAVE10"){
+    const response=await page.request.post("/api/admin",{headers,data:{action:"record",input:{kind:"coupon",id:null,version:0,data:{code,type:"percent",value:10,min_subtotal_pence:0,active:true,expires_at:null,usage_limit:1}}}});
+    expect(response.status(),await response.text()).toBe(200);
+  }
+  const context=await browser.newContext({viewport:{width:code==="freedel"?393:1440,height:900}});
+  try{
+    const shop=await context.newPage();await shop.goto("http://127.0.0.1:3107/collection/design-01");
+    await shop.getByRole("button",{name:"54",exact:true}).click();await shop.getByRole("button",{name:"Add to bag",exact:true}).click();
+    await expect(shop.getByRole("dialog",{name:/^Your bag/})).toBeVisible();await shop.goto("http://127.0.0.1:3107/bag");
+    await shop.getByLabel("Discount code",{exact:true}).fill(code);await shop.getByRole("button",{name:"Apply",exact:true}).click();
+    await expect(shop.locator(".discount-code__success")).toContainText(code.toUpperCase());
+    if(code==="SAVE10")await expect(shop.locator(".bag-page .bag-subtotal").filter({hasText:"After discount"})).toContainText('\u00a367.50');
+    await shop.goto("http://127.0.0.1:3107/checkout");await expect(shop.locator(".discount-code__success")).toContainText(code.toUpperCase());
+    for(const[field,value]of Object.entries(details))if(field!=="country")await shop.locator('#checkout-'+field).fill(value);
+    await shop.getByRole("button",{name:"Review your details",exact:true}).click();await expect(shop.locator(".checkout-review")).toBeVisible();
+    await expect(shop.locator(".checkout-total dd")).toHaveText(code==="freedel"?'\u00a375.00':'\u00a371.75');
+    expect(await shop.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);
+    const lines=await shop.evaluate(()=>JSON.parse(localStorage.getItem("seen.bag.v1")!).lines);
+    const response=await shop.request.post("/api/checkout/review",{headers,data:{details,shippingMethod:"standard",lines,couponCode:code}});expect(response.status()).toBe(200);
+    const review=await response.json();
+    const opened=await shop.request.post("/api/checkout/session",{headers,data:{details,shippingMethod:"standard",lines,couponCode:code,requestId:randomUUID(),reviewFingerprint:review.reviewFingerprint,shippingQuote:review.shippingQuote}});
+    expect(opened.status(),await opened.text()).toBe(200);const order=await opened.json();
+    const state=await(await request.get("http://127.0.0.1:3108/__test/state")).json();expect(state.sessions[0].amount_total).toBe(code==="freedel"?7500:7175);
+    const paid=await request.post("http://127.0.0.1:3108/__test/event",{data:{sessionId:state.sessions[0].id,state:"paid"}});expect((await paid.json()).status).toBe(200);
+    await shop.goto('http://127.0.0.1:3107/order-confirmation?order='+order.orderId);await expect(shop.getByRole("heading",{name:"Thank you. Your order is confirmed.",exact:true})).toBeVisible();
+    await expect(shop.locator(".checkout-totals")).toContainText(code.toUpperCase());
+    const snapshot=await(await page.request.get("/api/admin")).json();const saved=snapshot.records.find((r:any)=>r.id===order.orderId);
+    expect(saved.payload.coupon.code).toBe(code.toUpperCase());expect(saved.payload.total_pence).toBe(code==="freedel"?7500:7175);
+  }finally{await context.close();}
+});
+
+test("invalid codes show clear feedback, removing a code restores the charge, and owners can create free-delivery codes",async({page,browser})=>{
+  test.setTimeout(90000);await setup(page);await publish(page);await page.goto("/admin/coupons");
+  const add=page.locator("details.admin-entity-form").filter({has:page.getByText("Add coupon",{exact:true})});await add.locator("summary").click();
+  await add.getByLabel("Coupon code",{exact:true}).fill("NEWFREE");await add.getByRole("combobox",{name:"Discount type",exact:true}).selectOption("free_delivery");
+  await expect(add.getByLabel("Discount (%)",{exact:true})).toHaveCount(0);await add.getByRole("button",{name:"Save coupon",exact:true}).click();
+  await expect(page.getByText("NEWFREE",{exact:true})).toBeVisible();
+  const context=await browser.newContext();
+  try{
+    const shop=await context.newPage();await shop.goto("http://127.0.0.1:3107/collection/design-01");await shop.getByRole("button",{name:"54",exact:true}).click();await shop.getByRole("button",{name:"Add to bag",exact:true}).click();
+    await expect(shop.getByRole("dialog",{name:/^Your bag/})).toBeVisible();await shop.goto("http://127.0.0.1:3107/bag");
+    await shop.getByLabel("Discount code",{exact:true}).fill("UNKNOWN");await shop.getByRole("button",{name:"Apply",exact:true}).click();await expect(shop.locator(".discount-code__error")).toContainText("unavailable");
+    await shop.getByLabel("Discount code",{exact:true}).fill("newfree");await shop.getByRole("button",{name:"Apply",exact:true}).click();await expect(shop.locator(".discount-code__success")).toContainText("NEWFREE");
+    await shop.getByRole("button",{name:"Remove code",exact:true}).click();await expect(shop.getByLabel("Discount code",{exact:true})).toHaveValue("");
+    await shop.goto("http://127.0.0.1:3107/checkout");
+    for(const[field,value]of Object.entries(details))if(field!=="country")await shop.locator('#checkout-'+field).fill(value);
+    await shop.getByRole("button",{name:"Review your details",exact:true}).click();await expect(shop.locator(".checkout-review")).toBeVisible();await expect(shop.locator(".checkout-total dd")).toHaveText('\u00a379.25');
+  }finally{await context.close();}
+});

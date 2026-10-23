@@ -5,7 +5,7 @@ import type { EmailPurchase } from "../../src/lib/order-emails/model";
 
 const purchase: EmailPurchase = {
   id: "50000000-0000-4000-8000-000000000001", order_number: "SEEN-012345ABCDEF", is_test: false,
-  currency: "gbp", confirmed_at: "2026-10-21T10:00:00+00:00", subtotal_pence: 9000, delivery_pence: 0, tax_pence: 0, total_pence: 9000,
+  currency: "gbp", confirmed_at: "2026-10-21T10:00:00+00:00", discount_pence:0, subtotal_pence: 9000, delivery_pence: 0, tax_pence: 0, total_pence: 9000,
   details: { firstName: "Test", lastName: "Shopper", email: "customer@example.test", phone: "+447700900123", addressLine1: "1 Example Street", addressLine2: "Flat 2", city: "London", postcode: "SW1A 1AA", country: "GB" },
   delivery: { carrier: "Royal Mail", label: "Standard delivery" },
   items: [{ name: "Burgundy Roselle Edit", design_reference: "design-01", size: "58", quantity: 2, unit_price_pence: 4500 }],

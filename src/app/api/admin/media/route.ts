@@ -11,7 +11,8 @@ import {
 const filename = z.string().regex(/^[a-f0-9-]+\.(?:webp|jpg|png|mp4)$/);
 export async function GET() {
   try {
-    const { client } = await requireAdmin();
+    const { client, mainAdmin, permissions, permissionsReady } = await requireAdmin();
+    if (permissionsReady && !mainAdmin && !["media","products","hero","content"].some(key => permissions.includes(key))) throw new AdminError("Media library access is not assigned to your account.", 403);
     const { data, error } = await client.storage.from("seen-media").list("", {
       limit: 1000,
       sortBy: { column: "created_at", order: "desc" },
@@ -39,7 +40,8 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     checkOrigin(request);
-    const { client } = await requireAdmin();
+    const { client, mainAdmin, permissions, permissionsReady } = await requireAdmin();
+    if (permissionsReady && !mainAdmin && !permissions.includes("media")) throw new AdminError("Media library access is not assigned to your account.", 403);
     const body = await readAdminBody(request);
     if (body.action === "sign") {
       const { type, size } = z

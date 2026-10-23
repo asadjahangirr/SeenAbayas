@@ -12,7 +12,7 @@ export const sectionDescriptions: Record<AdminSection, string> = {
   orders: "Review purchases, prepare parcels and add tracking details.",
   inbox: "Read messages customers send through Contact Us.",
   finance: "Review received payments and record business expenses.",
-  coupons: "Prepare discount codes. Customer redemption is not available yet.",
+  coupons: "Create percentage, fixed-amount or free-standard-delivery codes for the bag and checkout.",
   content: "Choose a website page, find its wording and edit it below.",
   hero: "Change the opening film and collection button on your homepage.",
   media: "Upload photos and videos, then choose where they appear.",

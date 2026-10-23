@@ -72,6 +72,9 @@ export async function requireAdmin(requireMfa = true) {
     role: access.data.role as "owner" | "editor",
     mfa: Boolean(access.data.mfa),
     passwordOnly: access.data.password_only_ready === true,
+    mainAdmin: access.data.permissions_ready === true ? access.data.main_admin === true : access.data.role === "owner",
+    permissionsReady: access.data.permissions_ready === true,
+    permissions: (access.data.permissions || []) as string[],
   };
 }
 

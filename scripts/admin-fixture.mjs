@@ -29,7 +29,9 @@ for (const file of [
   "20261022000100_shipping_quotes.sql",
   "20261023000100_shipping_read_compatibility.sql",
   "20261023000300_multi_parcel_shipping.sql",
+  "20261023000400_checkout_coupons.sql",
   "20261023000200_admin_workspace.sql",
+  "20261023000500_admin_permissions.sql",
 ])
   await db.exec(await readFile(`supabase/migrations/${file}`, "utf8"));
 await db.query("insert into auth.users(id,email,email_confirmed_at) values($1,'owner@example.test',now())", [owner]);
@@ -37,6 +39,7 @@ await db.query(
   "insert into seen_private.admin_members(user_id,role) values($1,'owner')",
   [owner],
 );
+await db.query("insert into seen_private.admin_primary_account(user_id) values($1)",[owner]);
 const user = {
   id: owner,
   aud: "authenticated",
@@ -84,6 +87,8 @@ const rpc = {
   submit_contact_enquiry: ["request_id", "message", "network_hash", "sender_hash"],
   admin_access: [],
   admin_account_lookup:["identifier"],admin_account_attempt:["identity_hash","network_hash","action"],
+  admin_account_set_permissions:["target","permissions","enabled","expected_version"],
+  admin_account_register_permissions:["operator_id","user_id","username","display_name","permissions"],
   admin_account_team:[],admin_account_register:["operator_id","user_id","username","display_name","member_role"],
   admin_account_email_request:["user_id","email","token_hash"],admin_account_claim_email:["token_hash"],
   admin_snapshot: [],
@@ -102,6 +107,8 @@ const rpc = {
   check_bag_availability: ["requested_lines"],
   payment_health: [],
   get_shipping_settings: [],
+  checkout_coupon_attempt:["network_hash"],checkout_coupon_quote:["code","subtotal_pence","payment_mode"],
+  payment_prepare_order_v4:["request_id","owner_hash","request_hash","details","requested_lines","shipping_method","expected_delivery","return_origin","payment_mode","quoted_delivery","expected_shipping","expected_commerce","coupon_code","expected_coupon"],
   shipping_quote_attempt: ["owner_hash", "network_hash"],
   shipping_health: [],
   payment_get_order: ["order_id", "owner_hash"],
@@ -150,11 +157,12 @@ async function reset(enroll = false) {
   uploads.clear();
   uploadNames.clear();
   await db.exec(
-    "reset role;delete from seen_private.admin_email_requests;delete from seen_private.admin_auth_attempts;delete from seen_private.admin_profiles;delete from seen_private.admin_members where user_id<>'10000000-0000-4000-8000-000000000010';delete from auth.users where id<>'10000000-0000-4000-8000-000000000010';update auth.users set email='owner@example.test',email_confirmed_at=now();update seen_private.admin_members set role='owner',active=true;delete from seen_private.shipping_quote_attempts;delete from seen_private.contact_receipts;delete from seen_private.order_emails;delete from seen_private.checkout_stock_events;delete from seen_private.stripe_event_receipts;delete from seen_private.checkout_items;delete from seen_private.checkout_orders;delete from seen_private.admin_records;delete from seen_private.admin_audit;delete from seen_private.site_history;update seen_private.site_documents set version=0,draft='{}',published=null,published_at=null;delete from seen_private.inventory;delete from public.product_variants;delete from public.products;delete from storage.objects;",
+    "reset role;delete from seen_private.admin_email_requests;delete from seen_private.admin_auth_attempts;delete from seen_private.admin_profiles;delete from seen_private.admin_members where user_id<>'10000000-0000-4000-8000-000000000010';delete from auth.users where id<>'10000000-0000-4000-8000-000000000010';update auth.users set email='owner@example.test',email_confirmed_at=now();update seen_private.admin_members set role='owner',active=true;delete from seen_private.shipping_quote_attempts;delete from seen_private.contact_receipts;delete from seen_private.order_emails;delete from seen_private.checkout_stock_events;delete from seen_private.stripe_event_receipts;delete from seen_private.checkout_coupon_uses;delete from seen_private.checkout_coupon_attempts;delete from seen_private.checkout_items;delete from seen_private.checkout_orders;delete from seen_private.admin_records;delete from seen_private.admin_audit;delete from seen_private.site_history;update seen_private.site_documents set version=0,draft='{}',published=null,published_at=null;delete from seen_private.inventory;delete from public.product_variants;delete from public.products;delete from storage.objects;",
   );
   await db.query("select set_config('request.jwt.claims',$1,false)", [
     JSON.stringify({ sub: owner, aal: "aal2" }),
   ]);
+  await db.exec("insert into seen_private.admin_records(kind,payload) values('coupon','{\"code\":\"FREEDEL\",\"type\":\"free_delivery\",\"value\":0,\"min_subtotal_pence\":0,\"active\":true,\"expires_at\":null,\"usage_limit\":null}')");
   const media = JSON.parse(
     await readFile("src/data/media.generated.json", "utf8"),
   );
@@ -363,7 +371,7 @@ const server = http.createServer(async (req, res) => {
             JSON.stringify(aal ? { sub: currentUserId, aal } : {}),
           ]);
           const service =
-            (name.startsWith("payment_") || name.startsWith("order_email_") || name.startsWith("shipping_") || name === "get_shipping_settings" || name === "submit_contact_enquiry" || (name.startsWith("admin_account_") && name !== "admin_account_team")) &&
+            (name.startsWith("checkout_coupon_") || name.startsWith("payment_") || name.startsWith("order_email_") || name.startsWith("shipping_") || name === "get_shipping_settings" || name === "submit_contact_enquiry" || (name.startsWith("admin_account_") && name !== "admin_account_team" && name !== "admin_account_set_permissions")) &&
             bearer === "sb_secret_SEEN_LOCAL_FIXTURE_ONLY";
           await db.exec(
             `set local role ${service ? "service_role" : aal ? "authenticated" : "anon"}`,

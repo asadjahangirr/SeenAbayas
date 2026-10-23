@@ -36,9 +36,9 @@ const help: Record<AdminSection, string[]> = {
     "Cash after expenses uses recorded payments and expenses; it is not an accounting profit calculation.",
   ],
   coupons: [
-    "Add a code, choose percentage or a fixed amount in pounds, and enter its discount.",
+    "Add a code and choose percentage, a fixed amount in pounds, or free standard delivery.",
     "Set an optional expiry and usage limit. Save the coupon or turn Active off to disable it.",
-    "Customer use of discount codes is not available yet. Saving a code prepares it for that later feature.",
+    "Customers enter one code in their bag or checkout. Codes, expiry, minimum spend and usage limits are checked again before payment; abandoned checkout reservations are released.",
   ],
   hero: [
     "Browse videos to upload an MP4 from your computer or reuse a library file. Add or reorder clips to play them in sequence.",
@@ -73,7 +73,7 @@ const help: Record<AdminSection, string[]> = {
   security: [
     "Use your current password to change your password or request a new recovery email.",
     "Open the verification message in your new inbox and confirm the address.",
-    "Password changes sign out your other sessions. Store owners can add another administrator below; each person can add their own email after signing in.",
+    "Password changes sign out your other sessions. Only the main administrator can add people or change their assigned access. Each person can add their own recovery email after signing in.",
   ],
 };
 export function AdminPageHelp({ section }: { section: AdminSection }) {

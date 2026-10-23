@@ -37,6 +37,7 @@ export function reviewFingerprint(review: CheckoutReview) {
       subtotal: review.bag.subtotalPence,
       total: review.estimatedTotalPence,
       shippingQuote: review.shippingQuote,
+      ...(review.coupon ? {coupon:review.coupon,discountPence:review.discountPence} : {}),
     }),
   );
 }
@@ -75,6 +76,8 @@ export type PaymentOrder = {
     chargePence: number;
   };
   subtotal_pence: number;
+  discount_pence?: number;
+  coupon?: import("@/lib/coupons/model").CheckoutCoupon | null;
   delivery_pence: number;
   total_pence: number;
   refunded_pence: number;
@@ -102,6 +105,8 @@ export function customerOrder(order: PaymentOrder) {
     delivery: order.delivery,
     items: order.items,
     subtotalPence: order.subtotal_pence,
+    discountPence: order.discount_pence || 0,
+    coupon: order.coupon || null,
     deliveryPence: order.delivery_pence,
     totalPence: order.total_pence,
     currency: "GBP" as const,

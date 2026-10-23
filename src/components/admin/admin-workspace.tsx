@@ -10,6 +10,7 @@ import {
 } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { permits, sectionAllowed, legacyAccess, type AdminAccess } from "@/lib/admin/permissions";
 import { adminNavigation, sectionDescriptions, sectionDestinations, customerCopy } from "@/lib/admin/presentation";
 import {
   ArrowUpRight,
@@ -132,7 +133,9 @@ export function AdminWorkspace({
   initial,
   email,
   role,
+  access: initialAccess,
 }: {
+  access?: AdminAccess;
   section: AdminSection;
   initial: AdminSnapshot;
   email: string;
@@ -154,6 +157,8 @@ export function AdminWorkspace({
   const sidebarRef = useRef<HTMLElement>(null);
   const menuRef = useRef<HTMLButtonElement>(null);
   const [snapshot, setSnapshot] = useState(initial);
+  const access: AdminAccess = snapshot.access?.permissions_ready ? { mainAdmin: snapshot.access.main_admin, permissions: snapshot.access.permissions } : initialAccess || legacyAccess(role);
+  const can = (key: string) => permits(access, key);
   const parsed = useMemo(() => siteDocumentSchema.safeParse(initial.site.draft), [initial.site.draft]);
   const [document, setDocument] = useState<SiteDocument>(
     parsed.success ? parsed.data : defaultDocument,
@@ -302,7 +307,7 @@ export function AdminWorkspace({
     try { await task; } finally { libraryPending.current = null; }
   };
   useEffect(() => {
-    if (["media", "hero", "products"].includes(section) && !libraryLoaded.current)
+    if (["media","products","hero","content"].some(can) && ["media", "hero", "products"].includes(section) && !libraryLoaded.current)
       void loadLibrary().catch((e) => setError(e.message));
   }, [section]);
   useEffect(() => {
@@ -390,14 +395,13 @@ export function AdminWorkspace({
   const spent =
     snapshot.statistics?.expensePence ??
     expenses.reduce((s, r) => s + Number(r.payload.amount_pence || 0), 0);
-  const restricted =
-    role !== "owner" &&
-    ["orders", "inbox", "finance", "coupons", "settings"].includes(section);
+  const restricted = !sectionAllowed(access, section);
   const editableCopy = useMemo(() => customerCopy(copyRegistry), []);
   const filteredCopy = useMemo(() => editableCopy.filter(c =>
+    (c.text !== "info@seenabayas.co.uk" || can("settings.business")) &&
     (group === "all" || c.places.some(place => place.name === group)) &&
     (c.text.toLowerCase().includes(query.toLowerCase()) || (document.text[c.text] || "").toLowerCase().includes(query.toLowerCase()))
-  ), [editableCopy, group, query, document.text]);
+  ), [editableCopy, group, query, document.text, access.mainAdmin, access.permissions]);
   const groups = useMemo(() => [...new Set(editableCopy.flatMap(c => c.places.map(p => p.name)))].sort(), [editableCopy]);
   const destination = group !== "all" && section === "content"
     ? editableCopy.flatMap(c => c.places).find(p => p.name === group)
@@ -430,7 +434,7 @@ export function AdminWorkspace({
     requestAnimationFrame(() => { headingRef.current?.focus({ preventScroll: true }); window.scrollTo({ top: 0, behavior: "instant" }); });
   };
   return (
-    <AdminMediaProvider files={library} reload={loadLibrary}>
+    <AdminMediaProvider files={library} reload={loadLibrary} canManage={can("media")}>
       <div className="admin-workspace" data-admin>
         {open && (
           <button
@@ -457,9 +461,9 @@ export function AdminWorkspace({
             <X size={20} />
           </button>
           <nav aria-label="Administration">
-            {adminNavigation.map(category => <div className="admin-nav-group" key={category.label}>
+            {adminNavigation.filter(category => category.sections.some(s => sectionAllowed(access, s))).map(category => <div className="admin-nav-group" key={category.label}>
               <p className="admin-nav-label">{category.label}</p>
-              {category.sections.map(s => <Link prefetch={false} key={s}  href={s === "dashboard" ? "/admin" : `/admin/${s}`}
+              {category.sections.filter(s => sectionAllowed(access, s)).map(s => <Link prefetch={false} key={s}  href={s === "dashboard" ? "/admin" : `/admin/${s}`}
                 aria-current={section === s ? "page" : undefined} onClick={event => navigate(event, s)}>
                 <span className="admin-nav-dot" aria-hidden="true" />{sectionNames[s]}
                 {s === "inbox" && records("message").some(r => !r.payload.read) && <span className="admin-unread" />}
@@ -477,7 +481,7 @@ export function AdminWorkspace({
           </a>
           <div className="admin-profile">
             <span>{email}</span>
-            <small>{role === "owner" ? "Store owner" : "Website editor"}</small>
+            <small>{access.mainAdmin ? "Main administrator" : "Administrator"}</small>
             <button
               onClick={() =>
                 void run(async () => {
@@ -520,7 +524,7 @@ export function AdminWorkspace({
                 {sectionDescriptions[section]}
               </p>
             </div>
-            {section === "products" && (
+            {section === "products" && !restricted && (
               <button
                 className="admin-primary"
                 disabled={busy}
@@ -540,14 +544,15 @@ export function AdminWorkspace({
                   <Save size={15} />
                   Save draft
                 </button>
-                <button
+                {can("publish") && <button
                   className="admin-primary"
                   disabled={busy}
                   onClick={() => void saveSite(true)}
+
                 >
                   Save & update store
                   <ArrowUpRight size={15} />
-                </button>
+                </button>}
               </div>
             )}
           </div>
@@ -605,15 +610,14 @@ export function AdminWorkspace({
           </section>}
           <AdminPageHelp section={section} />
           {restricted ? (
-            <Panel title="Owner access required">
+            <Panel title="Access not assigned">
               <p>
-                Ask the project owner to manage financial, customer and legal
-                settings.
+                Ask the main administrator to assign this section to your account.
               </p>
             </Panel>
           ) : (
             <>
-              {section === "dashboard" && (
+              {section === "dashboard" && access.mainAdmin && (
                 <>
                   <Stats
                     values={[
@@ -704,17 +708,19 @@ export function AdminWorkspace({
                       ["settings", "Change delivery or the banner", "Fees, free delivery and your top announcement"],
                       ["orders", "Prepare customer orders", "Purchased items, addresses and tracking"],
                       ["security", "Manage your account", "Password, email and administrator access"],
-                    ] as const).map(([target, title, note]) => <Link prefetch={false} key={target}  href={`/admin/${target}`} onClick={event => navigate(event, target)}><strong>{title}<ArrowUpRight size={15} /></strong><span>{note}</span></Link>)}</div>
+                    ] as const).filter(([target]) => sectionAllowed(access, target)).map(([target, title, note]) => <Link prefetch={false} key={target}  href={`/admin/${target}`} onClick={event => navigate(event, target)}><strong>{title}<ArrowUpRight size={15} /></strong><span>{note}</span></Link>)}</div>
                   </Panel>
-                  {role === "owner" && <ConnectionChecks />}
+                  {access.mainAdmin && <ConnectionChecks />}
 
                 </>
               )}
+              {section === "dashboard" && !access.mainAdmin && <Panel title="Your workspace" description="You can manage the sections assigned by the main administrator. Your own password and recovery email are always available."><div className="admin-quick-tasks">{adminSections.filter(target => target !== "dashboard" && sectionAllowed(access,target)).map(target => <Link prefetch={false} key={target} href={`/admin/${target}`} onClick={event => navigate(event,target)}><strong>{sectionNames[target]}</strong><span>{sectionDescriptions[target]}</span></Link>)}</div></Panel>}
               {section === "products" && (
                 <ProductManager
                   createRequest={createProductRequest}
                   onDirtyChange={setProductDirty}
-                  canDelete={role === "owner"}
+                  canDelete={can("products.delete")}
+                  canUpload={can("media")}
                   products={snapshot.products}
                   categories={records("category")}
                   library={library}
@@ -741,8 +747,8 @@ export function AdminWorkspace({
               {section === "coupons" && (
                 <>
                   <Panel
-                    title="Discounts, ready for checkout"
-                    description="Codes are saved privately. Redemption, expiry and usage limits must be enforced by the future checkout service."
+                    title="Discount codes"
+                    description="Customers can apply one code in their bag or checkout. Choose a product discount or free standard delivery."
                   >
                     <p>
                       Fixed discount values and minimum subtotals are in pounds
@@ -1116,7 +1122,7 @@ export function AdminWorkspace({
               )}
               {section === "appearance" && (
                 <>
-                  <Panel
+                  {can("appearance.colours") && <Panel
                     title="A palette with presence"
                     description="Use restrained colours that keep text clear against the background."
                   >
@@ -1153,8 +1159,8 @@ export function AdminWorkspace({
                         A considered expression of elegance.
                       </span>
                     </div>
-                  </Panel>
-                  <Panel
+                  </Panel>}
+                  {can("appearance.motion") && <Panel
                     title="The motion collection"
                     description="Choose how sections appear as customers scroll and how buttons respond. These settings respect reduced-motion preferences."
                   >
@@ -1201,8 +1207,8 @@ export function AdminWorkspace({
                       </Field>
                     </div>
                     <MotionDemo appearance={document.appearance} />
-                  </Panel>
-                  <Panel
+                  </Panel>}
+                  {can("appearance.featured") && <Panel
                     title="Homepage edit"
                     description="Select up to four visible products in display order. Uncheck a selected piece to make room for another. Hide this section to remove the homepage edit."
                   >
@@ -1250,12 +1256,12 @@ export function AdminWorkspace({
                     >
                       Hide homepage edit
                     </button>
-                  </Panel>
+                  </Panel>}
                 </>
               )}
               {section === "settings" && (
                 <>
-                  <Panel title="Delivery announcement">
+                  {can("settings.announcement") && <Panel title="Delivery announcement">
                     <div className="admin-form-stack">
                       <label className="admin-checkbox">
                         <input
@@ -1369,8 +1375,8 @@ export function AdminWorkspace({
                         document.announcement.text !== "Complimentary UK delivery on orders over {threshold}" &&
                         <p className="admin-caption">The free delivery offer is disabled. Check that your custom banner describes the current offer accurately.</p>}
                     </div>
-                  </Panel>
-                  <Panel
+                  </Panel>}
+                  {can("settings.delivery") && <Panel
                     title="Shipping & order settings"
                     description="Set the customer delivery fee in pounds and the merchandise subtotal that qualifies for free standard delivery. Checkout, the bag and the automatic banner use the same published settings."
                   >
@@ -1444,13 +1450,14 @@ export function AdminWorkspace({
                         : `${formatGbp(currentPolicies.delivery.standardChargePence)}.`}
                       {" Express upgrades keep their separate charge. Existing Stripe checkouts keep their original quoted total."}
                     </output>
-                  </Panel>
-                  <ShippingSettingsEditor value={document.shipping} products={snapshot.products}
-                    onChange={shipping => editSite({ ...document, shipping })} />
-                  <PolicyEditor
+                  </Panel>}
+                  {can("settings.delivery") && <ShippingSettingsEditor value={document.shipping} products={snapshot.products}
+                    onChange={shipping => editSite({ ...document, shipping })} />}
+                  {["business","delivery","privacy","review"].some(group => can(`settings.${group}`)) && <PolicyEditor
+                    allowedGroups={["business","delivery","privacy","review"].filter(group => can(`settings.${group}`))}
                     value={document.policies}
                     onChange={(v) => editSite({ ...document, policies: v })}
-                  />
+                  />}
                   <Panel title="Integrations">
                     <p>
                       Your store keeps accounts, website changes, stock and uploaded files together.
@@ -1460,8 +1467,8 @@ export function AdminWorkspace({
                     </p>
                     <p>
                       Your payment provider collects customer payments. The standard delivery fee
-                      above does not buy a Royal Mail label. Royal Mail automation
-                      and customer coupon redemption remain separate integrations.
+                      above does not buy a Royal Mail label. Automatic Royal Mail labels
+                      remain a separate fulfilment integration.
                     </p>
                   </Panel>
                 </>
@@ -1526,10 +1533,10 @@ export function AdminWorkspace({
               )}
               {section === "security" && (
                 <>
-                  <AccountTeam owner={role === "owner"} />
+                  <AccountTeam owner={access.mainAdmin} />
                   <SecuritySettings
                     email={email}
-                    role={role}
+                    role={access.mainAdmin ? "Main administrator" : "Administrator"}
                     busy={busy}
                     execute={run}
                   />
@@ -1606,6 +1613,7 @@ function ProductManager({
   createRequest,
   onDirtyChange,
   canDelete,
+  canUpload,
   products,
   categories,
   library,
@@ -1616,6 +1624,7 @@ function ProductManager({
   createRequest: number;
   onDirtyChange: (dirty: boolean) => void;
   canDelete: boolean;
+  canUpload: boolean;
   products: AdminProduct[];
   categories: AdminRecord[];
   library: LibraryFile[];
@@ -2133,7 +2142,7 @@ function ProductManager({
               <input
                 type="file"
                 accept="image/jpeg,image/png,image/webp"
-                disabled={busy || form.photos.length >= 12}
+                disabled={busy || !canUpload || form.photos.length >= 12}
                 onChange={(e) => {
                   const file = e.target.files?.[0];
                   if (!file) return;
@@ -2450,7 +2459,7 @@ function EntityForm({
     date: "Date",
     note: "Note",
   };
-  const fields = Object.keys(entityDefaults[kind]);
+  const fields = Object.keys(entityDefaults[kind]).filter(key=>!(kind==="coupon" && form.type==="free_delivery" && key==="value"));
   return (
     <details ref={detailsRef} className="admin-panel admin-entity-form">
       <summary>{record ? `Edit ${kind}` : `Add ${kind}`}</summary>
@@ -2490,11 +2499,12 @@ function EntityForm({
                     setForm({
                       ...form,
                       [key]: e.target.value,
-                      value: e.target.value === "fixed" ? 1000 : 10,
+                      value: e.target.value === "fixed" ? 1000 : e.target.value === "free_delivery" ? 0 : 10,
                     })
                   }
                 >
                   <option value="percent">Percentage</option>
+                  <option value="free_delivery">Free standard delivery</option>
                   <option value="fixed">Fixed amount (£)</option>
                 </select>
               ) : key === "description" || key === "note" ? (
@@ -3024,10 +3034,12 @@ function MediaLibrary({
 }
 
 function PolicyEditor({
+  allowedGroups,
   value,
   onChange,
 }: {
   value: unknown;
+  allowedGroups?: string[];
   onChange: (v: unknown) => void;
 }) {
   const parsed = settingsSchema.safeParse(value);
@@ -3046,7 +3058,7 @@ function PolicyEditor({
       title="Business, delivery & policy details"
       description="Leave unconfirmed information blank. Legal pages remain drafts until required details and review are complete."
     >
-      {Object.entries(current).map(([group, fields]) => (
+      {Object.entries(current).filter(([group]) => !allowedGroups || allowedGroups.includes(group)).map(([group, fields]) => (
         <details className="admin-policy-group" key={group}>
           <summary>{group}</summary>
           <div className="admin-fields">

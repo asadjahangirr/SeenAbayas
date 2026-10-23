@@ -5,8 +5,8 @@ export const maxDuration = 60;
 
 export async function GET(request: Request) {
   try {
-    const { role } = await requireAdmin();
-    if (role !== "owner") throw new AdminError("Only the owner can inspect payment setup.", 403);
+    const { mainAdmin } = await requireAdmin();
+    if (!mainAdmin) throw new AdminError("Only the owner can inspect payment setup.", 403);
     const report = await getPaymentSetupStatus();
     if (new URL(request.url).searchParams.get("stripe") === "read" && report.readyMode) {
       return privateJson({

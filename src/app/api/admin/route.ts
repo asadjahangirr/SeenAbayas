@@ -36,7 +36,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     checkOrigin(request);
-    const { client, role } = await requireAdmin();
+    const { client, role, permissionsReady } = await requireAdmin();
     const body = await readAdminBody(request);
     let result;
     if (body.action === "site") {
@@ -50,7 +50,7 @@ export async function POST(request: Request) {
             throw new AdminError("Run 20261022000100_shipping_quotes.sql in Supabase SQL Editor before saving Royal Mail settings.", 503);
         }
       }
-      if (role !== "owner") {
+      if (!permissionsReady && role !== "owner") {
         const previous = await client.rpc("admin_snapshot");
         if (previous.error) throw new AdminError("Reload administration data before saving.", 503);
         const current = shippingSettingsSchema.parse(previous.data?.site?.draft?.shipping || {});

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { permissionKeys } from "@/lib/admin/permissions";
 import { createHash, randomUUID } from "node:crypto";
 import { cookies } from "next/headers";
 import { accountAttempt, lookupAccount, accountService, accountRpc, removeLegacyAuthenticator, requestAccountEmail, sendAccountRecovery } from "@/lib/admin/accounts";
@@ -103,7 +104,7 @@ export async function POST(request: Request) {
       });
       return privateJson({ success:true });
     }
-    const { client, mfa, passwordOnly, user, role } = await requireAdmin(false);
+    const { client, mfa, passwordOnly, user, mainAdmin, permissionsReady } = await requireAdmin(false);
     if (body.action === "logout") {
       (await cookies()).delete(recoveryCookie);
       await client.auth.signOut();
@@ -145,17 +146,29 @@ export async function POST(request: Request) {
         );
       return privateJson({ success: true });
     }
+    if (body.action === "set-admin-permissions") {
+      if (!mainAdmin || !permissionsReady) throw new AdminError("Only the main administrator can change access. Install the administrator permissions update first.", 403);
+      const input = z.object({id:z.uuid(),permissions:z.array(z.enum(permissionKeys as [string,...string[]])).max(permissionKeys.length),active:z.boolean(),version:z.number().int().min(0),current:z.string().min(1).max(128)}).strict().parse(body.input);
+      await accountAttempt(request,user.id,"create");
+      const verified=await client.auth.signInWithPassword({email:user.email!,password:input.current});
+      if(verified.error)throw new AdminError("Current password was not accepted.",401);
+      const fresh=await requireAdmin();
+      if(!fresh.mainAdmin)throw new AdminError("Main administrator access required.",403);
+      const result=await fresh.client.rpc("admin_account_set_permissions",{target:input.id,permissions:input.permissions,enabled:input.active,expected_version:input.version});
+      if(result.error)throw new AdminError(result.error.code==="40001"?"Access changed. Reload before saving.":"Could not change access. The main account cannot be restricted.",result.error.code==="40001"?409:400);
+      return privateJson({success:true});
+    }
     if (body.action === "create-admin") {
-      if (!passwordOnly || role !== "owner") throw new AdminError("Only the store owner can add an administrator.", 403);
-      const input = z.object({ username:z.string().trim().toLowerCase().regex(/^[a-z][a-z0-9._-]{2,39}$/), displayName:z.string().trim().min(1).max(80), password:z.string().min(14).max(128), role:z.enum(["owner","editor"]), current:z.string().min(1).max(128) }).strict().parse(body.input);
+      if (!passwordOnly || !mainAdmin || !permissionsReady) throw new AdminError("Only the main administrator can add an administrator. Install the administrator permissions update first.", 403);
+      const input = z.object({ username:z.string().trim().toLowerCase().regex(/^[a-z][a-z0-9._-]{2,39}$/), displayName:z.string().trim().min(1).max(80), password:z.string().min(14).max(128), permissions:z.array(z.enum(permissionKeys as [string,...string[]])).max(permissionKeys.length), current:z.string().min(1).max(128) }).strict().parse(body.input);
       await accountAttempt(request, user.id, "create");
       const verified = await client.auth.signInWithPassword({email:user.email!,password:input.current});
       if (verified.error) throw new AdminError("Current password was not accepted.", 401);
-      await requireAdmin();
+      if (!(await requireAdmin()).mainAdmin) throw new AdminError("Main administrator access required.",403);
       const service = accountService();
       const created = await service.auth.admin.createUser({ email:`${randomUUID()}@admin.invalid`, email_confirm:true, password:input.password, user_metadata:{display_name:input.displayName} });
       if (created.error || !created.data.user) throw new AdminError("Could not create this administrator. Check the password and try again.", 400);
-      try { await accountRpc("admin_account_register", {operator_id:user.id,user_id:created.data.user.id,username:input.username,display_name:input.displayName,member_role:input.role}); }
+      try { await accountRpc("admin_account_register_permissions", {operator_id:user.id,user_id:created.data.user.id,username:input.username,display_name:input.displayName,permissions:input.permissions}); }
       catch(error) { await service.auth.admin.deleteUser(created.data.user.id); throw error; }
       return privateJson({success:true,username:input.username});
     }

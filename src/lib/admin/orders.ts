@@ -29,6 +29,7 @@ export function orderDetails(record: AdminRecord) {
     address: [text(address.addressLine1), text(address.addressLine2), text(address.city), text(address.postcode), text(address.country) === "GB" ? "United Kingdom" : text(address.country)].filter(Boolean),
     items, hasIncompleteItems: Array.isArray(p.items) && items.length !== p.items.length,
     subtotalPence: money(p.subtotal_pence), deliveryPence: money(p.delivery_pence),
+    discountPence: money(p.discount_pence),couponCode:text(object(p.coupon).code),
     totalPence: money(p.total_pence), refundedPence: money(p.refunded_pence),
     deliveryLabel: [text(delivery.carrier), text(delivery.label) || text(p.delivery_method)].filter(Boolean).join(" · "),
     isTest: p.is_test === true, source: p.source === "stripe_checkout" ? "Stripe Checkout" : "Recorded order",

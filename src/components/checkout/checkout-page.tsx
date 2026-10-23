@@ -39,6 +39,7 @@ import {
 import { formatGbp } from "@/lib/money";
 import { requestDeadline } from "@/lib/request-deadline";
 import { browserId } from "@/lib/browser-id";
+import { DiscountCode } from "@/components/bag/discount-code";
 
 const fieldNames: Record<keyof CheckoutDetails, { label: string }> = {
   email: { label: "Email address" },
@@ -57,7 +58,7 @@ export function CheckoutPageContent({
 }: {
   paymentMode?: "test" | "live" | null;
 }) {
-  const { quote, ready, busy: bagBusy, error: bagError, retry } = useBag();
+  const { quote, ready, busy: bagBusy, error: bagError, retry, couponCode, coupon } = useBag();
   const document = useSiteDocument();
   const preview = useContentPreview();
   const testMode = paymentMode === "test" && !preview;
@@ -82,11 +83,11 @@ export function CheckoutPageContent({
   const reviewHeading = useRef<HTMLHeadingElement>(null);
   const controller = useRef<AbortController | null>(null);
   const pending = useRef(false);
-  const key = JSON.stringify([quote, document.commerce, document.policies, document.shipping.mode]);
+  const key = JSON.stringify([quote, document.commerce, document.policies, document.shipping.mode, couponCode]);
   const keyRef = useRef(key);
   keyRef.current = key;
   const review = reviewState?.key === key ? reviewState.value : null;
-  const options = checkoutDeliveryOptions(document, quote);
+  const options = checkoutDeliveryOptions(document, coupon?.freeDelivery?{...quote,freeDelivery:true}:quote);
   const selectedMethod = options.some((option) => option.id === method)
     ? method
     : "standard";
@@ -104,7 +105,7 @@ export function CheckoutPageContent({
     ? review.estimatedTotalPence
     : delivery.chargePence === null
       ? null
-      : displayedBag.subtotalPence + delivery.chargePence;
+      : displayedBag.subtotalPence - (coupon?.discountPence||0) + delivery.chargePence;
   useEffect(() => () => controller.current?.abort(), []);
 
   function focusErrors() {
@@ -166,6 +167,7 @@ export function CheckoutPageContent({
           requestId: paymentAttempt.current.id,
           reviewFingerprint: review.reviewFingerprint,
           ...(review.shippingQuote ? { shippingQuote: review.shippingQuote } : {}),
+          ...(review.coupon ? {couponCode:review.coupon.code} : {}),
         }),
       });
       const data = await response.json();
@@ -246,6 +248,7 @@ export function CheckoutPageContent({
           details: parsed.data,
           shippingMethod: selectedMethod,
           lines: checkoutRequestLines(quote),
+          ...(couponCode ? {couponCode} : {}),
         }),
       });
       const result = await response.json();
@@ -821,6 +824,7 @@ export function CheckoutPageContent({
                   ))}
                 </ul>
               </details>
+              <DiscountCode disabled={busy||openingPayment||bagBusy}/>
               <dl className="checkout-totals">
                 <div>
                   <dt>
@@ -828,6 +832,7 @@ export function CheckoutPageContent({
                   </dt>
                   <dd>{formatGbp(displayedBag.subtotalPence)}</dd>
                 </div>
+                {!!(review?.discountPence||coupon?.discountPence)&&<div><dt>Discount ({review?.coupon?.code||coupon?.code})</dt><dd>-{formatGbp(review?.discountPence||coupon?.discountPence||0)}</dd></div>}
                 <div>
                   <dt>
                     <Copy text={"Delivery"} />

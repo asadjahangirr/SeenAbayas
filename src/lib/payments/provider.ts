@@ -3,6 +3,7 @@ import type Stripe from "stripe";
 import { checkoutDetailsSchema } from "@/lib/checkout/model";
 import { paymentServices, paymentRpc, getPaymentOrder } from "./server";
 import { PaymentError, type PaymentOrder } from "./model";
+import { discountedPrices } from "@/lib/coupons/model";
 
 export function providerSnapshot(
   order: PaymentOrder,
@@ -210,11 +211,11 @@ export async function openHostedCheckout(order: PaymentOrder) {
           metadata: { order_id: order.id, request_hash: order.request_hash },
         },
         allowed_payment_method_types: ["card", "klarna", "afterpay_clearpay"],
-        line_items: order.items.map((item) => ({
-          quantity: item.quantity,
+        line_items: discountedPrices(order.items, order.discount_pence || 0).map(({item,quantity,unitAmount}) => ({
+          quantity,
           price_data: {
             currency: "gbp",
-            unit_amount: item.unit_price_pence,
+            unit_amount: unitAmount,
             product_data: {
               name: `${item.name} - Size ${item.size}`,
               metadata: {

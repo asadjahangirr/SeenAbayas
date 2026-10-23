@@ -299,6 +299,8 @@ export function OrderConfirmation({ orderId }: { orderId: string }) {
                 </dt>
                 <dd>{formatGbp(order.subtotalPence)}</dd>
               </div>
+              {!!order.discountPence&&<div><dt>Discount ({order.coupon?.code})</dt><dd>-{formatGbp(order.discountPence)}</dd></div>}
+              {order.coupon&&!order.discountPence&&<div><dt>Delivery code</dt><dd>{order.coupon.code}</dd></div>}
               <div>
                 <dt>
                   <Copy text={"Delivery"} />

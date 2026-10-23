@@ -11,6 +11,7 @@ import { checkoutOwnerCookie, hash, reviewFingerprint, PaymentError } from "@/li
 import { applyCarrierQuote } from "@/lib/shipping/checkout";
 import { ShippingError } from "@/lib/shipping/settings";
 import { readPaymentOrigin } from "@/lib/payments/config.mjs";
+import { checkCoupon, applyCoupon } from "@/lib/coupons/server";
 
 export const maxDuration = 60;
 
@@ -115,6 +116,10 @@ export async function POST(request: NextRequest) {
     const token = previous && /^[a-f0-9]{64}$/.test(previous) ? previous : randomBytes(32).toString("hex");
     review.mode = mode || "preview";
     review.taxStatus = mode === "live" ? "none" : "unconfirmed";
+    if(parsed.data.couponCode){
+      if(!mode)throw new PaymentError("Discount codes are not available in preview.",409);
+      applyCoupon(review,await checkCoupon(parsed.data.couponCode,quote.subtotalPence,mode));
+    }
     if (enabled && document.shipping.mode === "royal_mail_olp")
       await applyCarrierQuote(review, document, hash(token), request);
     const response = reply({

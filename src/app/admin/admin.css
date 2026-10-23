@@ -1196,3 +1196,11 @@
 
 .admin-topbar{gap:12px}.admin-topbar>span{flex:1}.admin-topbar>button:not(.admin-menu-toggle){font-size:11px;letter-spacing:0;flex:none}
 @media(max-width:600px){.admin-topbar>span{display:none}.admin-topbar>button:not(.admin-menu-toggle){margin-left:auto;padding:9px 10px}.admin-topbar>a{flex:none}}
+
+.admin-permissions { border: 1px solid var(--admin-line, #ddd); padding: 18px; border-radius: 8px; min-width: 0; }
+.admin-permissions legend { padding: 0 8px; font-weight: 600; }
+.admin-permission-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 270px), 1fr)); gap: 20px; margin-top: 18px; }
+.admin-permission-grid h4 { margin: 0 0 12px; }
+.admin-permission-grid .admin-checkbox { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; line-height: 1.5; }
+.admin-permission-grid input { flex-shrink: 0; margin-top: 4px; }
+.admin-workspace .admin-upload-button[hidden] { display: none; }

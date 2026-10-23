@@ -21,9 +21,9 @@ export const emailPurchaseSchema = z.object({
     name: z.string().min(1).max(200), design_reference: z.string().max(100),
     size: z.string().min(1).max(100), quantity: z.number().int().min(1).max(10), unit_price_pence: money,
   })).min(1).max(20),
-  subtotal_pence: money, delivery_pence: money, tax_pence: money, total_pence: money,
+  subtotal_pence: money, discount_pence:money.default(0), coupon:z.object({code:z.string().max(40)}).nullable().optional(),delivery_pence: money, tax_pence: money, total_pence: money,
 }).refine(o => o.items.reduce((sum, i) => sum + i.quantity * i.unit_price_pence, 0) === o.subtotal_pence &&
-  o.subtotal_pence + o.delivery_pence + o.tax_pence === o.total_pence, "Purchase totals must match");
+  o.subtotal_pence - o.discount_pence + o.delivery_pence + o.tax_pence === o.total_pence, "Purchase totals must match");
 export type EmailPurchase = z.infer<typeof emailPurchaseSchema>;
 export type OrderEmailConfig = { apiKey: string; from: string; origin: string; mode: "test" | "live"; testRecipient?: string };
 
