@@ -235,7 +235,7 @@ export function CheckoutPageContent({
     const currentKey = key;
     const activeController = new AbortController();
     controller.current = activeController;
-    const deadline = requestDeadline(20000, activeController.signal);
+    const deadline = requestDeadline(45000, activeController.signal);
     try {
       const response = await fetch("/api/checkout/review", {
         method: "POST",

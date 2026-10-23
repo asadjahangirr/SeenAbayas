@@ -28,6 +28,7 @@ for (const file of [
   "20261021000300_contact_inbox.sql",
   "20261022000100_shipping_quotes.sql",
   "20261023000100_shipping_read_compatibility.sql",
+  "20261023000300_multi_parcel_shipping.sql",
   "20261023000200_admin_workspace.sql",
 ])
   await db.exec(await readFile(`supabase/migrations/${file}`, "utf8"));

@@ -14,7 +14,9 @@ export function shippingInputHash(document: SiteDocument, settings: ShippingSett
 const schema = z.object({ inputHash: z.string().regex(/^[a-f0-9]{64}$/), delivery: z.object({
   id: z.enum(["standard", "express"]), label: z.string().min(1).max(150), carrier: z.literal("Royal Mail"), source: z.literal("royal_mail_olp"),
   serviceCode: z.string().min(1).max(30), chargePence: z.number().int().min(0).max(99999999), carrierCostPence: z.number().int().min(0).max(99999999),
-  weightInGrams: z.number().int().min(1).max(20000), packageFormat: z.enum(["SmallParcel", "MediumParcel"]), expiresAt: z.number().int(),
+  weightInGrams: z.number().int().min(1).max(400000), packageFormat: z.enum(["SmallParcel", "MediumParcel"]), expiresAt: z.number().int(),
+  parcels: z.array(z.object({ weightInGrams: z.number().int().min(1).max(20000), quantity: z.number().int().min(1).max(200),
+    carrierCostPence: z.number().int().min(0).max(99999999) }).strict()).min(2).max(20).optional(),
 }).strict() }).strict();
 function proof(body: string, secret: string) { return createHmac("sha256", secret).update(`seen-shipping-quote:v1:${body}`).digest(); }
 export function signShippingQuote(inputHash: string, delivery: CarrierDelivery, secret: string) {
@@ -24,7 +26,7 @@ export function signShippingQuote(inputHash: string, delivery: CarrierDelivery, 
 }
 export function verifyShippingQuote(token: string | undefined, inputHash: string, secret: string, now = Date.now()) {
   try {
-    if (!token || token.length > 4096 || secret.length < 24) throw Error();
+    if (!token || token.length > 8192 || secret.length < 24) throw Error();
     const [body, signature, extra] = token.split(".");
     if (!body || !signature || extra !== undefined) throw Error();
     const actual = Buffer.from(signature, "base64url"), expected = proof(body, secret);

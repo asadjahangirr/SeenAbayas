@@ -114,7 +114,7 @@ export function checkoutDeliveryOptions(
     {
       id: "standard",
       label: "Standard delivery",
-      chargePence: document.shipping.mode === "royal_mail_olp" ? null : bag.freeDelivery ? 0 : delivery.standardChargePence,
+      chargePence: bag.freeDelivery ? 0 : document.shipping.mode === "royal_mail_olp" ? null : delivery.standardChargePence,
       deliveryAim: delivery.standardDeliveryAim,
     },
   ];

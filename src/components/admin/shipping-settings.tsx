@@ -17,7 +17,7 @@ export function ShippingSettingsEditor({ value, products, onChange }: {
   const missing = missingShippingSettings(value);
   return <section className="admin-panel">
     <div className="admin-panel__heading"><h2>Royal Mail & parcel setup</h2>
-      <p>Prepare measurements now. Keep fixed delivery selected until your key, services and prices have been verified. No labels or postage are purchased here.</p></div>
+      <p>Set your measured packaging and garment weights. Checkout uses additional parcels when an order exceeds one parcel's capacity. No labels or postage are purchased here.</p></div>
     <div className="admin-fields">
       <Field label="Delivery calculation"><select value={value.mode} onChange={e => update("mode", e.target.value as ShippingSettings["mode"])}>
         <option value="fixed">Admin fixed delivery fee</option><option value="royal_mail_olp">Royal Mail pay-as-you-go prices</option></select></Field>
@@ -37,7 +37,7 @@ export function ShippingSettingsEditor({ value, products, onChange }: {
         <option value="unconfirmed">Not verified yet</option><option value="cost_includes_vat">Cost already includes carrier VAT</option><option value="cost_plus_vat">Add cost and carrier VAT</option></select></Field>
     </div>
     <p className="admin-caption">Verify service codes and the price interpretation against your own Royal Mail quote. The store's zero added product tax does not remove VAT included in postage. OBA/developer-portal credentials are different integrations; selecting a type does not convert the key.</p>
-    <p className="admin-caption">One parcel is quoted. Confirm how many garments fit its measured dimensions; larger orders are blocked for a separate arrangement. Missing values stay blank and never become guessed measurements.</p>
+    <p className="admin-caption">Maximum pieces applies to each parcel, not the whole order. Checkout splits garments across additional parcels using the saved capacity and weight limits, includes packaging weight for every parcel, and combines their prices. Confirm how many garments fit the measured packaging; no weights or dimensions are guessed. Standard delivery is free when the enabled offer's threshold is reached, including multi-parcel orders.</p>
     {missing.length > 0 && <p className="admin-caption">Setup still needs: {missing.join(", ")}.</p>}
     <h3>Garment weight by size</h3>
     <p className="admin-caption">Enter the garment weight without packaging. Only sizes with a confirmed weight can use carrier-calculated checkout. Save & update store publishes these settings.</p>

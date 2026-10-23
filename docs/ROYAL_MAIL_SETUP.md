@@ -1,5 +1,10 @@
 # Royal Mail setup for SEEN
 
+## Multi-item update - 23 October 2026
+
+The new multi-parcel adapter supersedes the one-parcel-only limit described later in this older guide. Capacity applies per parcel; checkout combines the measured parcel quotes and retains actual postage costs when standard delivery is waived. See [MULTI_ITEM_DELIVERY_FIX.md](MULTI_ITEM_DELIVERY_FIX.md) for required SQL, the explicit GBP 80 offer correction and deployment. The replacement key passed a read-only OLP check with raw authentication and returned 221 priced Royal Mail service entries. That is access evidence, not a live payment/fulfilment certification. Mandatory MFA references below also predate the password-only admin update.
+
+
 Updated 22 October 2026.
 
 **Implemented:** editable parcel/garment measurements, an owner/MFA-protected connection diagnostic, and server-calculated Click & Drop pay-as-you-go checkout quotes. Fixed delivery is the default. **Not activated or verified with the real carrier:** the saved key returned HTTP 401; account type, measurements, service codes and price/VAT interpretation remain unconfirmed. Automatic shipment creation, label retrieval and tracking synchronisation are separate unfinished fulfilment work.

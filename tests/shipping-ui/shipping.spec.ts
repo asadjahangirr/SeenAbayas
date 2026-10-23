@@ -90,3 +90,52 @@ test("missing parcel data and provider outages cannot fall back to free delivery
     const state=await(await request.get("http://127.0.0.1:3108/__test/state")).json();expect(state.sessions).toHaveLength(0);expect(state.stock[0]).toEqual({on_hand:5,reserved:0});
   } finally {await context.close();}
 });
+
+
+for(const mixed of [false,true])test(mixed?"mixed products get GBP 90 checkout with free standard multi-parcel delivery":"two of the same garment get free standard delivery at exactly GBP 80",async({page,browser,request})=>{
+  test.setTimeout(90000);await setup(page);await publish(page);
+  let snapshot=await(await page.request.get("/api/admin")).json();
+  for(const [reference,price] of [["design-01",4000],["design-02",5000]] as const){
+    const raw=snapshot.products.find((p:any)=>p.design_reference===reference);
+    const response=await page.request.post("/api/admin",{headers,data:{action:"product",updatedAt:raw.updated_at,product:{
+      id:raw.id,design_reference:raw.design_reference,name:raw.name,description:raw.description,price_pence:price,cost_pence:raw.cost_pence,
+      status:"published",details_confirmed:true,sort_order:raw.sort_order,photos:raw.photos,category:raw.category,tone:raw.tone,
+      variants:raw.variants.map((v:any)=>({id:v.id,size_label:v.size_label,sku:v.sku,active:v.active,on_hand:v.on_hand}))
+    }}});expect(response.status(),await response.text()).toBe(200);
+  }
+  snapshot=await(await page.request.get("/api/admin")).json();
+  const document=snapshot.site.draft;document.commerce.freeDeliveryEnabled=true;document.commerce.freeDeliveryThresholdPence=8000;
+  document.shipping.maxItemsPerParcel=1;
+  for(const p of snapshot.products.filter((p:any)=>["design-01","design-02"].includes(p.design_reference)))
+    for(const v of p.variants)document.shipping.variantWeights[v.id]=p.design_reference==="design-01"?400:600;
+  expect((await page.request.post("/api/admin",{headers,data:{action:"site",input:{document,version:snapshot.site.version,publish:true}}})).status()).toBe(200);
+  const context=await browser.newContext({viewport:{width:mixed?393:1440,height:900}});
+  try{
+    const shop=await context.newPage();await shop.goto("http://127.0.0.1:3107/collection/design-01");
+    await shop.getByRole("button",{name:"54",exact:true}).click();await shop.getByRole("button",{name:"Add to bag",exact:true}).click();
+    await expect(shop.getByRole("dialog",{name:/^Your bag/})).toBeVisible();
+    if(mixed){
+      await shop.goto("http://127.0.0.1:3107/collection/design-02");await shop.getByRole("button",{name:"54",exact:true}).click();
+      await shop.getByRole("button",{name:"Add to bag",exact:true}).click();
+      await expect(shop.getByRole("dialog",{name:/^Your bag/})).toBeVisible();
+    }else{
+      await shop.getByRole("button",{name:"Increase quantity",exact:true}).click();
+      await expect(shop.getByLabel("Quantity 2",{exact:true})).toBeVisible();
+    }
+    const lines=await shop.evaluate(()=>JSON.parse(localStorage.getItem("seen.bag.v1")!).lines);
+    await shop.goto("http://127.0.0.1:3107/checkout");
+    await expect(shop.locator(".checkout-total dd")).toHaveText(mixed?"\u00a390.00":"\u00a380.00");
+    for(const [field,value]of Object.entries(details))if(field!=="country")await shop.locator('#checkout-'+field).fill(value);
+    await shop.getByRole("button",{name:"Review your details",exact:true}).click();await expect(shop.locator(".checkout-review")).toBeVisible();
+    await expect(shop.locator(".checkout-total dd")).toHaveText(mixed?"\u00a390.00":"\u00a380.00");
+    expect(await shop.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);
+    const response=await shop.request.post("/api/checkout/review",{headers,data:{details,shippingMethod:"standard",lines}});expect(response.status()).toBe(200);
+    const review=await response.json();expect(review.delivery).toMatchObject({chargePence:0,carrierCostPence:850,parcels:[
+      {weightInGrams:mixed?700:500,quantity:1,carrierCostPence:425},{weightInGrams:500,quantity:1,carrierCostPence:425}
+    ]});
+    const opened=await shop.request.post("/api/checkout/session",{headers,data:{details,shippingMethod:"standard",lines,requestId:randomUUID(),reviewFingerprint:review.reviewFingerprint,shippingQuote:review.shippingQuote}});
+    expect(opened.status(),await opened.text()).toBe(200);
+    const state=await(await request.get("http://127.0.0.1:3108/__test/state")).json();expect(state.sessions[0].amount_total).toBe(mixed?9000:8000);
+    expect(state.stock[0].reserved).toBe(mixed?1:2);
+  }finally{await context.close();}
+});

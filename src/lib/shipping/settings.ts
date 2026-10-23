@@ -33,24 +33,48 @@ export function missingShippingSettings(settings: ShippingSettings) {
   if (settings.priceBasis === "unconfirmed") missing.push("carrier price/VAT basis");
   return missing;
 }
-export function parcelForBag(settings: ShippingSettings, bag: BagQuote) {
+export type ShippingParcel = { weightInGrams: number; packageFormat: ShippingSettings["packageFormat"]; quantity: number };
+export const maximumShippingParcels = 20;
+
+/** Pack measured garments into the configured packaging; capacity applies per parcel. */
+export function parcelsForBag(settings: ShippingSettings, bag: BagQuote): ShippingParcel[] {
   if (missingShippingSettings(settings).length) throw new ShippingError("Delivery is being configured. Please contact customer care.");
-  let weight = settings.packagingWeightGrams!;
-  let quantity = 0;
-  for (const line of bag.lines) {
-    const itemWeight = settings.variantWeights[line.variantId];
-    if (!line.piece || line.issue || !itemWeight) throw new ShippingError("Delivery measurements for this selection are not confirmed. Please contact customer care.");
-    quantity += line.quantity;
-    weight += itemWeight * line.quantity;
-  }
-  if (!quantity || quantity > settings.maxItemsPerParcel!) throw new ShippingError("This selection needs a separate delivery arrangement. Please contact customer care.");
   // Dimensions are stored as integer mm, entered as cm in admin. See official UK size guide.
   const dimensions = [settings.lengthMm!, settings.widthMm!, settings.heightMm!].sort((a,b) => b-a);
   const limits = settings.packageFormat === "SmallParcel" ? [450,350,160] : [610,460,460];
   const maximumWeight = settings.packageFormat === "SmallParcel" ? 2000 : 20000;
-  if (dimensions.some((value, i) => value > limits[i]) || weight > maximumWeight)
+  if (dimensions.some((value, i) => value > limits[i]))
     throw new ShippingError("This selection exceeds the configured parcel size. Please contact customer care.");
-  return { weightInGrams: weight, packageFormat: settings.packageFormat, quantity };
+  const parcels: ShippingParcel[] = [];
+  // Stable first-fit decreasing order also runs inside the transactional SQL check.
+  const lines = [...bag.lines].sort((a,b) => (settings.variantWeights[b.variantId] || 0) - (settings.variantWeights[a.variantId] || 0)
+    || (a.variantId < b.variantId ? -1 : a.variantId > b.variantId ? 1 : 0));
+  for (const line of lines) {
+    const itemWeight = settings.variantWeights[line.variantId];
+    if (!line.piece || line.issue || !itemWeight) throw new ShippingError("Delivery measurements for this selection are not confirmed. Please contact customer care.");
+    if (!Number.isInteger(line.quantity) || line.quantity < 1 || line.quantity > 10) throw new ShippingError("Please review the quantities in your bag.", 400);
+    if (itemWeight + settings.packagingWeightGrams! > maximumWeight)
+      throw new ShippingError("This selection exceeds the configured parcel size. Please contact customer care.");
+    for (let unit=0; unit<line.quantity; unit++) {
+      let parcel = parcels.find(p => p.quantity < settings.maxItemsPerParcel! && p.weightInGrams + itemWeight <= maximumWeight);
+      if (!parcel) {
+        if (parcels.length >= maximumShippingParcels) throw new ShippingError("This large order needs a separate delivery arrangement. Please contact customer care.");
+        parcel = { weightInGrams: settings.packagingWeightGrams!, packageFormat: settings.packageFormat, quantity: 0 };
+        parcels.push(parcel);
+      }
+      parcel.weightInGrams += itemWeight;
+      parcel.quantity++;
+    }
+  }
+  if (!parcels.length) throw new ShippingError("Add an available piece to your bag first.", 400);
+  return parcels;
+}
+
+/** Retained for consumers explicitly requesting one parcel. Checkout uses parcelsForBag. */
+export function parcelForBag(settings: ShippingSettings, bag: BagQuote) {
+  const parcels = parcelsForBag(settings, bag);
+  if (parcels.length !== 1) throw new ShippingError("This selection needs a separate delivery arrangement. Please contact customer care.");
+  return parcels[0];
 }
 
 /** Decimal carrier amounts are pounds; reject fractions of a penny, never silently round them. */

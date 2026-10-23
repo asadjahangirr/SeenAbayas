@@ -4,7 +4,8 @@ import { readFile } from "node:fs/promises";
 import { processOrderEmails, type EmailRpc } from "../../src/lib/order-emails/worker";
 import { emailPurchaseSchema, type EmailClaim, type OrderEmailConfig } from "../../src/lib/order-emails/model";
 import { defaultDocument, siteDocumentSchema } from "../../src/lib/cms/model";
-import { defaultShippingSettings } from "../../src/lib/shipping/settings";
+import { defaultShippingSettings, parcelsForBag } from "../../src/lib/shipping/settings";
+import type { BagQuote } from "../../src/lib/bag/model";
 
 let db: PGlite;
 const owner = "10000000-0000-4000-8000-000000000010";
@@ -45,6 +46,7 @@ test.beforeAll(async () => {
     "20261021000200_order_emails.sql",
     "20261022000100_shipping_quotes.sql",
     "20261023000100_shipping_read_compatibility.sql",
+  "20261023000300_multi_parcel_shipping.sql",
   ])
     await db.exec(await readFile(`supabase/migrations/${file}`, "utf8"));
   await db.query("insert into auth.users(id) values($1)", [owner]);
@@ -257,7 +259,7 @@ test("editors cannot change parcel settings through the existing CMS save functi
   await denied(() => db.query("select public.admin_save_site($1,0,true)",[changed]));
   await denied(() => db.query("select public.admin_shipping_health()"));
   await db.query("select set_config('request.jwt.claims',$1,false)",[JSON.stringify({sub:owner,aal:"aal2"})]);
-  expect((await db.query<any>("select public.admin_shipping_health() data")).rows[0].data).toEqual({quotes_ready:true,fulfilment_ready:false});
+  expect((await db.query<any>("select public.admin_shipping_health() data")).rows[0].data).toEqual({quotes_ready:true,multi_parcel_ready:true,fulfilment_ready:false});
   await db.query("select public.admin_save_site($1,0,false)",[changed]);
   await db.query("select set_config('request.jwt.claims',$1,false)",[JSON.stringify({sub:editor,aal:"aal2"})]);
   // Editors cannot publish an owner's still-private parcel changes unchanged.
@@ -760,4 +762,50 @@ test("a sandbox worker cannot claim live notifications even when the Supabase pr
   expect(result.accepted).toBe(2);
   for (const message of messages) expect(message.to).toEqual(["controlled@example.test"]);
   expect((await emailRpc<any>("order_email_status", { target_order: live.id })).counts).toEqual({ queued: 2 });
+});
+
+
+test("SQL and browser-server packing agree for mixed weights, capacities and weight-limited parcels",async()=>{
+  const second="20000000-0000-4000-8000-000000000002";
+  for(const capacity of [1,2,3,10])for(const weight of [100,900,1500]){
+    const document=await shippingDocument();
+    const settings={...document.shipping,maxItemsPerParcel:capacity,variantWeights:{[variant]:weight,[second]:400}};
+    const lines=[{variant_id:variant,quantity:3},{variant_id:second,quantity:2}];
+    const sql=(await db.query<any>("select seen_private.shipping_parcel_plan($1,$2) data",[settings,lines])).rows[0].data;
+    const bag:BagQuote={subtotalPence:20000,freeDelivery:true,lines:lines.map(line=>({variantId:line.variant_id,quantity:line.quantity,issue:null,piece:{id:"design-01",name:"Test garment",size:"54",pricePence:4000,photo:{src:"/images/products/design-01/front.webp",alt:"Test garment",label:"Front"}}}))};
+    expect(sql).toEqual(parcelsForBag(settings,bag).map(({weightInGrams,quantity})=>({weightInGrams,quantity})));
+  }
+});
+
+test("multi-parcel checkout reserves the full quantity, charges zero at GBP 80+, and rejects tampered parcel counts or costs",async()=>{
+  const document=await shippingDocument(8000);document.shipping.maxItemsPerParcel=1;
+  await db.query("update seen_private.site_documents set published=$1,draft=$1 where id",[document]);
+  const delivery={id:"standard",label:"Tracked 48",carrier:"Royal Mail",source:"royal_mail_olp",serviceCode:"TEST48",chargePence:0,carrierCostPence:850,weightInGrams:1000,packageFormat:"SmallParcel",expiresAt:Date.now()+300000,
+    parcels:[{weightInGrams:500,quantity:1,carrierCostPence:425},{weightInGrams:500,quantity:1,carrierCostPence:425}]};
+  const open=async(quote=delivery)=>(await db.query<any>("select public.payment_prepare_order_v3($1,$2,$3,$4,$5,'standard',0,'http://localhost:3000','live',$6,$7,$8) data",
+    [requestId,ownerHash,requestHash,details,[{variant_id:variant,quantity:2,unit_price_pence:8000}],quote,document.shipping,document.commerce])).rows[0].data;
+  await denied(()=>open({...delivery,parcels:[{...delivery.parcels[0],quantity:2},delivery.parcels[1]]}));
+  await denied(()=>open({...delivery,parcels:[delivery.parcels[0]]}));
+  await denied(()=>open({...delivery,carrierCostPence:425}));
+  await denied(()=>open({...delivery,weightInGrams:900}));
+  expect(await stock()).toEqual({on_hand:5,reserved:0});
+  const order=await open();expect(order).toMatchObject({subtotal_pence:16000,delivery_pence:0,total_pence:16000,delivery:{carrierCostPence:850,parcels:delivery.parcels}});
+  expect(await stock()).toEqual({on_hand:5,reserved:2});
+  expect((await open()).id).toBe(order.id);
+  await apply(order,"paid","evt_multi_paid");expect(await stock()).toEqual({on_hand:3,reserved:0});
+});
+
+test("GBP 80 operator correction preserves private drafts, measurements, products and stock and is idempotent",async()=>{
+  const document=await shippingDocument(200);document.commerce.freeDeliveryEnabled=false;
+  const draft=structuredClone(document);draft.text["Private test heading"]="Do not publish";
+  await db.query("update seen_private.site_documents set draft=$1,published=$2 where id",[draft,document]);
+  const script=(await readFile("supabase/enable-free-delivery-80.sql","utf8")).replace(/^begin;$/m,"").replace(/^commit;$/m,"");
+  await db.exec(script);
+  const read=async()=>(await db.query<any>("select draft,published,version from seen_private.site_documents where id")).rows[0];
+  const after=await read();expect(after.published.commerce).toEqual({...document.commerce,freeDeliveryEnabled:true,freeDeliveryThresholdPence:8000});
+  expect(after.published.text).not.toHaveProperty("Private test heading");expect(after.draft.text["Private test heading"]).toBe("Do not publish");
+  expect(after.published.shipping).toEqual(document.shipping);expect(await stock()).toEqual({on_hand:5,reserved:0});
+  await db.exec(script);expect((await read()).version).toBe(after.version);
+  await db.exec(await readFile("supabase/migrations/20261023000300_multi_parcel_shipping.sql","utf8").then(s=>s.replace(/^begin;$/m,"").replace(/^commit;$/m,"")));
+  expect((await read()).published).toEqual(after.published);
 });

@@ -1,5 +1,10 @@
 # SEEN ABAYAS - Project handover and continuation guide
 
+## Latest delivery correction - 23 October 2026
+
+Multi-item delivery now plans and quotes additional parcels instead of rejecting orders above one parcel capacity. Run `supabase/migrations/20261023000300_multi_parcel_shipping.sql` before deploying. The separate requested business correction is `supabase/enable-free-delivery-80.sql` (enables free standard delivery at GBP 80+, preserves unrelated drafts and all existing orders/stock). Read [MULTI_ITEM_DELIVERY_FIX.md](MULTI_ITEM_DELIVERY_FIX.md). A read-only hosted diagnosis found capacity 1, nine size weights and free delivery disabled with threshold GBP 2; no hosted writes were performed. Earlier one-parcel-only statements below are historical.
+
+
 Last reviewed: **23 October 2026**. Workspace: `E:\AsadJahangirr_2pacistan\SeenAbayas`.
 
 This file transfers the project context to a new developer or coding agent. It records the current implementation, the developer's decisions, known limitations, verification history, required client inputs and the remaining execution order. It contains no credentials, passwords, customer records or client bank details.

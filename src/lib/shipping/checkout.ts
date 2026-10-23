@@ -4,8 +4,8 @@ import { isIP } from "node:net";
 import type { CheckoutReview } from "@/lib/checkout/model";
 import type { SiteDocument } from "@/lib/cms/model";
 import { paymentRpc } from "@/lib/payments/server";
-import { shippingSettingsSchema, parcelForBag, ShippingError } from "./settings";
-import { royalMailRate } from "./rates";
+import { shippingSettingsSchema, parcelsForBag, ShippingError } from "./settings";
+import { royalMailRates } from "./rates";
 import { shippingInputHash, signShippingQuote, verifyShippingQuote } from "./quote-token";
 import { readPaymentCredentials } from "@/lib/payments/config.mjs";
 
@@ -17,7 +17,11 @@ export async function privateShippingSettings() {
 export async function applyCarrierQuote(review: CheckoutReview, document: SiteDocument, ownerHash: string, request: Request, token?: string) {
   const settings = await privateShippingSettings();
   if (settings.mode !== "royal_mail_olp") throw new ShippingError("Delivery settings changed. Please review again.", 409);
-  const parcel = parcelForBag(settings, review.bag);
+  const parcels = parcelsForBag(settings, review.bag);
+  if (parcels.length > 1) {
+    const health = await paymentRpc<{ multi_parcel_ready?: boolean }>("shipping_health");
+    if (!health.multi_parcel_ready) throw new ShippingError("Multi-item delivery is being updated. Please try again shortly.");
+  }
   const secret = process.env.SUPABASE_SECRET_KEY || "";
   const inputHash = shippingInputHash(document, settings, review.bag, review.details, review.delivery.id, ownerHash);
   let delivery;
@@ -37,7 +41,7 @@ export async function applyCarrierQuote(review: CheckoutReview, document: SiteDo
         return fetch(`${fixture}/__test/royal-mail${url.search}`, init);
       };
     }
-    delivery = await royalMailRate(settings, parcel, review.details.postcode, review.delivery.id, review.bag.freeDelivery,
+    delivery = await royalMailRates(settings, parcels, review.details.postcode, review.delivery.id, review.bag.freeDelivery,
       { key: process.env.ROYAL_MAIL_API_KEY, authMode: process.env.ROYAL_MAIL_AUTH_MODE === "raw" ? "raw" : "bearer" }, transport);
     token = signShippingQuote(inputHash, delivery, secret);
   }

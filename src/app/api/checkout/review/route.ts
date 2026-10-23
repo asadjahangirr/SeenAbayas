@@ -12,6 +12,8 @@ import { applyCarrierQuote } from "@/lib/shipping/checkout";
 import { ShippingError } from "@/lib/shipping/settings";
 import { readPaymentOrigin } from "@/lib/payments/config.mjs";
 
+export const maxDuration = 60;
+
 const reply = (body: unknown, status = 200) =>
   NextResponse.json(body, {
     status,

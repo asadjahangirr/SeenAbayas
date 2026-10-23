@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { boundedJson, royalMailConfiguration } from "./royal-mail-probe.mjs";
-import { carrierPence, ShippingError, type ShippingSettings, type parcelForBag } from "./settings";
+import { carrierPence, ShippingError, type ShippingSettings, type ShippingParcel } from "./settings";
 
 const serviceSchema = z.object({
   brand: z.string(), serviceCode: z.string().min(1).max(30), serviceName: z.string().min(1).max(150),
@@ -12,9 +12,10 @@ export type CarrierDelivery = {
   id: "standard" | "express"; label: string; carrier: "Royal Mail"; chargePence: number;
   source: "royal_mail_olp"; serviceCode: string; carrierCostPence: number;
   weightInGrams: number; packageFormat: "SmallParcel" | "MediumParcel"; expiresAt: number;
+  parcels?: { weightInGrams: number; quantity: number; carrierCostPence: number }[];
 };
 
-export async function royalMailRate(settings: ShippingSettings, parcel: ReturnType<typeof parcelForBag>, postcode: string,
+export async function royalMailRate(settings: ShippingSettings, parcel: ShippingParcel, postcode: string,
   method: "standard" | "express", freeStandard: boolean,
   credentials: { key?: string; authMode?: "bearer" | "raw" }, fetcher: typeof fetch = fetch): Promise<CarrierDelivery> {
   if (!royalMailConfiguration(credentials.key).configured) throw new ShippingError("Delivery quotes are not available yet. Please contact customer care.");
@@ -48,4 +49,37 @@ export async function royalMailRate(settings: ShippingSettings, parcel: ReturnTy
     if (error instanceof ShippingError) throw error;
     throw new ShippingError("We could not check delivery just now. Please try again.");
   } finally { clearTimeout(timer); }
+}
+
+/** Quote every parcel, reuse identical weights, and waive only the customer's standard fee. */
+export async function royalMailRates(settings: ShippingSettings, parcels: ShippingParcel[], postcode: string,
+  method: "standard" | "express", freeStandard: boolean,
+  credentials: { key?: string; authMode?: "bearer" | "raw" }, fetcher: typeof fetch = fetch): Promise<CarrierDelivery> {
+  const quotes = new Map<string, CarrierDelivery>();
+  const breakdown: NonNullable<CarrierDelivery["parcels"]> = [];
+  let first: CarrierDelivery | undefined;
+  let lastStarted = 0;
+  const deadline = Date.now() + 25_000;
+  for (const parcel of parcels) {
+    const key = `${parcel.packageFormat}:${parcel.weightInGrams}`;
+    let quote = quotes.get(key);
+    if (!quote) {
+      // Click & Drop allows two requests/second. Identical parcels need one lookup.
+      const delay = Math.max(0, 550 - (Date.now() - lastStarted));
+      if (delay) await new Promise(resolve => setTimeout(resolve, delay));
+      if (Date.now() > deadline - 8000) throw new ShippingError("Delivery is taking longer than expected. Please try again.");
+      lastStarted = Date.now();
+      quote = await royalMailRate(settings, parcel, postcode, method, false, credentials, fetcher);
+      quotes.set(key, quote);
+    }
+    first ||= quote;
+    breakdown.push({ weightInGrams: parcel.weightInGrams, quantity: parcel.quantity, carrierCostPence: quote.carrierCostPence });
+  }
+  if (!first) throw new ShippingError("Add an available piece to your bag first.", 400);
+  const cost = breakdown.reduce((total,p) => total+p.carrierCostPence,0);
+  if (cost > 99999999) throw new ShippingError("The delivery price is outside the supported range.");
+  return { ...first, carrierCostPence: cost, chargePence: method === "standard" && freeStandard ? 0 : cost,
+    weightInGrams: breakdown.reduce((total,p) => total+p.weightInGrams,0),
+    expiresAt: Math.min(...[...quotes.values()].map(q=>q.expiresAt)),
+    ...(breakdown.length > 1 ? { parcels: breakdown } : {}) };
 }
