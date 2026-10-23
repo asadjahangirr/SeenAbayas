@@ -61,8 +61,8 @@ const help: Record<AdminSection, string[]> = {
     "Save & update store applies these choices. Products still appear in the full collection independently.",
   ],
   settings: [
-    "Change the delivery banner, free delivery threshold and confirmed business information.",
-    "Amounts are in pounds. Unknown legal or delivery information can stay blank until confirmed.",
+    "Shipping & order settings controls the standard delivery charge, free delivery threshold and minimum order. Exactly the threshold qualifies; express upgrades are separate.",
+    "Amounts are in pounds. A blank standard fee blocks payment below the free threshold; 0 means no charge. Edit Banner message or use the automatic delivery message with {threshold} to keep its amount in sync.",
     "Save & update store applies the settings. API keys and payment provider accounts are configured separately.",
   ],
   history: [

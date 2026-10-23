@@ -3,6 +3,8 @@ import { PGlite } from "@electric-sql/pglite";
 import { readFile } from "node:fs/promises";
 import { processOrderEmails, type EmailRpc } from "../../src/lib/order-emails/worker";
 import { emailPurchaseSchema, type EmailClaim, type OrderEmailConfig } from "../../src/lib/order-emails/model";
+import { defaultDocument } from "../../src/lib/cms/model";
+import { defaultShippingSettings } from "../../src/lib/shipping/settings";
 
 let db: PGlite;
 const owner = "10000000-0000-4000-8000-000000000010";
@@ -41,6 +43,7 @@ test.beforeAll(async () => {
     "20261020000300_stock_management.sql",
     "20261021000100_live_payments.sql",
     "20261021000200_order_emails.sql",
+    "20261022000100_shipping_quotes.sql",
   ])
     await db.exec(await readFile(`supabase/migrations/${file}`, "utf8"));
   await db.query("insert into auth.users(id) values($1)", [owner]);
@@ -150,6 +153,91 @@ async function denied(fn: () => Promise<unknown>) {
   await expect(fn()).rejects.toThrow();
   await db.exec("rollback to savepoint rejection;release savepoint rejection");
 }
+
+async function shippingDocument(threshold = 10000) {
+  const document = structuredClone(defaultDocument);
+  document.commerce.freeDeliveryThresholdPence = threshold;
+  document.shipping = { ...defaultShippingSettings, mode: "royal_mail_olp", accountType: "olp", dispatchPostcode: "SW1A 1AA",
+    packagingWeightGrams: 100, lengthMm: 300, widthMm: 200, heightMm: 100, maxItemsPerParcel: 2,
+    standardServiceCode: "TEST48", priceBasis: "cost_plus_vat", variantWeights: { [variant]: 400 } };
+  await db.query("update seen_private.site_documents set draft=$1,published=$1 where id", [document]);
+  return document;
+}
+async function carrierPrepare(document: typeof defaultDocument, patch: Record<string, unknown> = {}) {
+  const delivery = { id: "standard", label: "Tracked 48", carrier: "Royal Mail", source: "royal_mail_olp", serviceCode: "TEST48", carrierCostPence: 425,
+    chargePence: document.commerce.freeDeliveryThresholdPence <= 8000 ? 0 : 425, weightInGrams: 500, packageFormat: "SmallParcel", expiresAt: Date.now()+300000, ...patch };
+  return (await db.query<any>("select public.payment_prepare_order_v3($1,$2,$3,$4,$5,'standard',$6,'http://localhost:3000','live',$7,$8,$9) data",
+    [requestId, ownerHash, requestHash, details, [{ variant_id: variant, quantity: 1, unit_price_pence: 8000 }], delivery.chargePence, delivery, document.shipping, document.commerce])).rows[0].data;
+}
+
+test("carrier order snapshots the verified shipping amount and keeps reservation/idempotency guarantees", async () => {
+  const document = await shippingDocument();
+  const order = await carrierPrepare(document);
+  expect(order).toMatchObject({ subtotal_pence: 8000, delivery_pence: 425, total_pence: 8425, is_test: false, delivery: { source: "royal_mail_olp", serviceCode: "TEST48", carrierCostPence: 425 } });
+  expect((await carrierPrepare(document)).id).toBe(order.id);
+  expect(await stock()).toEqual({ on_hand: 5, reserved: 1 });
+  expect((await apply(order,"paid","evt_shipping_paid")).stock_state).toBe("committed");
+  expect(await stock()).toEqual({ on_hand: 4, reserved: 0 });
+});
+test("carrier checkout includes the free threshold while retaining actual postage cost", async () => {
+  const order = await carrierPrepare(await shippingDocument(8000));
+  expect(order).toMatchObject({ delivery_pence: 0, total_pence: 8000, delivery: { chargePence: 0, carrierCostPence: 425 } });
+});
+test("expired, changed or missing carrier snapshots cannot reserve stock and older fixed-fee paths cannot bypass carrier mode", async () => {
+  const document = await shippingDocument();
+  for (const patch of [{ expiresAt: 0 }, { expiresAt: null }, { weightInGrams: 501 }, { serviceCode: "OTHER" }, { chargePence: 1 }, { source: "fixed" }])
+    await denied(() => carrierPrepare(document, patch));
+  const changed = structuredClone(document); changed.shipping.packagingWeightGrams=101;
+  await db.query("update seen_private.site_documents set published=$1 where id", [changed]);
+  await denied(() => carrierPrepare(document));
+  // Legacy public backend function computes fixed zero at £80; the insert guard still rejects it.
+  await denied(() => prepare());
+  expect(await stock()).toEqual({ on_hand: 5, reserved: 0 });
+});
+test("public CMS strips parcel/origin settings and anonymous roles cannot read the private configuration or prepare quotes", async () => {
+  await shippingDocument();
+  await db.exec("set local role anon");
+  const publicDocument = (await db.query<any>("select public.get_site_document() data")).rows[0].data;
+  expect(publicDocument.shipping).toEqual({ mode: "royal_mail_olp" });
+  expect(JSON.stringify(publicDocument)).not.toContain("SW1A 1AA");
+  await denied(() => db.query("select public.get_shipping_settings()"));
+  await denied(() => db.query("select public.admin_shipping_health()"));
+  await denied(() => db.query("select public.shipping_quote_attempt($1,$2)",[ownerHash,requestHash]));
+  await db.exec("reset role");
+});
+test("editors cannot change parcel settings through the existing CMS save function", async () => {
+  const document = await shippingDocument();
+  const editor = "10000000-0000-4000-8000-000000000011";
+  await db.query("insert into auth.users(id) values($1)",[editor]);
+  await db.query("insert into seen_private.admin_members(user_id,role) values($1,'editor')",[editor]);
+  await db.query("select set_config('request.jwt.claims',$1,false)",[JSON.stringify({sub:editor,aal:"aal2"})]);
+  const changed = structuredClone(document); changed.shipping.packagingWeightGrams=200;
+  await denied(() => db.query("select public.admin_save_site($1,0,true)",[changed]));
+  await denied(() => db.query("select public.admin_shipping_health()"));
+  await db.query("select set_config('request.jwt.claims',$1,false)",[JSON.stringify({sub:owner,aal:"aal2"})]);
+  expect((await db.query<any>("select public.admin_shipping_health() data")).rows[0].data).toEqual({quotes_ready:true,fulfilment_ready:false});
+  await db.query("select public.admin_save_site($1,0,false)",[changed]);
+  await db.query("select set_config('request.jwt.claims',$1,false)",[JSON.stringify({sub:editor,aal:"aal2"})]);
+  // Editors cannot publish an owner's still-private parcel changes unchanged.
+  await denied(() => db.query("select public.admin_save_site($1,1,true)",[changed]));
+  await db.query("select set_config('request.jwt.claims',$1,false)",[JSON.stringify({sub:owner,aal:"aal1"})]);
+  await denied(() => db.query("select public.admin_shipping_health()"));
+  await db.query("select set_config('request.jwt.claims',$1,false)",[JSON.stringify({sub:owner,aal:"aal2"})]);
+});
+test("shared quote limits reject excess attempts without touching commerce records", async () => {
+  for (let i=0;i<10;i++) await db.query("select public.shipping_quote_attempt($1,$2)",[ownerHash,requestHash]);
+  await denied(() => db.query("select public.shipping_quote_attempt($1,$2)",[ownerHash,requestHash]));
+  expect((await db.query<any>("select count(*)::integer n from seen_private.shipping_quote_attempts")).rows[0].n).toBe(10);
+  expect(await stock()).toEqual({on_hand:5,reserved:0});
+});
+test("shipping migration reruns preserve existing orders, reservations and saved settings", async () => {
+  const document = await shippingDocument(); const order = await carrierPrepare(document);
+  const script = (await readFile("supabase/migrations/20261022000100_shipping_quotes.sql","utf8")).replace(/^begin;\s*$/m,"").replace(/^commit;\s*$/m,"");
+  await db.exec(script);
+  expect(await stock()).toEqual({on_hand:5,reserved:1});
+  expect((await carrierPrepare(document)).id).toBe(order.id);
+  expect((await db.query<any>("select public.get_shipping_settings() data")).rows[0].data).toEqual(document.shipping);
+});
 
 test("reservation snapshots server prices, retries are idempotent and buyer ownership is checked", async () => {
   const first = await prepare();

@@ -4,7 +4,7 @@ import { isolatedEnvironment } from "./scripts/test-environment.mjs";
 export default defineConfig({
   testDir: "./tests",
   outputDir: "test-results/storefront",
-  testIgnore: ["**/catalog/**", "**/catalog-ui/**", "**/development-ui/**", "**/contact-ui/**", "**/inbox-ui/**", "**/film-ui/**", "**/admin-ui/**", "**/mobile-ui/**", "**/checkout-ui/**", "**/payments-ui/**", "**/live-payments-ui/**"],
+  testIgnore: ["**/catalog/**", "**/catalog-ui/**", "**/development-ui/**", "**/contact-ui/**", "**/inbox-ui/**", "**/film-ui/**", "**/admin-ui/**", "**/mobile-ui/**", "**/checkout-ui/**", "**/payments-ui/**", "**/live-payments-ui/**", "**/shipping-ui/**"],
   fullyParallel: false,
   workers: 1,
   forbidOnly: Boolean(process.env.CI),

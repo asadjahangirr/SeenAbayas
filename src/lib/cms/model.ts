@@ -1,5 +1,6 @@
 import { z } from "zod";
 import policyDefaults from "@/data/store-settings.json";
+import { shippingSettingsSchema, defaultShippingSettings } from "@/lib/shipping/settings";
 
 export const assetPath = z
   .string()
@@ -98,6 +99,7 @@ export const siteDocumentSchema = z
       .strict(),
     featured: z.array(z.string().regex(/^design-[0-9]{2,4}$/)).max(8),
     policies: z.unknown(),
+    shipping: shippingSettingsSchema.default(defaultShippingSettings),
   })
   .strict();
 export type SiteDocument = z.infer<typeof siteDocumentSchema>;
@@ -132,6 +134,7 @@ export const defaultDocument: SiteDocument = {
   },
   featured: ["design-01", "design-02", "design-03", "design-06"],
   policies: policyDefaults,
+  shipping: defaultShippingSettings,
 };
 
 export function deliveryThresholdFor(document: SiteDocument) {
@@ -144,6 +147,10 @@ export function deliveryThresholdFor(document: SiteDocument) {
 }
 export function announcementTextFor(document: SiteDocument) {
   // Upgrade the previous stock message without overwriting custom announcements.
+  const automatic = [defaultDocument.announcement.text, "Complimentary UK delivery on orders over {threshold}"]
+    .includes(document.announcement.text);
+  if (automatic && !document.commerce.freeDeliveryEnabled)
+    return "UK delivery available. View delivery information.";
   const text = document.announcement.text === "Complimentary UK delivery on orders over {threshold}"
     ? "Complimentary UK delivery on orders of {threshold} or more"
     : document.announcement.text;

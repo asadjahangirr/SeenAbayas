@@ -102,6 +102,7 @@ export type CheckoutReview = {
   taxStatus: "unconfirmed" | "none";
   paymentAvailable: boolean;
   reviewFingerprint?: string;
+  shippingQuote?: string;
 };
 
 export function checkoutDeliveryOptions(
@@ -113,7 +114,7 @@ export function checkoutDeliveryOptions(
     {
       id: "standard",
       label: "Standard delivery",
-      chargePence: bag.freeDelivery ? 0 : delivery.standardChargePence,
+      chargePence: document.shipping.mode === "royal_mail_olp" ? null : bag.freeDelivery ? 0 : delivery.standardChargePence,
       deliveryAim: delivery.standardDeliveryAim,
     },
   ];
@@ -121,7 +122,7 @@ export function checkoutDeliveryOptions(
     options.push({
       id: "express",
       label: "Express delivery",
-      chargePence: delivery.expressChargePence,
+      chargePence: document.shipping.mode === "royal_mail_olp" ? null : delivery.expressChargePence,
       deliveryAim: delivery.expressDeliveryAim,
     });
   return options;

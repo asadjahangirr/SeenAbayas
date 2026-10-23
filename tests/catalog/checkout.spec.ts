@@ -156,3 +156,13 @@ test("legacy stock announcement follows the new inclusive rule and custom messag
   document.announcement.text = "A new collection awaits.";
   expect(announcementTextFor(document)).toBe("A new collection awaits.");
 });
+
+test("automatic banner stops advertising free delivery when the offer is disabled", () => {
+  const document = structuredClone(defaultDocument);
+  document.commerce.freeDeliveryThresholdPence = 7250;
+  expect(announcementTextFor(document)).toContain("£72.5 or more");
+  document.commerce.freeDeliveryEnabled = false;
+  expect(announcementTextFor(document)).toBe("UK delivery available. View delivery information.");
+  document.announcement.text = "Our new edit is here.";
+  expect(announcementTextFor(document)).toBe("Our new edit is here.");
+});

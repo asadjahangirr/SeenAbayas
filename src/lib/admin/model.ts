@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { assetPath, siteDocumentSchema } from "@/lib/cms/model";
 import { settingsSchema } from "@/lib/policies";
+import { missingShippingSettings } from "@/lib/shipping/settings";
 import type { StoreConnection } from "@/lib/storefront/model";
 
 export const adminSections = [
@@ -196,6 +197,10 @@ export const documentRequestSchema = z
   })
   .strict()
   .superRefine((v, ctx) => {
+    if (v.publish && v.document.shipping.mode === "royal_mail_olp") {
+      const missing = missingShippingSettings(v.document.shipping);
+      if (missing.length) ctx.addIssue({ code: "custom", message: `Complete Royal Mail setup before enabling carrier prices: ${missing.join(", ")}.` });
+    }
     const policies = settingsSchema.safeParse(v.document.policies);
     if (!policies.success)
       ctx.addIssue({

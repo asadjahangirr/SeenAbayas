@@ -25,7 +25,9 @@
     "test:checkout-ui": "playwright test --config playwright.checkout-ui.config.ts",
     "test:payments-ui": "playwright test --config playwright.payments-ui.config.ts",
     "test:live-payments-ui": "playwright test --config playwright.live-payments-ui.config.ts",
-    "check:payments": "node scripts/check-payments.mjs"
+    "check:payments": "node scripts/check-payments.mjs",
+    "check:shipping": "node scripts/check-shipping.mjs",
+    "test:shipping-ui": "playwright test --config playwright.shipping-ui.config.ts"
   },
   "engines": {
     "node": "24.x"

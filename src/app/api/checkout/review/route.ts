@@ -7,7 +7,9 @@ import {
 import { getBagState } from "@/lib/bag/server";
 import { randomBytes } from "node:crypto";
 import { readyPaymentMode } from "@/lib/payments/server";
-import { checkoutOwnerCookie, reviewFingerprint } from "@/lib/payments/model";
+import { checkoutOwnerCookie, hash, reviewFingerprint, PaymentError } from "@/lib/payments/model";
+import { applyCarrierQuote } from "@/lib/shipping/checkout";
+import { ShippingError } from "@/lib/shipping/settings";
 import { readPaymentOrigin } from "@/lib/payments/config.mjs";
 
 const reply = (body: unknown, status = 200) =>
@@ -107,19 +109,18 @@ export async function POST(request: NextRequest) {
     );
     const mode = await readyPaymentMode();
     const enabled = Boolean(mode);
+    const previous = request.cookies.get(checkoutOwnerCookie)?.value;
+    const token = previous && /^[a-f0-9]{64}$/.test(previous) ? previous : randomBytes(32).toString("hex");
     review.mode = mode || "preview";
     review.taxStatus = mode === "live" ? "none" : "unconfirmed";
+    if (enabled && document.shipping.mode === "royal_mail_olp")
+      await applyCarrierQuote(review, document, hash(token), request);
     const response = reply({
       ...review,
       paymentAvailable: enabled && review.delivery.chargePence !== null,
       ...(enabled ? { reviewFingerprint: reviewFingerprint(review) } : {}),
     });
     if (enabled) {
-      const previous = request.cookies.get(checkoutOwnerCookie)?.value;
-      const token =
-        previous && /^[a-f0-9]{64}$/.test(previous)
-          ? previous
-          : randomBytes(32).toString("hex");
       // Establish ownership before any reservation; network retries can then
       // recover an order even if its session response never reaches the browser.
       response.cookies.set(checkoutOwnerCookie, token, {
@@ -131,13 +132,13 @@ export async function POST(request: NextRequest) {
       });
     }
     return response;
-  } catch {
+  } catch (error) {
     return reply(
       {
         error:
-          "We couldn't review your selection. Your details are still here; please try again.",
+          error instanceof ShippingError || error instanceof PaymentError ? error.message : "We couldn't review your selection. Your details are still here; please try again.",
       },
-      503,
+      error instanceof ShippingError || error instanceof PaymentError ? error.status : 503,
     );
   }
 }

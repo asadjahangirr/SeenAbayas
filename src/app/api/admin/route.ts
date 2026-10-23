@@ -14,6 +14,7 @@ import {
   documentRequestSchema,
 } from "@/lib/admin/model";
 import { getStoreConnection } from "@/lib/storefront/server";
+import { defaultShippingSettings, shippingSettingsSchema } from "@/lib/shipping/settings";
 
 export async function GET() {
   try {
@@ -35,11 +36,29 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     checkOrigin(request);
-    const { client } = await requireAdmin();
+    const { client, role } = await requireAdmin();
     const body = await readAdminBody(request);
     let result;
     if (body.action === "site") {
       const v = documentRequestSchema.parse(body.input);
+      // Do not persist private origin/parcel data before the public-read
+      // redaction migration is installed, even when saving only a draft.
+      if (JSON.stringify(v.document.shipping) !== JSON.stringify(defaultShippingSettings)) {
+        if (role === "owner") {
+          const health = await client.rpc("admin_shipping_health");
+          if (health.error || health.data?.quotes_ready !== true)
+            throw new AdminError("Run 20261022000100_shipping_quotes.sql in Supabase SQL Editor before saving Royal Mail settings.", 503);
+        }
+      }
+      if (role !== "owner") {
+        const previous = await client.rpc("admin_snapshot");
+        if (previous.error) throw new AdminError("Reload administration data before saving.", 503);
+        const current = shippingSettingsSchema.parse(previous.data?.site?.draft?.shipping || {});
+        const published = shippingSettingsSchema.parse(previous.data?.site?.published?.shipping || {});
+        if (JSON.stringify(current) !== JSON.stringify(v.document.shipping) ||
+          (v.publish && JSON.stringify(published) !== JSON.stringify(v.document.shipping)))
+          throw new AdminError("Only the owner can change shipping settings.", 403);
+      }
       result = await client.rpc("admin_save_site", {
         document: v.document,
         expected_version: v.version,

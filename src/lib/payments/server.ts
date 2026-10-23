@@ -52,6 +52,8 @@ export async function paymentRpc<T>(
         403,
       );
     if (error.code === "P0001") {
+      if (error.message === "Delivery quote rate limit exceeded")
+        throw new PaymentError("Too many delivery checks. Please wait a minute and try again.", 429);
       const allowed = [
         "Stock changed",
         "Prices changed",
@@ -61,6 +63,10 @@ export async function paymentRpc<T>(
         "Finish or cancel",
         "Selection is below",
         "Delivery option is unavailable",
+        "Delivery quote",
+        "Delivery settings changed",
+        "Delivery measurements",
+        "Delivery service changed",
         "Checkout request does not match",
       ];
       if (allowed.some((prefix) => error.message.startsWith(prefix)))

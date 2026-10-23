@@ -10,6 +10,7 @@ export const paymentRequestSchema = checkoutReviewRequestSchema
   .extend({
     requestId: z.uuid(),
     reviewFingerprint: z.string().regex(/^[a-f0-9]{64}$/),
+    shippingQuote: z.string().max(4096).optional(),
   })
   .strict();
 export const cancelPaymentSchema = z.object({ orderId: z.uuid() }).strict();
@@ -35,6 +36,7 @@ export function reviewFingerprint(review: CheckoutReview) {
       delivery: review.delivery,
       subtotal: review.bag.subtotalPence,
       total: review.estimatedTotalPence,
+      shippingQuote: review.shippingQuote,
     }),
   );
 }

@@ -82,7 +82,7 @@ export function CheckoutPageContent({
   const reviewHeading = useRef<HTMLHeadingElement>(null);
   const controller = useRef<AbortController | null>(null);
   const pending = useRef(false);
-  const key = JSON.stringify([quote, document.commerce, document.policies]);
+  const key = JSON.stringify([quote, document.commerce, document.policies, document.shipping.mode]);
   const keyRef = useRef(key);
   keyRef.current = key;
   const review = reviewState?.key === key ? reviewState.value : null;
@@ -165,6 +165,7 @@ export function CheckoutPageContent({
           lines: checkoutRequestLines(review.bag),
           requestId: paymentAttempt.current.id,
           reviewFingerprint: review.reviewFingerprint,
+          ...(review.shippingQuote ? { shippingQuote: review.shippingQuote } : {}),
         }),
       });
       const data = await response.json();
@@ -541,6 +542,7 @@ export function CheckoutPageContent({
                         </span>
                       </label>
                     ))}
+                    {document.shipping.mode === "royal_mail_olp" && <p className="checkout-section-note"><Copy text={"Enter your delivery address and review your details to calculate the Royal Mail charge. The final total is shown before payment."} /></p>}
                     {document.commerce.freeDeliveryEnabled && (
                       <p className="checkout-section-note">
                         <Copy

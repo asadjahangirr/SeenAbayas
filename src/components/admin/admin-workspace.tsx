@@ -32,6 +32,8 @@ import {
 } from "@/lib/admin/model";
 import {
   defaultDocument,
+  announcementTextFor,
+  deliveryThresholdFor,
   siteDocumentSchema,
   type SiteDocument,
 } from "@/lib/cms/model";
@@ -44,6 +46,7 @@ import developmentCatalog from "@/data/development-catalog.json";
 import copyRegistry from "@/data/cms-copy.generated.json";
 import { formatGbp } from "@/lib/money";
 import { ChangeEmail } from "./change-email";
+import { ShippingSettingsEditor } from "./shipping-settings";
 import { settingsSchema } from "@/lib/policies";
 import { productSchema } from "@/lib/admin/model";
 import { MoneyInput } from "./money-input";
@@ -138,6 +141,10 @@ export function AdminWorkspace({
   const [document, setDocument] = useState<SiteDocument>(
     parsed.success ? parsed.data : defaultDocument,
   );
+  const policySettings = settingsSchema.safeParse(document.policies);
+  const currentPolicies = policySettings.success
+    ? policySettings.data
+    : settingsSchema.parse(defaultDocument.policies);
   const [dirty, setDirty] = useState(false);
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -671,6 +678,10 @@ export function AdminWorkspace({
                       </a>
                       <a className="admin-inline-link" href="/api/admin/order-emails" target="_blank" rel="noopener noreferrer">
                         Check order email setup
+                        <ArrowUpRight size={16} />
+                      </a>
+                      <a className="admin-inline-link" href="/api/admin/shipping/readiness?royalMail=read" target="_blank" rel="noopener noreferrer">
+                        Check Royal Mail read access
                         <ArrowUpRight size={16} />
                       </a>
                       </>
@@ -1318,21 +1329,37 @@ export function AdminWorkspace({
                         />
                       </Field>
                       <p className="admin-caption">
-                        Use the threshold placeholder in the message to display
-                        the configured delivery threshold. Delivery charges are
-                        managed below.
+                        Use {"{threshold}"} to keep the banner amount linked to
+                        your free delivery threshold. Save & update store publishes
+                        the banner and delivery settings together.
                       </p>
+                      <button type="button" onClick={() => editSite({
+                        ...document,
+                        announcement: { ...document.announcement, text: defaultDocument.announcement.text },
+                      })}>Use automatic delivery message</button>
+                      <output aria-label="Banner preview" className="admin-banner-preview"
+                        style={{ background: document.announcement.background, color: document.announcement.ink }}>
+                        {announcementTextFor(document)}
+                      </output>
+                      {!document.announcement.enabled && <p className="admin-caption">Banner hidden on the store. Preview shown above.</p>}
+                      {!document.commerce.freeDeliveryEnabled && document.announcement.text !== defaultDocument.announcement.text &&
+                        document.announcement.text !== "Complimentary UK delivery on orders over {threshold}" &&
+                        <p className="admin-caption">The free delivery offer is disabled. Check that your custom banner describes the current offer accurately.</p>}
                     </div>
                   </Panel>
-                  <PolicyEditor
-                    value={document.policies}
-                    onChange={(v) => editSite({ ...document, policies: v })}
-                  />
                   <Panel
                     title="Shipping & order settings"
-                    description="The offer and bag progress update from these settings. Checkout rechecks the published delivery rules and minimum order before opening payment."
+                    description="Set the customer delivery fee in pounds and the merchandise subtotal that qualifies for free standard delivery. Checkout, the bag and the automatic banner use the same published settings."
                   >
                     <div className="admin-fields">
+                      <Field label="Standard delivery charge (£)">
+                        <MoneyInput value={currentPolicies.delivery.standardChargePence}
+                          placeholder="Not set"
+                          aria-describedby="standard-delivery-help"
+                          onChange={(pence) => editSite({ ...document, policies: {
+                            ...currentPolicies, delivery: { ...currentPolicies.delivery, standardChargePence: pence },
+                          } })} />
+                      </Field>
                       <Field label="Complimentary UK delivery">
                         <select
                           value={String(document.commerce.freeDeliveryEnabled)}
@@ -1379,17 +1406,39 @@ export function AdminWorkspace({
                         />
                       </Field>
                     </div>
+                    <p id="standard-delivery-help" className="admin-caption">
+                      Enter 0 for no standard delivery charge. Leave blank only while
+                      undecided: orders that do not qualify for free delivery cannot pay
+                      until a charge is set. This is the fee you charge customers;
+                      purchasing Royal Mail postage is separate.
+                    </p>
+                    <output aria-label="Delivery rule summary" className="admin-caption">
+                      {document.commerce.freeDeliveryEnabled
+                        ? `Standard delivery is free at ${deliveryThresholdFor(document)} or more. Below this subtotal: `
+                        : "Free delivery offer disabled. Standard delivery for all orders: "}
+                      {currentPolicies.delivery.standardChargePence === null
+                        ? "charge not set; payment blocked for non-qualifying orders."
+                        : `${formatGbp(currentPolicies.delivery.standardChargePence)}.`}
+                      {" Express upgrades keep their separate charge. Existing Stripe checkouts keep their original quoted total."}
+                    </output>
                   </Panel>
+                  <ShippingSettingsEditor value={document.shipping} products={snapshot.products}
+                    onChange={shipping => editSite({ ...document, shipping })} />
+                  <PolicyEditor
+                    value={document.policies}
+                    onChange={(v) => editSite({ ...document, policies: v })}
+                  />
                   <Panel title="Integrations">
                     <p>
                       Supabase handles accounts, content, stock and media.
-                      Resend and Turnstile power contact delivery when
-                      configured. Provider secrets are managed in hosting
+                      Contact enquiries go to the private Admin Inbox. Resend
+                      sends purchase emails when enabled. Provider secrets are managed in hosting
                       environment variables and never exposed in this editor.
                     </p>
                     <p>
-                      Payment collection, Royal Mail fulfilment and coupon
-                      redemption await checkout integration.
+                      Stripe handles payment collection. The standard delivery fee
+                      above does not buy a Royal Mail label. Royal Mail automation
+                      and customer coupon redemption remain separate integrations.
                     </p>
                   </Panel>
                 </>
@@ -2965,7 +3014,7 @@ function PolicyEditor({
         <details className="admin-policy-group" key={group}>
           <summary>{group}</summary>
           <div className="admin-fields">
-            {Object.entries(fields).map(([key, val]) => (
+            {Object.entries(fields).filter(([key]) => key !== "standardChargePence").map(([key, val]) => (
               <Field
                 key={key}
                 label={

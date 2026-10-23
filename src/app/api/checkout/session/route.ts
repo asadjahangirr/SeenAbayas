@@ -13,6 +13,8 @@ import {
 } from "@/lib/payments/model";
 import { paymentRpc, requireCheckout } from "@/lib/payments/server";
 import { openHostedCheckout } from "@/lib/payments/provider";
+import { applyCarrierQuote } from "@/lib/shipping/checkout";
+import { ShippingError } from "@/lib/shipping/settings";
 
 export const maxDuration = 60;
 export async function POST(request: NextRequest) {
@@ -96,6 +98,11 @@ export async function POST(request: NextRequest) {
           409,
         );
       }
+      let carrier: Awaited<ReturnType<typeof applyCarrierQuote>> | undefined;
+      if (document.shipping.mode === "royal_mail_olp") {
+        if (!data.shippingQuote) throw new ShippingError("Please review your delivery charge again.", 409);
+        carrier = await applyCarrierQuote(review, document, ownerHash, request, data.shippingQuote);
+      } else if (data.shippingQuote) throw new ShippingError("Delivery settings changed. Please review again.", 409);
       if (reviewFingerprint(review) !== data.reviewFingerprint)
         throw new PaymentError(
           "Prices or delivery details changed. Review your selection again.",
@@ -106,7 +113,7 @@ export async function POST(request: NextRequest) {
           "Delivery charges must be confirmed before this selection can proceed to payment.",
           409,
         );
-      order = await paymentRpc<PaymentOrder>(mode === "live" ? "payment_prepare_order_v2" : "payment_prepare_order", {
+      order = await paymentRpc<PaymentOrder>(carrier ? "payment_prepare_order_v3" : mode === "live" ? "payment_prepare_order_v2" : "payment_prepare_order", {
         request_id: data.requestId,
         owner_hash: ownerHash,
         request_hash: requestHash,
@@ -119,7 +126,8 @@ export async function POST(request: NextRequest) {
         shipping_method: data.shippingMethod,
         expected_delivery: review.delivery.chargePence,
         return_origin: siteOrigin,
-        ...(mode === "live" ? {payment_mode: mode} : {}),
+        ...(mode === "live" || carrier ? {payment_mode: mode} : {}),
+        ...(carrier ? { quoted_delivery: carrier.delivery, expected_shipping: carrier.settings, expected_commerce: document.commerce } : {}),
       });
     }
     if (["expired", "failed"].includes(order.state))
@@ -133,11 +141,11 @@ export async function POST(request: NextRequest) {
     return reply(
       {
         error:
-          error instanceof PaymentError
+          error instanceof PaymentError || error instanceof ShippingError
             ? error.message
             : "We couldn't open payment. Your bag is saved; retry to recover the same checkout.",
       },
-      error instanceof PaymentError ? error.status : 503,
+      error instanceof PaymentError || error instanceof ShippingError ? error.status : 503,
     );
   }
 }

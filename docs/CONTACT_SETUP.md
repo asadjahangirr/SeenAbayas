@@ -2,6 +2,8 @@
 
 The client requested website enquiries in **Admin → Inbox**, without contact emails or Turnstile. Purchase-confirmation and owner order emails remain separate.
 
+**22 October acceptance passed:** the operator confirms applying the migration, a Ready deployment and a labelled live enquiry arriving in Admin → Inbox with name, email, phone and message all correct. Public GETs independently verified the enabled form without Turnstile. The deployed Contact → Admin Inbox workflow is accepted; no further setup or repeat submission is required. Installation instructions below remain for new environments. Test-message deletion has not been confirmed.
+
 ## Install and enable
 
 1. In the existing Supabase project → SQL Editor, run the complete `supabase/migrations/20261021000300_contact_inbox.sql`. Expected result: **Success. No rows returned.** It adds protected inbox ingestion, retry receipts and shared rate limits. Installation does not edit existing messages, orders, payments or stock. It is safe to rerun.

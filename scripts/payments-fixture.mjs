@@ -15,6 +15,14 @@ const server = http.createServer(async (req, res) => {
     res.end(JSON.stringify(value));
   };
   try {
+    if (url.pathname === "/__test/royal-mail") {
+      if (req.headers.authorization !== "Bearer ROYAL_MAIL_LOCAL_FIXTURE_ONLY" || req.method !== "GET") { send({},401); return; }
+      if (unavailable) { send({},503); return; }
+      send({ services: [
+        { brand: "RoyalMail", serviceCode: "TEST48", serviceName: "Royal Mail Tracked 48", packageFormat: "SmallParcel", minWeightGrams: 1, maxWeightGrams: 2000, cost: 3.54, vatCost: 0.71 },
+        { brand: "RoyalMail", serviceCode: "TEST24", serviceName: "Royal Mail Tracked 24", packageFormat: "SmallParcel", minWeightGrams: 1, maxWeightGrams: 2000, cost: 5, vatCost: 1 },
+      ] }); return;
+    }
     let raw = "";
     for await (const chunk of req) raw += chunk;
     if (url.pathname === "/__test/reset") {

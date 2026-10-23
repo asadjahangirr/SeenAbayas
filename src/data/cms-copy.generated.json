@@ -127,6 +127,16 @@
     ]
   },
   {
+    "text": "royal_mail_olp",
+    "groups": [
+      "api · checkout · review · route",
+      "api · checkout · session · route",
+      "checkout · checkout-page",
+      "shipping-delivery",
+      "src · lib · checkout · model"
+    ]
+  },
+  {
     "text": "Stock has changed. Review the unavailable items in your bag before continuing.",
     "groups": [
       "api · checkout · review · route"
@@ -170,6 +180,12 @@
   },
   {
     "text": "payment_prepare_order_v2",
+    "groups": [
+      "api · checkout · session · route"
+    ]
+  },
+  {
+    "text": "payment_prepare_order_v3",
     "groups": [
       "api · checkout · session · route"
     ]
@@ -773,6 +789,12 @@
   },
   {
     "text": "Email address",
+    "groups": [
+      "checkout · checkout-page"
+    ]
+  },
+  {
+    "text": "Enter your delivery address and review your details to calculate the Royal Mail charge. The final total is shown before payment.",
     "groups": [
       "checkout · checkout-page"
     ]
@@ -2899,6 +2921,12 @@
     ]
   },
   {
+    "text": "Delivery price checks",
+    "groups": [
+      "privacy-policy"
+    ]
+  },
+  {
     "text": "Depending on the circumstances and legal basis, you may ask to access, correct, erase or restrict use of your information, or ask for a portable copy. You may also have a right to object to processing. If a future activity relies on consent, you will be able to withdraw that consent.",
     "groups": [
       "privacy-policy"
@@ -3061,6 +3089,12 @@
     ]
   },
   {
+    "text": "To limit automated price requests, private receipts contain server-keyed hashes of the checkout identity and, on Vercel, the platform-provided network address. They contain no raw postcode or network address. Receipts older than one day are pruned on the next price request.",
+    "groups": [
+      "privacy-policy"
+    ]
+  },
+  {
     "text": "To make a request or raise a concern, email ",
     "groups": [
       "privacy-policy"
@@ -3080,6 +3114,12 @@
   },
   {
     "text": "When enabled, a Cloudflare Turnstile check helps protect the contact form. A check can reject an automated submission; customer care remains available by email. Read the ",
+    "groups": [
+      "privacy-policy"
+    ]
+  },
+  {
+    "text": "When Royal Mail calculated delivery is enabled, reviewing checkout sends your UK postcode, parcel weight and package format to Royal Mail to obtain a delivery price. This price check does not send your name, email or full street address, and does not purchase postage. The agreed price is signed for your checkout and expires after five minutes.",
     "groups": [
       "privacy-policy"
     ]
@@ -3544,6 +3584,12 @@
   },
   {
     "text": "Available for eligible destinations",
+    "groups": [
+      "shipping-delivery"
+    ]
+  },
+  {
+    "text": "Calculated at checkout for your parcel and delivery address",
     "groups": [
       "shipping-delivery"
     ]
@@ -4277,7 +4323,31 @@
     ]
   },
   {
+    "text": "Delivery measurements",
+    "groups": [
+      "src · lib · payments · server"
+    ]
+  },
+  {
     "text": "Delivery option is unavailable",
+    "groups": [
+      "src · lib · payments · server"
+    ]
+  },
+  {
+    "text": "Delivery quote rate limit exceeded",
+    "groups": [
+      "src · lib · payments · server"
+    ]
+  },
+  {
+    "text": "Delivery service changed",
+    "groups": [
+      "src · lib · payments · server"
+    ]
+  },
+  {
+    "text": "Delivery settings changed",
     "groups": [
       "src · lib · payments · server"
     ]
@@ -4308,6 +4378,12 @@
   },
   {
     "text": "This checkout cannot be accessed. Return to your bag and try again.",
+    "groups": [
+      "src · lib · payments · server"
+    ]
+  },
+  {
+    "text": "Too many delivery checks. Please wait a minute and try again.",
     "groups": [
       "src · lib · payments · server"
     ]

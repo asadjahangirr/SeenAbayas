@@ -1,50 +1,75 @@
-# SEEN ABAYAS — client handover verification
+# SEEN ABAYAS — handover verification
 
-Started 21 October 2026. **Audit in progress; the website is not yet certified ready for handover.**
+Later shipping checkpoint (22 October): the baseline below predates the new editable parcel settings and signed OLP quotation adapter. These are now implemented and tested locally; see [ROYAL_MAIL_SETUP.md](ROYAL_MAIL_SETUP.md). Their new migration/deployment, real credential access, measured inputs/service codes and price interpretation remain pending. Automatic fulfilment/labels are still unfinished. Do not add later overlapping check counts to this historical baseline.
 
-## Scope and evidence rules
+Reviewed **22 October 2026 (Asia/Karachi)**. Evidence collected on 21–22 October. Source checkpoint: **bc72d90** (`admin fixed`). **Selected automated checks are verified; commercial acceptance remains incomplete.**
 
-Verify all current customer routes, shared navigation/dialogs, product photographs/search/filter/sort, bag/storage/stock, checkout validation/totals, payment states/webhooks/recovery, customer/owner emails, all fourteen admin sections and their controls, publishing/media/synchronisation, account/MFA/roles/privacy, responsive layouts/accessibility, policy/content accuracy and deployment behaviour. Inspect gaps in existing test coverage and add meaningful journey/error checks. Fix reproducible bugs while preserving approved design and shared inventory.
+**Subsequent delivery-controls phase (22 October):** clearer fee/threshold/banner editing was added after this baseline. Its production build, six focused model checks and two isolated mobile/desktop admin→checkout→fake-Stripe journeys passed; see [DELIVERY_SETTINGS.md](DELIVERY_SETTINGS.md). The 356-case ledger below remains the earlier baseline, not a claim of a full-suite rerun after the new phase. Controls await deployment and the owner-selected actual fee; the agent changed no hosted rates or prices.
 
-Passing isolated tests proves the corresponding application behaviour; it does not establish physical-device playback/Apple Pay, live merchant permissions, real carrier activation, production email/Turnstile/Auth configuration or truthful business inputs. Missing integrations and incomplete features must remain explicit, not counted as passing because a disabled button renders.
+## Result and limits
 
-No real charges, refunds, hosted stock changes, administrator-account changes, customer messages, shipments, production publication or deployment will be performed as routine test side effects. Provider sandbox tests and disposable local fixtures are separate from read-only live observations. Existing email-delivery receipts are historical evidence; do not resend merely to populate this audit.
+There is passing evidence for **356 distinct automated checks: 132 database/model checks and 224 browser checks**. This combines completed full runs and focused corrections/reruns. It is not one uninterrupted 356/356 run, a guarantee that every possible interaction is covered, or a security/accessibility certification.
 
-## Current execution environment
+Fourteen unauthenticated production access-boundary checks also passed. The operator confirms installing the contact-inbox migration and deploying Ready. Public GETs independently verified an enabled Contact form without Turnstile, corrected payment/policy wording and the product size-readiness guard. The operator subsequently submitted a labelled live enquiry and confirmed that name, email, phone and message all arrived correctly in Admin → Inbox: **live Contact acceptance passed**. This manual result is separate from the 356 automated checks.
 
-- Original workspace: E:\AsadJahangirr_2pacistan\SeenAbayas; source edits happen here.
-- Workspace drive initially has approximately 21 MB free; the user's development server is running on port 3000.
-- Full audit uses a fresh temporary copy on C:, including the installed locked dependencies but excluding private .env files. The ignored test-results/qa-session.json records its absolute location and source fingerprint. No live credentials are copied to that test workspace.
-- scripts/test-environment.mjs explicitly disables external services unless a suite supplies its own synthetic fixture values.
-- Production-facing checks use only read-only operations and sanitised outcomes.
+No real charge/refund, hosted stock/order write, account change, shipment, new email or valid live contact submission was performed by the agent during this audit. The operator performed the successful contact acceptance submission. Earlier authorised sample-email receipts are separate evidence. The operator committed/deployed changes; the agent did not commit, push or deploy.
 
-## Findings and repairs so far
+## Repairs
 
-1. The foundation Playwright config omitted live-payments-ui from its exclusions, so it discovered tests requiring a different server/fixture. Corrected suite separation.
-2. Several browser configurations inherited local payment/email/server settings. Added a shared, explicit isolated environment so saved real credentials cannot activate integrations during fixture runs.
-3. The live order-confirmation page labelled genuine orders as "Test reference". Corrected the live/test label and added assertions to the existing paid-order journey.
-4. Public FAQs/terms/privacy still described real payments as unavailable after live checkout was enabled. Added mode-aware disclosures and actual private order/email processing information. Business-policy drafts and missing disclosures remain explicit; no business facts or approval were invented.
-5. Several older mobile tests tried opening the intentionally hidden homepage navigation before scrolling. They now scroll until the logo docks before interacting. The approved film/navbar behaviour is preserved.
-6. The operator requested Contact → Admin Inbox only and explicitly declined Turnstile. Implemented direct private inbox delivery, strict validation/honeypot/origin bounds, database-atomic sender/network/global quotas and durable idempotency receipts. No CAPTCHA or contact email is used in inbox mode. `20261021000300_contact_inbox.sql` must be installed in the hosted project before deployment. Purchase emails remain independent. Local non-secret `CONTACT_DELIVERY=inbox` was set; private credentials were preserved.
+1. **Live order reference:** genuine confirmations incorrectly said "Test reference". The label now follows the immutable order environment; assertions cover both modes.
+2. **Payment/privacy wording:** FAQs/terms still denied active payments. Public disclosures now follow actual payment readiness, explain private order/email processing and preserve unknown business details and policy-review gates.
+3. **Product size interaction before readiness:** a size control could accept input before its client/bag state was ready, losing selection. Size buttons now wait for readiness; a deliberately delayed JavaScript test verifies the guard.
+4. **Contact → Admin Inbox:** implemented the requested inbox-only path without Turnstile or contact email. Server validation, origin/body bounds, honeypot, private service-only SQL ingestion, atomic shared quotas and durable retry receipts protect the path. Existing purchase emails remain independent. The operator reports SQL installed and Ready deployment; public enablement is verified.
+5. **Test isolation:** browser servers explicitly clear real integration settings unless a suite supplies synthetic fixture values. Foundation no longer discovers payment tests requiring different ports/servers.
+6. **Current navigation/catalogue expectations:** older tests tried clicking the deliberately hidden mobile opening navbar and treated the now-published design-08 as missing. Tests now dock navigation by scrolling, exercise all nine designs and use design-9999 for the true 404. The approved design is preserved.
 
-## Verification ledger
+## Automated evidence
 
-- Current application production build passed after the content/inbox changes.
-- All 131 database/model checks passed, including private inbox ingestion, repeat-message deduplication, deletion/retry safety and shared sender/network/global quotas. Disposable PGlite only; no hosted writes.
-- Earlier audit-snapshot catalogue/bag browser suite: 13 passed. Film browser suite: 15 passed across responsive sizes and motion/playback states. Shared changes require assessing/rerunning relevant suites before final sign-off.
-- Foundation rerun and new inbox browser journeys are in progress. An initial new inbox test used an incorrectly scoped locator after a successful submission; its selector was corrected without changing application behaviour.
-- Foundation completed 99 passing checks; its final failure incorrectly used the now-published design-08 as a nonexistent product. Updated the route check to cover all nine designs and use design-9999 for the genuine 404; the focused regression passed. This establishes all 100 distinct foundation checks across the completed run and focused correction, not a single 100/100 run.
-- Inbox browser suite: all 3 passed, with actual local Next.js API → protected SQL → MFA admin inbox. Mobile and desktop exercise validation, stored text, reply link, read/archive/unarchive/delete; API checks cover idempotent repeats, changed payload, honeypot, foreign origin and HTTP 429. One run reached the final deletion but exceeded the original 30-second whole-journey budget during parallel audit work; the complete multi-page journey now has a 60-second budget and passed in 17s/11s. No application change hid a workflow failure.
-- Local reachable Git-history pattern scan: 15 commits / 488 text blobs examined. Matches were confined to synthetic credential literals in test files, including four short word-based placeholders. No real credential was identified. Scope excludes remote-only refs, forks, dangling objects and unrecognised secret formats; it is not a guarantee of zero historical exposure.
-- Dependency audit across all installed dependencies returned zero known advisories at this run. This is not proof against all vulnerabilities.
-- Fresh read-only public observations: main customer routes returned 200 with private/no-store and nonce CSP; live Contact was disabled; FAQs/terms denied active payments; robots.txt and sitemap.xml returned 404. Local content/contact repairs have not been deployed by the agent.
-- Current browser suites, expanded interaction coverage, remaining security/dependency checks, visual inspection and deployment acceptance are still pending. Dated earlier handover runs are not substituted for this audit.
+Run commands from the source root with `npm.cmd`. Browser suites use a built production app. Full runs and focused reruns are listed below; earlier failing reports remain available rather than being relabelled as passing.
 
-## Inputs and external acceptance to verify
+- **Database/models — 132:** `test:catalog`. `catalog-final.json` (131) plus `contact-migration-rerun.json` (1). Payment/order/stock/email state, grants, private contact ingestion, quota boundaries, deduplication, deleted-message retry safety and rerunnable migration preservation. Disposable PGlite only.
+- **Foundation — 100:** `test:foundation`. `foundation-current.json` (99 passing) plus `foundation-products.json` (corrected nine-product/404 case).
+- **Catalogue/bag — 14:** `test:catalog-ui`. `catalog-ui-current.json` (13 passing) plus `catalog-focused.json` (client navigation). The parallel run exceeded a navigation assertion budget; sequential focus passed without a routing change. Includes delayed-hydration size protection.
+- **Admin — 33:** `test:admin-ui`. `admin-ui-current.json` (27 passing), `admin-focused.json` (14-section navigation case), `admin-handover-current.json` (5 added journeys). Role/MFA boundaries, catalogue/media/visibility/publishing, orders/finance, category/coupon/expense lifecycle, history restoration and password-change/relogin. The long multi-page case now has a 60-second budget; corrected selectors concern a notes textarea and revision timestamp.
+- **Development catalogue — 6:** `test:development-ui`, `development-ui.json`.
+- **Android touch emulation — 11:** `test:mobile-ui`, `mobile-ui.json`.
+- **Checkout — 11:** `test:checkout-ui`, `checkout-ui.json`.
+- **Sandbox payments/recovery — 18:** `test:payments-ui`. `payments-ui.json` (15 passing) plus `payments-recovery-current.json` (3 corrected recovery-response assertions). Recovery also returns email worker status; substantive outage/pending/orphan/reservation assertions remain.
+- **Simulated live commerce — 8:** `test:live-payments-ui`, `live-payments-ui.json`. Checkout, signed event, stock commit/replay, confirmation, outbox through fake Resend, canonical Admin Orders/Finance. Providers and data are isolated.
+- **Contact → Admin Inbox — 3:** `test:inbox-ui`, `inbox-ui-verified.json`. Real local Next.js API → protected SQL → owner/MFA inbox at 393/1440 px. Fields, retries, altered reference, honeypot, foreign origin, quota feedback, read/archive/unarchive/delete. A locator and whole-journey timing budget were corrected before final passing runs.
+- **Optional contact email mode — 3:** `test:contact-ui`, `contact-ui.json`. Synthetic challenge/email responses; default production is inbox mode.
+- **Film/homepage — 17:** `test:film-ui`, `film-current.json`. Responsive docking, motion/playback and scrolled edit/story readability. Full-page captures reviewed at 393/1440 px; fixture names/prices are not current hosted commercial data.
 
-- Royal Mail account type/API access, actual parcel measurements/service codes and below-GBP80 delivery price are awaiting client details. No shipping route/label integration was implemented in the preceding prerequisite discussion.
-- Local contact sender and Turnstile settings are absent at the presence-only audit check; deployed settings still need independent observation.
-- Cards/Clearpay sandbox successes and two received order-email templates were reported previously; current complete-provider tests and remaining Klarna/Apple Pay/device paths must be assessed without inferring success.
-- Business/legal details, final policy review/indexing, unfinished customer features and operational refund/dispatch workflows need current-code verification.
+Current production build passed after the last product-readiness change. Later changes were tests/fixtures/documentation. A byte comparison at finalisation found no differing tracked/unignored TS/TSX/MJS/JSON/SQL/CSS source files between the original workspace and tested copy. Do not infer that a later commit is covered without reviewing its diff.
 
-This ledger will be updated with exact commands, source state, results, fixes and outstanding evidence as the goal continues.
+## Environment and reproducibility
+
+- Source: `E:\AsadJahangirr_2pacistan\SeenAbayas`.
+- Low source-drive space required isolated `C:\Users\ASAD\AppData\Local\Temp\seen-full-qa-BmwkPJ`. Locked installed dependencies were copied; private `.env` files excluded. The user's development server was retained.
+- Reports: the copy's `qa-reports/`; screenshots/traces: its `test-results/`. Temporary evidence may be removed by the operating system.
+- Ignored source-workspace records: `test-results/qa-session.json`, `qa-final-ledger.json`, `live-boundaries.json`, `deployed-inbox-readiness.json`, `git-history-secret-scan.json`. Sanitised outcomes, not credentials/customer content.
+- `scripts/qa-workspace.mjs --sync` updates the copy; do not sync during tests. `scripts/test-environment.mjs` isolates service settings. Admin/inbox/mobile/payment suites share ports: run sequentially.
+- Windows Edge/Chromium with Android/touch emulation. Physical Android Chrome and iPhone Safari remain unverified.
+
+## Production, dependency and history observations
+
+- **14/14 boundary probes:** unauthenticated private APIs rejected access; guessed order status 404; session GET 405; private preview required login; unsigned webhook 400; unsigned recovery 401; foreign-origin contact 403; `.env.local`/`.git/config` not served. Responses private/no-store, no matched credential pattern. Invalid requests created no messages/orders/payments.
+- **After deployment:** Contact, FAQs, terms, privacy and design-01 returned 200/private-no-store. Contact enabled without Turnstile script/challenge frame allowance; updated copy and size guard present. The operator then independently confirmed a labelled live submission arriving in Admin Inbox with all fields correct; no agent access to the private message was needed.
+- Hosted catalogue read returned nine products; read-only bag RPC passed. Neither reserves/deducts inventory.
+- Local sandbox payment diagnostic passed configuration/database and bounded Checkout Sessions/Customers reads. It does not prove write scopes, live webhook delivery or method eligibility. Healthy live-account results previously reported are a separate checkpoint.
+- Dependency audit: zero known advisories at the run; unknown vulnerabilities remain outside that claim.
+- Reachable local history: 15 commits / 488 text blobs, synthetic test matches only; no real credential identified. Remote-only refs, forks, dangling objects and unrecognised formats outside scope.
+- Public `/robots.txt` and `/sitemap.xml` returned 404: SEO implementation remains outstanding.
+
+## Production acceptance and remaining work
+
+1. **Contact — accepted:** operator confirms the labelled deployed enquiry reached Admin Inbox with all fields correct. SQL/Ready deployment are operator-reported; form enablement independently verified. No further setup/repeat test required. The operator may delete the test; deletion is not yet confirmed.
+2. **Shipping:** below-GBP-80 payments blocked pending a confirmed charge. Free standard delivery is inclusive at GBP 80. Confirm Royal Mail account/API capabilities and actual services/parcel details. No carrier label integration or automatic price quotation implemented.
+3. **Payments:** Klarna completion unresolved after a provider-hosted white screen; Apple Pay needs an eligible device/wallet. A coordinated genuine payment → webhook → order/stock → customer/owner emails cycle remains unverified. Reads cannot replace it. Do not initiate genuine transactions as routine QA.
+4. **Emails:** two authorised [TEST] templates were accepted by real Resend and received in one controlled inbox. This proves template delivery, not the distinct owner's mailbox or a deployed live purchase cycle. Do not resend without a reason.
+5. **Operations:** actual payment refunds/exchanges, dispatch/tracking/low-stock notifications and automated Royal Mail labels remain separate implementation. Manual admin entries are not connected provider actions.
+6. **Business/content:** confirm identity/addresses, dispatch promises, privacy retention/processing, tax review and final policies. Preserve unknown/draft/noindex gates. Add sitemap/robots, accurate structured data and final social previews.
+7. **Production operations:** verify Auth email/recovery/callback/MFA, shared abuse limits on other sensitive paths, monitoring/payment-email alerts, backups and restore. Real phones, keyboard and screen-reader acceptance remain.
+8. **Queued scope:** coupon redemption deferred. Header search, newsletter consent/unsubscribe/admin subscriptions and remaining originally planned homepage sections are not completed by this audit. Collection search/admin coupon CRUD already work.
+
+Preserve shared Supabase inventory, publication/role controls, film design and inbox-only Contact. Follow the latest instruction before a new integration; rerun checks only when relevant changes/failures justify them.
